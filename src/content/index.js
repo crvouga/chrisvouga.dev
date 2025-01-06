@@ -154,6 +154,21 @@ const workProjects = [
       "vercel",
     ],
   },
+  {
+    title: "Courier Company Website",
+    deployment: {
+      t: "public",
+      url: "https://gps-couriers-website.vercel.app/",
+    },
+    code: {
+      t: "private",
+    },
+    description: "A marketing website for a hospice courier company.",
+    imageAlt: "project screenshot or video",
+    imageSrc: ["/courier.optimized.webp"],
+    youTubeVideoId: "kFwPTJcM6I0",
+    topics: ["css", "material-ui", "nextjs", "react", "typescript"],
+  },
 ];
 
 const gamezillaHref = "https://www.gamezilla.app/";
@@ -300,22 +315,6 @@ const sideProjects = [
       "typescript",
       "supabase",
     ],
-  },
-
-  {
-    title: "Courier Company Website",
-    deployment: {
-      t: "public",
-      url: "https://gps-couriers-website.vercel.app/",
-    },
-    code: {
-      t: "private",
-    },
-    description: "A marketing website for a hospice courier company.",
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/courier.optimized.webp"],
-    youTubeVideoId: "kFwPTJcM6I0",
-    topics: ["css", "material-ui", "nextjs", "react", "typescript"],
   },
 
   {
