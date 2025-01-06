@@ -26,7 +26,7 @@ const work = [
   {
     name: "Freelancing",
     jobTitle: "Frontend Developer",
-    jobDescription: `Worked as a freelance frontend developer for a couple years. Primarily developed static sites for small businesses`,
+    jobDescription: `Worked as a freelance frontend developer for a couple of years. Primarily developed static sites for small businesses`,
     yearStart: 2020,
     yearEnd: 2022,
   },
@@ -56,7 +56,7 @@ const workProjects = [
     deployment: { t: "private" },
     code: { t: "private" },
     description:
-      "Triangulator is a product developed by ASU that automate the process of course transfers between universities. My contributions include being one of the leading developers on the project.",
+      "Triangulator is a product developed by ASU that automates the process of determining course transfers between universities. My contributions include being one of the leading developers on the project.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/triangulator.optimized.webp"],
     topics: [
@@ -103,7 +103,7 @@ const workProjects = [
     deployment: { t: "public", url: "https://sundevils.com/" },
     code: { t: "private" },
     description:
-      "The official website for the ASU Sun Devils. My contributions include developing interactive react components like a upcoming game feed and news feed",
+      "The official website for the ASU Sun Devils. My contributions include developing interactive React components like the upcoming game feed and news feed.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/sun-devils.optimized.webp"],
     topics: ["bootstrap", "drupal", "javascript", "react", "css", "php"],
