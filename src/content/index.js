@@ -362,22 +362,6 @@ const sideProjects = [
   },
 
   {
-    title: "Image resizer service",
-    code: {
-      t: "public",
-      url: "https://github.com/crvouga/imageresizerservice.com",
-    },
-    deployment: {
-      t: "public",
-      url: "https://www.imageresizerservice.com/",
-    },
-    description: `A zero dependency image resizer service. Used to optimize images for web apps. Made to be self-hosted.`,
-    imageAlt: "project screenshot or video",
-    imageSrc: [],
-    topics: ["go"],
-  },
-
-  {
     title: "Anime Blog",
     description: "A jamstack blog about anime.",
     imageAlt: "project screenshot or video",
@@ -497,6 +481,22 @@ const sideProjects = [
     imageSrc: ["/simon-says.optimized.webp"],
     youTubeVideoId: "WrUFzlKL0E0",
     topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
+  },
+
+  {
+    title: "Image resizer service",
+    code: {
+      t: "public",
+      url: "https://github.com/crvouga/imageresizerservice.com",
+    },
+    deployment: {
+      t: "public",
+      url: "https://www.imageresizerservice.com/",
+    },
+    description: `A zero dependency image resizer service. Used to optimize images for web apps. Made to be self-hosted.`,
+    imageAlt: "project screenshot or video",
+    imageSrc: [],
+    topics: ["go", "sqlite"],
   },
 ];
 
