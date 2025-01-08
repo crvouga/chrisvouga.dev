@@ -268,7 +268,7 @@ const sideProjects = [
     title: "Fullstack Todo App",
     code: {
       t: "public",
-      url: "https://github.com/crvouga/todo",
+      url: "https://github.com/crvouga/todo-v1",
     },
     deployment: {
       t: "not-deployed-anymore",
