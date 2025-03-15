@@ -1,13 +1,13 @@
 {
   "type": "module",
   "scripts": {
-    "start": "bun x concurrently \"bun --watch ./src/main.js\" \"bun x serve dist\"",
-    "dev": "bun start",
-    "build": "bun ./src/main.js",
-    "tc": "bun x tsc -w",
-    "optimize-images": "bun ./src/optimize-images.js"
+    "start": "npx concurrently \"node --watch ./src/main.js\" \"npx serve dist\"",
+    "dev": "npm run start",
+    "build": "node ./src/main.js",
+    "tc": "npx tsc -w",
+    "optimize-images": "node ./src/optimize-images.js"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.14"
+    "@types/node": "^22.13.10"
   }
 }

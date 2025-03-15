@@ -1,15 +1,15 @@
 // @ts-check
-
 import { data } from "./content/index.js";
 import { tag, text } from "./library/html/index.js";
+import { replaceAll } from "./library/replace-all.js";
 import { viewAboutMeSection } from "./sections/about-me.js";
 import { viewContactSection } from "./sections/contact.js";
+import { viewEducationSection } from "./sections/education.js";
 import { viewFooterSection } from "./sections/footer.js";
 import { viewHeadingSection } from "./sections/heading/index.js";
 import { viewSideProjectsSection } from "./sections/side-projects/index.js";
 import { viewWorkProjectsSection } from "./sections/work-projects.js";
 import { viewWorkSection } from "./sections/work.js";
-import { viewEducationSection } from "./sections/education.js";
 import { HEAD } from "./ui/head.js";
 import { THEME } from "./ui/theme.js";
 
@@ -68,9 +68,11 @@ export const viewDoc = (_a, c) => {
         "meta",
         {
           name: "description",
-          content: data.metaDescription
-            .replaceAll("\n", "")
-            .replaceAll("\t", ""),
+          content: replaceAll(
+            replaceAll(data.metaDescription, "\n", ""),
+            "\t",
+            ""
+          ),
         },
         []
       ),
