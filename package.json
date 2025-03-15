@@ -2,6 +2,7 @@
   "type": "module",
   "scripts": {
     "start": "bun x concurrently \"bun --watch ./src/main.js\" \"bun x serve dist\"",
+    "dev": "bun start",
     "build": "bun ./src/main.js",
     "tc": "bun x tsc -w",
     "optimize-images": "bun ./src/optimize-images.js"

@@ -36,9 +36,11 @@ HEAD.push(
         }
         .contact-link-button-label {
             color: ${THEME.colors.neutralMuted};
+            text-align: left;
         }
         .contact-link-button-value {
             color: ${THEME.colors.neutral};
+            text-align: left;
         }
         .contact-link-button:hover .contact-link-button-value {
             opacity: 0.8;
