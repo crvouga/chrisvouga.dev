@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
-import fs from "fs";
 import path from "path";
+import { getAllFiles } from "./library/file-system.js";
 
 /**
  * The directory to search in.
@@ -15,31 +15,6 @@ const dir = "./public";
 const width = 600;
 
 console.log("Optimizing images...");
-
-/**
- * Recursively retrieve all files from a given directory.
- *
- * @param {string} dirPath - The directory path to search.
- * @returns {string[]} An array of file paths.
- */
-function getAllFiles(dirPath) {
-  /** @type {string[]} */
-  let filesList = [];
-
-  /** @type {import('fs').Dirent[]} */
-  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name);
-    if (entry.isDirectory()) {
-      filesList = filesList.concat(getAllFiles(fullPath));
-    } else {
-      filesList.push(fullPath);
-    }
-  }
-
-  return filesList;
-}
 
 /**
  * An array of all files found recursively in `dir`.

@@ -108,7 +108,7 @@ HEAD.push(
         iframe.style.height = '100%';
         container.appendChild(iframe);
       }
-    `),
+      `),
   ])
 );
 
@@ -117,6 +117,6 @@ HEAD.push(
  * @param {{ youTubeVideoId: string }} param0
  * @returns {string}
  */
-function toYouTubeVideoUrl({ youTubeVideoId }) {
+const toYouTubeVideoUrl = ({ youTubeVideoId }) => {
   return `https://www.youtube.com/embed/${youTubeVideoId}?autoplay=1&loop=1&mute=1&playlist=${youTubeVideoId}`;
-}
+};
