@@ -233,6 +233,22 @@ const sideProjects = [
   },
 
   {
+    title: "Image service",
+    code: {
+      t: "public",
+      url: "https://github.com/crvouga/imageresizerservice.com",
+    },
+    deployment: {
+      t: "public",
+      url: "https://www.imageresizerservice.com/",
+    },
+    description: `A zero dependency image service. Used to optimize images for web apps. Made for longevity and zero-config self-hosting.`,
+    imageAlt: "project screenshot or video",
+    imageSrc: [],
+    topics: ["go", "html", "css", "javascript"],
+  },
+
+  {
     title: "Pickflix",
     deployment: {
       t: "not-deployed-anymore",
@@ -481,22 +497,6 @@ const sideProjects = [
     imageSrc: ["/simon-says.optimized.webp"],
     youTubeVideoId: "WrUFzlKL0E0",
     topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
-  },
-
-  {
-    title: "Image resizer service",
-    code: {
-      t: "public",
-      url: "https://github.com/crvouga/imageresizerservice.com",
-    },
-    deployment: {
-      t: "public",
-      url: "https://www.imageresizerservice.com/",
-    },
-    description: `A zero dependency image resizer service. Used to optimize images for web apps. Made to be self-hosted.`,
-    imageAlt: "project screenshot or video",
-    imageSrc: [],
-    topics: ["go", "sqlite"],
   },
 ];
 

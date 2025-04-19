@@ -61,6 +61,7 @@ export const topicToImageSrc = {
   go: "/go.svg",
   trpc: "/trpc.svg",
   vercel: "/vercel-icon.svg",
+  html: "/html-5.svg",
 };
 
 /**
@@ -71,6 +72,7 @@ export const topicToImageSrc = {
  * @type {{ [key in Topic]: string; }}
  */
 export const topicToName = {
+  html: "HTML",
   neo4j: "Neo4j",
   flask: "Flask",
   graphene: "Graphene",
