@@ -1,5 +1,3 @@
-import { url } from "inspector";
-
 /**
  * @param {string} href
  * @param {string} text
