@@ -1,3 +1,5 @@
+import { url } from "inspector";
+
 /**
  * @param {string} href
  * @param {string} text
@@ -233,26 +235,10 @@ const sideProjects = [
   },
 
   {
-    title: "Image service",
-    code: {
-      t: "public",
-      url: "https://github.com/crvouga/imageresizerservice.com",
-    },
-    deployment: {
-      t: "public",
-      url: "https://www.imageresizerservice.com/",
-    },
-    description: `A zero dependency image service. Used to optimize images for web apps. Made for longevity and zero-config self-hosting.`,
-    imageAlt: "project screenshot or video",
-    imageSrc: [],
-    topics: ["go", "html", "css", "javascript"],
-  },
-
-  {
     title: "Pickflix",
     deployment: {
-      t: "not-deployed-anymore",
-      // url: "https://crvouga-pickflix.herokuapp.com/",
+      t: "public",
+      url: "https://pickflix.chrisvouga.dev/",
     },
     code: {
       t: "public",
@@ -303,6 +289,22 @@ const sideProjects = [
       "nodejs",
       "mongodb",
     ],
+  },
+
+  {
+    title: "Image service",
+    code: {
+      t: "public",
+      url: "https://github.com/crvouga/imageresizerservice.com",
+    },
+    deployment: {
+      t: "public",
+      url: "https://www.imageresizerservice.com/",
+    },
+    description: `A zero dependency image service. Used to optimize images for web apps. Made for longevity and zero-config self-hosting.`,
+    imageAlt: "project screenshot or video",
+    imageSrc: [],
+    topics: ["go", "html", "css", "javascript"],
   },
 
   {
