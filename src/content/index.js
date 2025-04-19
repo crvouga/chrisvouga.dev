@@ -199,40 +199,6 @@ const sideProjects = [
   },
 
   {
-    title: "moviefinder.app",
-    deployment: {
-      t: "public",
-      url: "https://www.moviefinder.app/",
-    },
-    code: {
-      t: "public",
-      url: "https://github.com/crvouga/moviefinder.app",
-    },
-    description: "A work-in-progress movie search app with a tiktok-like UI.",
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/moviefinder-app.optimized.webp"],
-    topics: ["rust", "tailwind", "postgres", "datastar"],
-  },
-
-  {
-    title: "headless-combobox",
-    deployment: {
-      t: "public",
-      url: "https://www.npmjs.com/package/headless-combobox",
-    },
-    code: {
-      t: "public",
-      url: "https://github.com/crvouga/headless-combobox",
-    },
-    imageAlt: "project screenshot or video",
-    imageSrc: [
-      "https://github.com/crvouga/headless-combobox/raw/main/demo.gif",
-    ],
-    description: `Purely functional, headless, framework-agnostic, zero dependency, accessible, TypeScript combobox library. Used to create comboboxes in any UI framework.`,
-    topics: ["typescript"],
-  },
-
-  {
     title: "Pickflix",
     deployment: {
       t: "public",
@@ -265,14 +231,32 @@ const sideProjects = [
   },
 
   {
+    title: "headless-combobox",
+    deployment: {
+      t: "public",
+      url: "https://www.npmjs.com/package/headless-combobox",
+    },
+    code: {
+      t: "public",
+      url: "https://github.com/crvouga/headless-combobox",
+    },
+    imageAlt: "project screenshot or video",
+    imageSrc: [
+      "https://github.com/crvouga/headless-combobox/raw/main/demo.gif",
+    ],
+    description: `Purely functional, headless, framework-agnostic, zero dependency, accessible, TypeScript combobox library. Used to create comboboxes in any UI framework.`,
+    topics: ["typescript"],
+  },
+
+  {
     title: "Fullstack Todo App",
     code: {
       t: "public",
       url: "https://github.com/crvouga/todo-v1",
     },
     deployment: {
-      t: "not-deployed-anymore",
-      // url: "https://todo.chrisvouga.dev",
+      t: "public",
+      url: "https://todo.chrisvouga.dev",
     },
     description: "Fullstack todo app. Sign in and start tracking things todo.",
     imageAlt: "project screenshot or video",
@@ -287,6 +271,22 @@ const sideProjects = [
       "nodejs",
       "mongodb",
     ],
+  },
+
+  {
+    title: "moviefinder.app",
+    deployment: {
+      t: "public",
+      url: "https://www.moviefinder.app/",
+    },
+    code: {
+      t: "public",
+      url: "https://github.com/crvouga/moviefinder.app",
+    },
+    description: "A work-in-progress movie search app with a tiktok-like UI.",
+    imageAlt: "project screenshot or video",
+    imageSrc: ["/moviefinder-app.optimized.webp"],
+    topics: ["rust", "tailwind", "postgres", "datastar"],
   },
 
   {
