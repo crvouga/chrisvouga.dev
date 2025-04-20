@@ -48,17 +48,44 @@ export const viewGridCollapsible = (props) => () => {
           const seeLessButton = document.querySelector('${seeLessSelector}');
           const hiddenCards = Array.from(document.querySelectorAll('${hiddenCardSelector}'));
 
-          if(seeMoreButton) {
-            seeMoreButton.style.display = isExpandedNew ? 'none' : 'block';
-          }
+          if (isExpandedNew) {
+            // Save the current scroll position when expanding
+            root.setAttribute('data-scroll-position', window.scrollY);
+            
+            if(seeMoreButton) {
+              seeMoreButton.style.display = 'none';
+            }
 
-          if(seeLessButton) {
-            seeLessButton.style.display = isExpandedNew ? 'block' : 'none';
-          }
+            if(seeLessButton) {
+              seeLessButton.style.display = 'block';
+            }
 
-          if(hiddenCards){
-            hiddenCards.forEach((card) => {
-              card.style.display = isExpandedNew ? 'block' : 'none';
+            if(hiddenCards){
+              hiddenCards.forEach((card) => {
+                card.style.display = 'block';
+              });
+            }
+          } else {
+            // Restore the scroll position when collapsing
+            if(seeMoreButton) {
+              seeMoreButton.style.display = 'block';
+            }
+
+            if(seeLessButton) {
+              seeLessButton.style.display = 'none';
+            }
+
+            if(hiddenCards){
+              hiddenCards.forEach((card) => {
+                card.style.display = 'none';
+              });
+            }
+            
+            // Get the saved scroll position and restore it
+            const savedScrollPosition = parseInt(root.getAttribute('data-scroll-position') || '0');
+            window.scrollTo({
+              top: savedScrollPosition,
+              behavior: 'instant'
             });
           }
         };
