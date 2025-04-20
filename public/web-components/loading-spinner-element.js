@@ -24,10 +24,16 @@ class LoadingSpinnerElement extends HTMLElement {
       .spinner {
           width: var(--spinner-size, 40px);
           height: var(--spinner-size, 40px);
+          min-width: var(--spinner-size, 40px);
+          min-height: var(--spinner-size, 40px);
+          max-width: var(--spinner-size, 40px);
+          max-height: var(--spinner-size, 40px);
+          box-sizing: border-box;
           border: var(--spinner-thickness, 4px) solid var(--spinner-color-light, rgba(0, 0, 0, 0.1));
           border-top: var(--spinner-thickness, 4px) solid var(--spinner-color, #333);
           border-radius: 50%;
           animation: spin 1s linear infinite;
+          flex-shrink: 0;
       }
 
       @keyframes spin {

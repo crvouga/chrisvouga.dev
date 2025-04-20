@@ -414,8 +414,15 @@ export const projects = [
     description: `A software-as-a service app that lets developers generate screenshots for their websites. It was used for this website.`,
     imageAlt: "project screenshot or video",
     imageSrc: ["/screenshot-service.optimized.webp"],
-    galleryImageSrc: ["/screenshot-service.png"],
-    youTubeVideoId: "lCEzYGJ0rN8",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "lCEzYGJ0rN8",
+        autoplay: true,
+        mute: true,
+      }),
+      "/screenshot-service.png",
+    ],
+
     topics: [
       "css",
       "heroku",

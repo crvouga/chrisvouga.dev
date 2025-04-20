@@ -12,7 +12,7 @@ import { THEME, unit } from "../ui/theme.js";
  */
 export const viewContactSection = (_a, _c) => {
   return viewSection({
-    title: "Let's get in touch",
+    title: "Contact",
   })({ class: "contact-section" }, [viewContacts()]);
 };
 
