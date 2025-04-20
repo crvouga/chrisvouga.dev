@@ -245,7 +245,7 @@ class ImageGalleryModalElement extends HTMLElement {
     });
 
     // Handle popstate events to close the modal when back button is pressed
-    window.addEventListener("popstate", (event) => {
+    window.addEventListener("popstate", (_event) => {
       if (this.isModalOpen) {
         this.closeModal(false); // Close without pushing state
       }
@@ -521,7 +521,7 @@ class ImageGalleryModalElement extends HTMLElement {
    * @param {string} imageUrl - The URL of the image
    * @param {HTMLElement} spinner - The spinner element
    */
-  displayFallbackImage(imageUrl, spinner) {
+  displayFallbackImage(imageUrl, _spinner) {
     const img = document.createElement("img");
     img.src = imageUrl;
     img.alt = this.imageAlt || "Gallery image";
