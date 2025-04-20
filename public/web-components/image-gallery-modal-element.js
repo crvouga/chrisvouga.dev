@@ -358,6 +358,9 @@ class ImageGalleryModalElement extends HTMLElement {
     this.currentIndex = index || 0;
     this.modal.style.display = "flex";
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    document.body.style.height = "100%";
     this.isModalOpen = true;
 
     // Add state to browser history
@@ -376,6 +379,9 @@ class ImageGalleryModalElement extends HTMLElement {
   closeModal(pushState = true) {
     this.modal.style.display = "none";
     document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.height = "";
     this.isModalOpen = false;
 
     // If we're closing via a user action (not browser back button)
