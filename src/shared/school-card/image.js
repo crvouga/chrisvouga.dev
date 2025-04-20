@@ -1,6 +1,7 @@
-import { fragment, tag, text } from "../../library/html/index.js";
+import { tag, text } from "../../library/html/index.js";
+import { stringToJsVarSafe } from "../../library/js-var.js";
 import { HEAD } from "../../ui/head.js";
-import { viewImage } from "../../ui/image.js";
+import { viewOpenGalleryButtonImageWrapper } from "../../ui/image-gallery-modal/open-gallery-button-image-wrapper.js";
 
 /**
  * @type {import("../../library/html/index.js").ViewWithProps<{ school: import("../../content/school.js").School }>}
@@ -8,28 +9,16 @@ import { viewImage } from "../../ui/image.js";
 export const viewSchoolCardImage = (props) => (attr, _) => {
   const alt = props.school.imageAlt || props.school.institutionName;
   const src = props.school.imageSrc;
+  const jsVarSafeNamespace = stringToJsVarSafe(props.school.institutionName);
 
-  return fragment([
-    tag(
-      "button",
-      {
-        type: "button",
-        onclick: `window.openImageGalleryModal({ images: [{ src: "${src}", alt: "${alt}" }] })`,
-        "aria-label": `View ${alt} in full screen`,
-        class: "school-card-image-button",
-      },
-      [
-        tag("div", { class: "school-card-image-container" }, [
-          viewImage({ src, alt })(
-            {
-              ...attr,
-              class: "school-card-image",
-            },
-            []
-          ),
-        ]),
-      ]
-    ),
+  return tag("div", { class: "school-card-image-container" }, [
+    viewOpenGalleryButtonImageWrapper({
+      src,
+      alt,
+      galleryImages: props.school.galleryImageSrc,
+      jsVarSafeNamespace,
+      showGalleryIndicator: true,
+    })({ ...attr, class: "school-card-image" }, []),
   ]);
 };
 

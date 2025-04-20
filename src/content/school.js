@@ -7,6 +7,7 @@
  * yearEnd: number | "Present";
  * imageSrc: string;
  * imageAlt: string;
+ * galleryImageSrc: string[];
  * }} School
  */
 
@@ -22,5 +23,6 @@ export const SCHOOL = [
     infoUrl: "https://www.asu.edu/",
     imageAlt: "Diploma",
     imageSrc: "/diploma.optimized.webp",
+    galleryImageSrc: ["/diploma.jpg"],
   },
 ];
