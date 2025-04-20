@@ -3,6 +3,7 @@
 import { fragment, tag, text } from "../../../library/html/index.js";
 import { stringToJsVarSafe } from "../../../library/js-var.js";
 import { HEAD } from "../../../ui/head.js";
+import { images } from "../../../ui/icons.js";
 import {
   openImageGalleryModalJs,
   viewImageGalleryModal,
@@ -44,8 +45,12 @@ const viewProjectCardMediaImageMain = (props) => (attr, _) => {
           { ...attr, class: "project-card-media-image" },
           []
         ),
-        tag("span", { class: "project-card-media-image-overlay" }, [
-          text("View Gallery"),
+        tag("div", { class: "project-card-media-gallery-indicator" }, [
+          images({
+            fill: "currentColor",
+            width: 28,
+            height: 28,
+          }),
         ]),
       ]
     ),
@@ -78,27 +83,20 @@ HEAD.push(
         position: relative;
         overflow: hidden;
       }
-      .project-card-media-image-overlay {
+      .project-card-media-gallery-indicator {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: rgba(0, 0, 0, 0.6);
-        color: white;
-        font-weight: bold;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-      .project-card-media-image-button:hover .project-card-media-image-overlay {
-        opacity: 1;
-      }
-      .project-card-media-image-button:hover .project-card-media-image {
-        opacity: 0.9;
-        transition: opacity 0.2s ease;
+        width: 32px;
+        height: 32px;
       }
     `),
   ])
