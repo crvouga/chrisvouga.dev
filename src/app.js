@@ -4,10 +4,10 @@ import { tag, text } from "./library/html/index.js";
 import { replaceAll } from "./library/replace-all.js";
 import { viewAboutMeSection } from "./sections/about-me.js";
 import { viewContactSection } from "./sections/contact.js";
-import { viewSchoolSection } from "./sections/school.js";
 import { viewFooterSection } from "./sections/footer.js";
 import { viewHeadingSection } from "./sections/heading/index.js";
 import { viewProjectsSection } from "./sections/projects.js";
+import { viewSchoolSection } from "./sections/school.js";
 import { viewWorkSection } from "./sections/work.js";
 import { HEAD } from "./ui/head.js";
 import { THEME } from "./ui/theme.js";
@@ -100,22 +100,7 @@ export const viewDoc = (_a, c) => {
         },
         []
       ),
-      // Add script to prevent double-tap zoom on mobile
-      tag("script", {}, [
-        text(`
-          document.addEventListener('DOMContentLoaded', function() {
-            // Prevent double-tap zoom on mobile devices
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(event) {
-              const now = Date.now();
-              if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-              }
-              lastTouchEnd = now;
-            }, false);
-          });
-        `),
-      ]),
+
       ...HEAD,
     ]),
     tag("body", {}, [
