@@ -216,6 +216,8 @@ class ImageGalleryModalElement extends HTMLElement {
     this.mediaTypes = [];
     /** @type {HTMLImageElement[]} */
     this.preloadedImages = [];
+    /** @type {boolean} */
+    this.isModalOpen = false;
 
     // Add event listeners
     closeButton.addEventListener("click", () => this.closeModal());
@@ -239,6 +241,13 @@ class ImageGalleryModalElement extends HTMLElement {
         } else if (event.key === "Escape") {
           this.closeModal();
         }
+      }
+    });
+
+    // Handle popstate events to close the modal when back button is pressed
+    window.addEventListener("popstate", (event) => {
+      if (this.isModalOpen) {
+        this.closeModal(false); // Close without pushing state
       }
     });
   }
@@ -349,6 +358,10 @@ class ImageGalleryModalElement extends HTMLElement {
     this.currentIndex = index || 0;
     this.modal.style.display = "flex";
     document.body.style.overflow = "hidden";
+    this.isModalOpen = true;
+
+    // Add state to browser history
+    history.pushState({ galleryModal: true }, "");
 
     // Preload all images when opening the modal
     this.preloadImages();
@@ -358,10 +371,19 @@ class ImageGalleryModalElement extends HTMLElement {
 
   /**
    * Close the modal gallery
+   * @param {boolean} [pushState=true] - Whether to push a new history state
    */
-  closeModal() {
+  closeModal(pushState = true) {
     this.modal.style.display = "none";
     document.body.style.overflow = "";
+    this.isModalOpen = false;
+
+    // If we're closing via a user action (not browser back button)
+    // we need to add a new history entry to prevent reopening the modal
+    // when the user navigates forward
+    if (pushState) {
+      history.pushState(null, "");
+    }
   }
 
   /**
@@ -390,107 +412,139 @@ class ImageGalleryModalElement extends HTMLElement {
     const mediaType = this.mediaTypes[this.currentIndex];
 
     if (mediaType === "video") {
-      // Handle YouTube video
-      const videoId = this.getYouTubeVideoId(currentUrl);
-      if (videoId) {
-        // Create loading spinner
-        const spinner = document.createElement("loading-spinner");
-        spinner.setAttribute("data-spinner-color", "#ffffff");
-        spinner.setAttribute(
-          "data-spinner-color-light",
-          "rgba(255, 255, 255, 0.2)"
-        );
-        spinner.setAttribute("data-spinner-size", "60px");
-        this.imageContainer.appendChild(spinner);
-
-        const iframe = document.createElement("iframe");
-        iframe.className = "gallery-modal-video";
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-        iframe.title = this.imageAlt || "YouTube video";
-        iframe.allow =
-          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        iframe.setAttribute("allowfullscreen", "");
-        iframe.style.display = "none"; // Hide iframe until loaded
-
-        // Remove spinner when iframe is loaded
-        iframe.addEventListener("load", () => {
-          spinner.remove();
-          iframe.style.display = "block";
-        });
-
-        this.imageContainer.appendChild(iframe);
-      } else {
-        console.error("Invalid YouTube URL:", currentUrl);
-      }
+      this.displayVideo(currentUrl);
     } else {
-      // Handle image
-      // Create loading spinner
-      const spinner = document.createElement("loading-spinner");
-      spinner.setAttribute("data-spinner-color", "#ffffff");
-      spinner.setAttribute(
-        "data-spinner-color-light",
-        "rgba(255, 255, 255, 0.2)"
-      );
-      spinner.setAttribute("data-spinner-size", "60px");
-      this.imageContainer.appendChild(spinner);
-
-      // Find the preloaded image if it exists
-      const preloadedImageIndex = this.preloadedImages.findIndex(
-        (img) => img.src === currentUrl
-      );
-
-      if (preloadedImageIndex !== -1) {
-        const preloadedImg = this.preloadedImages[preloadedImageIndex];
-        const img = document.createElement("img");
-        img.src = currentUrl;
-        img.alt = this.imageAlt || "Gallery image";
-        img.className = "gallery-modal-image";
-
-        // If the image is already loaded, show it immediately
-        if (preloadedImg.complete) {
-          spinner.remove();
-          this.imageContainer.appendChild(img);
-        } else {
-          // Otherwise wait for it to load
-          img.style.display = "none";
-          preloadedImg.onload = () => {
-            spinner.remove();
-            img.style.display = "block";
-          };
-          this.imageContainer.appendChild(img);
-        }
-      } else {
-        // Fallback for any images that weren't preloaded
-        const img = document.createElement("img");
-        img.src = currentUrl;
-        img.alt = this.imageAlt || "Gallery image";
-        img.className = "gallery-modal-image";
-        img.style.display = "none"; // Hide image until loaded
-
-        img.onload = function () {
-          // Use the correct type for 'this' in the event handler
-          const imgElement = this;
-          if (imgElement instanceof HTMLImageElement) {
-            // Hide spinner and show image
-            const container = imgElement.parentElement;
-            if (container) {
-              const spinnerElement = container.querySelector("loading-spinner");
-              if (spinnerElement) {
-                spinnerElement.remove();
-              }
-            }
-            imgElement.style.display = "block";
-          }
-        };
-
-        this.imageContainer.appendChild(img);
-      }
+      this.displayImage(currentUrl);
     }
 
     // Update counter
     this.counter.textContent = `${this.currentIndex + 1} / ${
       this.images.length
     }`;
+  }
+
+  /**
+   * Creates and adds a loading spinner to the image container
+   * @returns {HTMLElement} The created spinner element
+   */
+  createLoadingSpinner() {
+    const spinner = document.createElement("loading-spinner");
+    spinner.setAttribute("data-spinner-color", "#ffffff");
+    spinner.setAttribute(
+      "data-spinner-color-light",
+      "rgba(255, 255, 255, 0.2)"
+    );
+    spinner.setAttribute("data-spinner-size", "60px");
+    this.imageContainer.appendChild(spinner);
+    return spinner;
+  }
+
+  /**
+   * Display a YouTube video in the modal
+   * @param {string} videoUrl - The URL of the YouTube video
+   */
+  displayVideo(videoUrl) {
+    const videoId = this.getYouTubeVideoId(videoUrl);
+    if (videoId) {
+      const spinner = this.createLoadingSpinner();
+
+      const iframe = document.createElement("iframe");
+      iframe.className = "gallery-modal-video";
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      iframe.title = this.imageAlt || "YouTube video";
+      iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      iframe.setAttribute("allowfullscreen", "");
+      iframe.style.display = "none"; // Hide iframe until loaded
+
+      // Remove spinner when iframe is loaded
+      iframe.addEventListener("load", () => {
+        spinner.remove();
+        iframe.style.display = "block";
+      });
+
+      this.imageContainer.appendChild(iframe);
+    } else {
+      console.error("Invalid YouTube URL:", videoUrl);
+    }
+  }
+
+  /**
+   * Display an image in the modal
+   * @param {string} imageUrl - The URL of the image to display
+   */
+  displayImage(imageUrl) {
+    const spinner = this.createLoadingSpinner();
+
+    // Try to use a preloaded image first
+    const preloadedImageIndex = this.preloadedImages.findIndex(
+      (img) => img.src === imageUrl
+    );
+
+    if (preloadedImageIndex !== -1) {
+      this.displayPreloadedImage(imageUrl, spinner, preloadedImageIndex);
+    } else {
+      this.displayFallbackImage(imageUrl, spinner);
+    }
+  }
+
+  /**
+   * Display a preloaded image
+   * @param {string} imageUrl - The URL of the image
+   * @param {HTMLElement} spinner - The spinner element
+   * @param {number} preloadedImageIndex - Index of the preloaded image
+   */
+  displayPreloadedImage(imageUrl, spinner, preloadedImageIndex) {
+    const preloadedImg = this.preloadedImages[preloadedImageIndex];
+    const img = document.createElement("img");
+    img.src = imageUrl;
+    img.alt = this.imageAlt || "Gallery image";
+    img.className = "gallery-modal-image";
+
+    // If the image is already loaded, show it immediately
+    if (preloadedImg.complete) {
+      spinner.remove();
+      this.imageContainer.appendChild(img);
+    } else {
+      // Otherwise wait for it to load
+      img.style.display = "none";
+      preloadedImg.onload = () => {
+        spinner.remove();
+        img.style.display = "block";
+      };
+      this.imageContainer.appendChild(img);
+    }
+  }
+
+  /**
+   * Display an image that wasn't preloaded
+   * @param {string} imageUrl - The URL of the image
+   * @param {HTMLElement} spinner - The spinner element
+   */
+  displayFallbackImage(imageUrl, spinner) {
+    const img = document.createElement("img");
+    img.src = imageUrl;
+    img.alt = this.imageAlt || "Gallery image";
+    img.className = "gallery-modal-image";
+    img.style.display = "none"; // Hide image until loaded
+
+    img.onload = function () {
+      // Use the correct type for 'this' in the event handler
+      const imgElement = this;
+      if (imgElement instanceof HTMLImageElement) {
+        // Hide spinner and show image
+        const container = imgElement.parentElement;
+        if (container) {
+          const spinnerElement = container.querySelector("loading-spinner");
+          if (spinnerElement) {
+            spinnerElement.remove();
+          }
+        }
+        imgElement.style.display = "block";
+      }
+    };
+
+    this.imageContainer.appendChild(img);
   }
 }
 
