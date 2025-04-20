@@ -519,7 +519,7 @@ class ImageGalleryModalElement extends HTMLElement {
   /**
    * Display an image that wasn't preloaded
    * @param {string} imageUrl - The URL of the image
-   * @param {HTMLElement} spinner - The spinner element
+   * @param {HTMLElement} _spinner - The spinner element
    */
   displayFallbackImage(imageUrl, _spinner) {
     const img = document.createElement("img");
