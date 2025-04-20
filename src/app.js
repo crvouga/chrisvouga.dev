@@ -100,6 +100,22 @@ export const viewDoc = (_a, c) => {
         },
         []
       ),
+      // Add script to prevent double-tap zoom on mobile
+      tag("script", {}, [
+        text(`
+          document.addEventListener('DOMContentLoaded', function() {
+            // Prevent double-tap zoom on mobile devices
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+              const now = Date.now();
+              if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+              }
+              lastTouchEnd = now;
+            }, false);
+          });
+        `),
+      ]),
       ...HEAD,
     ]),
     tag("body", {}, [
@@ -125,6 +141,7 @@ HEAD.push(
     * { 
       font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; 
       color: ${THEME.colors.text};
+      touch-action: manipulation; /* Prevents double-tap to zoom */
     }
     body {
       margin: 0;
