@@ -1,7 +1,11 @@
 // @ts-check
 
-import { tag, text } from "../../../library/html/index.js";
-import { HEAD } from "../../../ui/head.js";
+import { fragment, tag, text } from "../../../library/html/index.js";
+import { stringToJsVarSafe } from "../../../library/js-var.js";
+import {
+  openImageGalleryModalJs,
+  viewImageGalleryModal,
+} from "../../../ui/image-gallery-modal/impl.js";
 import { viewImage } from "../../../ui/image.js";
 
 /**
@@ -21,11 +25,32 @@ export const viewProjectCardMediaImage = (props) => {
 const viewProjectCardMediaImageMain = (props) => (attr, _) => {
   const alt = props.project?.imageAlt;
   const src = props.project?.imageSrc?.[0] ?? " ";
-
-  return viewImage({ src, alt })(
-    { ...attr, class: "project-card-media-image" },
-    []
-  );
+  const jsVarSafeNamespace = stringToJsVarSafe(props.project.title);
+  return fragment([
+    tag(
+      "button",
+      {
+        onclick: openImageGalleryModalJs({
+          jsVarSafeNamespace,
+        }),
+        "aria-label": "Open image gallery",
+        title: "Click to view image gallery",
+        type: "button",
+        class: "project-card-media-image-button",
+      },
+      [
+        viewImage({ src, alt })(
+          { ...attr, class: "project-card-media-image" },
+          []
+        ),
+      ]
+    ),
+    viewImageGalleryModal({
+      imageAlt: alt,
+      imageSrc: props.project?.galleryImageSrc ?? [],
+      jsVarSafeNamespace,
+    })(),
+  ]);
 };
 
 HEAD.push(
@@ -36,6 +61,20 @@ HEAD.push(
         height: 100%;
         object-fit: cover;
         display: block;
+      }
+      .project-card-media-image-button {
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: none;
+      }
+      .project-card-media-image-button:hover {
+        opacity: 0.75;
+        transition: opacity 0.2s ease;
       }
     `),
   ])
