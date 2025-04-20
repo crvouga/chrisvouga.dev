@@ -306,6 +306,34 @@ const sideProjects = [
   },
 
   {
+    title: "Connect Four: AI & Multiplayer",
+    deployment: {
+      t: "public",
+      url: "https://connectfour.chrisvouga.dev/",
+    },
+    code: {
+      t: "public",
+      url: "https://github.com/crvouga/connect-four",
+    },
+    description: "Play the game Connect Four online with your friends",
+    imageAlt: "project screenshot or video",
+    imageSrc: ["/connect-four.optimized.webp"],
+    youTubeVideoId: "9_TbyftkaQw",
+    topics: [
+      "css",
+      "greensock",
+      "heroku",
+      "material-ui",
+      "nodejs",
+      "ramda",
+      "redux",
+      "redux-saga",
+      "javascript",
+      "socket-io",
+    ],
+  },
+
+  {
     title: "Screenshots as a Service",
     code: {
       t: "public",
@@ -399,34 +427,6 @@ const sideProjects = [
       t: "public",
       url: "https://github.com/crvouga/anime",
     },
-  },
-
-  {
-    title: "Multiplayer Connect Four",
-    deployment: {
-      t: "public",
-      url: "https://connectfour.chrisvouga.dev/",
-    },
-    code: {
-      t: "public",
-      url: "https://github.com/crvouga/connect-four",
-    },
-    description: "Play the game Connect Four online with your friends",
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/connect-four.optimized.webp"],
-    youTubeVideoId: "9_TbyftkaQw",
-    topics: [
-      "css",
-      "greensock",
-      "heroku",
-      "material-ui",
-      "nodejs",
-      "ramda",
-      "redux",
-      "redux-saga",
-      "javascript",
-      "socket-io",
-    ],
   },
 
   {
