@@ -25,13 +25,16 @@ export const viewImageGalleryModal = (props) => () => {
   return fragment([
     tag("script", {}, [
       text(`
-        document.addEventListener('DOMContentLoaded', function() {
-          const galleryModal = document.getElementById('${elementId}');
-          if (galleryModal) {
-            galleryModal.setImages(${JSON.stringify(
-              props.imageSrc
-            )}, ${JSON.stringify(props.imageAlt || "Gallery image")});
-          }
+        window.addEventListener('load', function() {
+          // Wait for a small delay to ensure all async scripts are fully loaded and processed
+          setTimeout(() => {
+            const galleryModal = document.getElementById('${elementId}');
+            if (galleryModal) {
+              galleryModal.setImages(${JSON.stringify(
+                props.imageSrc
+              )}, ${JSON.stringify(props.imageAlt || "Gallery image")});
+            }
+          }, 100);
         });
       `),
     ]),
