@@ -189,21 +189,33 @@ class ImageGalleryModalElement extends HTMLElement {
         width: 60px;
         height: 60px;
       }
+      
+      .preloaded-images {
+        display: none;
+      }
     `;
 
     // Append style and container to shadow DOM
     shadow.appendChild(style);
     shadow.appendChild(container);
 
+    // Create a container for preloaded images
+    const preloadContainer = document.createElement("div");
+    preloadContainer.className = "preloaded-images";
+    shadow.appendChild(preloadContainer);
+
     // Store references to elements
     this.modal = container;
     this.imageContainer = imageContainer;
+    this.preloadContainer = preloadContainer;
     this.counter = counter;
     this.currentIndex = 0;
     /** @type {string[]} */
     this.images = [];
     /** @type {string[]} */
     this.mediaTypes = [];
+    /** @type {HTMLImageElement[]} */
+    this.preloadedImages = [];
 
     // Add event listeners
     closeButton.addEventListener("click", () => this.closeModal());
@@ -301,6 +313,30 @@ class ImageGalleryModalElement extends HTMLElement {
   }
 
   /**
+   * Preload all images in the gallery
+   */
+  preloadImages() {
+    // Clear previous preloaded images
+    this.preloadContainer.innerHTML = "";
+    this.preloadedImages = [];
+
+    // Only preload actual images, not videos
+    const imagesToPreload = this.images.filter(
+      (_, index) => this.mediaTypes[index] === "image"
+    );
+
+    // Create and load all images
+    imagesToPreload.forEach((url) => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = this.imageAlt || "Gallery image";
+      img.className = "gallery-modal-image";
+      this.preloadedImages.push(img);
+      this.preloadContainer.appendChild(img);
+    });
+  }
+
+  /**
    * Open the modal gallery at a specific index
    * @param {number} [index=0] - The index of the image to show
    */
@@ -313,6 +349,10 @@ class ImageGalleryModalElement extends HTMLElement {
     this.currentIndex = index || 0;
     this.modal.style.display = "flex";
     document.body.style.overflow = "hidden";
+
+    // Preload all images when opening the modal
+    this.preloadImages();
+
     this.updateImage();
   }
 
@@ -376,29 +416,57 @@ class ImageGalleryModalElement extends HTMLElement {
       spinner.setAttribute("data-spinner-size", "60px");
       this.imageContainer.appendChild(spinner);
 
-      const img = document.createElement("img");
-      img.src = currentUrl;
-      img.alt = this.imageAlt || "Gallery image";
-      img.className = "gallery-modal-image";
-      img.style.display = "none"; // Hide image until loaded
+      // Find the preloaded image if it exists
+      const preloadedImageIndex = this.preloadedImages.findIndex(
+        (img) => img.src === currentUrl
+      );
 
-      img.onload = function () {
-        // Use the correct type for 'this' in the event handler
-        const imgElement = this;
-        if (imgElement instanceof HTMLImageElement) {
-          // Hide spinner and show image
-          const container = imgElement.parentElement;
-          if (container) {
-            const spinnerElement = container.querySelector("loading-spinner");
-            if (spinnerElement) {
-              spinnerElement.remove();
-            }
-          }
-          imgElement.style.display = "block";
+      if (preloadedImageIndex !== -1) {
+        const preloadedImg = this.preloadedImages[preloadedImageIndex];
+        const img = document.createElement("img");
+        img.src = currentUrl;
+        img.alt = this.imageAlt || "Gallery image";
+        img.className = "gallery-modal-image";
+
+        // If the image is already loaded, show it immediately
+        if (preloadedImg.complete) {
+          spinner.remove();
+          this.imageContainer.appendChild(img);
+        } else {
+          // Otherwise wait for it to load
+          img.style.display = "none";
+          preloadedImg.onload = () => {
+            spinner.remove();
+            img.style.display = "block";
+          };
+          this.imageContainer.appendChild(img);
         }
-      };
+      } else {
+        // Fallback for any images that weren't preloaded
+        const img = document.createElement("img");
+        img.src = currentUrl;
+        img.alt = this.imageAlt || "Gallery image";
+        img.className = "gallery-modal-image";
+        img.style.display = "none"; // Hide image until loaded
 
-      this.imageContainer.appendChild(img);
+        img.onload = function () {
+          // Use the correct type for 'this' in the event handler
+          const imgElement = this;
+          if (imgElement instanceof HTMLImageElement) {
+            // Hide spinner and show image
+            const container = imgElement.parentElement;
+            if (container) {
+              const spinnerElement = container.querySelector("loading-spinner");
+              if (spinnerElement) {
+                spinnerElement.remove();
+              }
+            }
+            imgElement.style.display = "block";
+          }
+        };
+
+        this.imageContainer.appendChild(img);
+      }
     }
 
     // Update counter
