@@ -21,6 +21,15 @@ export const viewProjectCardStatus = (props) => (_a, _c) => {
     );
   }
 
+  if (props.project.deployment.t === "not-deployed-yet") {
+    children.push(
+      viewProjectCardStatusSingle({
+        ...props,
+        text: "Project is not deployed yet",
+      })({})
+    );
+  }
+
   if (props.project.deployment.t === "private") {
     children.push(
       viewProjectCardStatusSingle({

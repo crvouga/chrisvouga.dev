@@ -23,6 +23,7 @@ class ToasterElement extends HTMLElement {
           justify-content: flex-start;
           gap: 0.5rem;
           z-index: 1000;
+          pointer-events: none;
       }
 
       .toast {
@@ -36,6 +37,7 @@ class ToasterElement extends HTMLElement {
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
           transform: translateY(-20px);
           animation: slide-in 0.3s forwards, slide-out 0.3s 2.5s forwards;
+          pointer-events: auto;
       }
 
       @keyframes slide-in {

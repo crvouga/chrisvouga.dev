@@ -7,7 +7,16 @@ import { appendExternalLinkIndicator } from "../ui/external-link-indicator.js";
 import { a } from "./a.js";
 
 /**
- * @typedef {{t: "public",  url: string,} | { t: "not-deployed-anymore",} | {t: "private"}} Deployment
+ * @typedef {{
+ *   t: "public";
+ *   url: string;
+ * } | {
+ *   t: "not-deployed-anymore";
+ * } | {
+ *   t: "not-deployed-yet";
+ * } | {
+ *   t: "private";
+ * }} Deployment
  */
 
 /**
@@ -672,7 +681,7 @@ const PROJECT_SIMON_SAYS = {
 /** @type {Project} */
 const PROJECT_SMART_DOG_DOOR = {
   title: "Smart Dog Door",
-  deployment: { t: "not-deployed-anymore" },
+  deployment: { t: "not-deployed-yet" },
   code: {
     t: "public",
     url: "https://github.com/crvouga/smart-dog-door-python",
