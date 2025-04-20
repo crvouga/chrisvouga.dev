@@ -297,12 +297,12 @@ const sideProjects = [
     },
     deployment: {
       t: "public",
-      url: "https://www.imageresizerservice.com/",
+      url: "https://imageservice.chrisvouga.dev",
     },
-    description: `A zero dependency image service. Used to optimize images for web apps. Made for longevity and zero-config self-hosting.`,
+    description: `A zero dependency image service. Used to optimize images for web apps. Designed for longevity and zero-config self-hosting.`,
     imageAlt: "project screenshot or video",
     imageSrc: [],
-    topics: ["go", "html", "css", "javascript"],
+    topics: ["go"],
   },
 
   {
