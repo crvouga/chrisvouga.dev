@@ -2,6 +2,7 @@
 
 import { tag } from "../../library/html/index.js";
 import { viewCard, viewCardContent } from "../../ui/card.js";
+import { appendExternalLinkIndicator } from "../../ui/external-link-indicator.js";
 import { viewLink } from "../../ui/link.js";
 import { unit } from "../../ui/theme.js";
 import { viewTypography } from "../../ui/typography.js";
@@ -21,7 +22,12 @@ export const viewSchoolCard =
             href: school.infoUrl ?? " ",
           },
           [
-            viewTypography({ level: "h3", text: school.institutionName })({
+            viewTypography({
+              level: "h3",
+              text: school.infoUrl
+                ? appendExternalLinkIndicator({ text: school.institutionName })
+                : school.institutionName,
+            })({
               style: {
                 "margin-bottom": unit(1),
               },

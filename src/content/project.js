@@ -3,6 +3,7 @@
  */
 
 import { toYouTubeVideoUrl } from "../library/youtube.js";
+import { appendExternalLinkIndicator } from "../ui/external-link-indicator.js";
 import { a } from "./a.js";
 
 /**
@@ -55,9 +56,7 @@ export const PROJECTS = [
     galleryImageSrc: [
       "/triangulator/assigned-reject-reason.png",
       "/triangulator/course-search-details-2.png",
-      "/triangulator/course-search-details.png",
       "/triangulator/course-search-loading.png",
-      "/triangulator/course-search-results.png",
       "/triangulator/course-search.png",
       "/triangulator/find-course.png",
       "/triangulator/inst-admin-all-users.png",
@@ -65,7 +64,6 @@ export const PROJECTS = [
       "/triangulator/inst-admin-boost-suggestions.png",
       "/triangulator/inst-admin-dashboard.png",
       "/triangulator/inst-admin-download.png",
-      "/triangulator/inst-admin-new-suggestions-2.png",
       "/triangulator/inst-admin-new-suggestions.png",
       "/triangulator/inst-admin-public-profile.png",
       "/triangulator/inst-admin-summary.png",
@@ -108,10 +106,10 @@ export const PROJECTS = [
     },
     description: `${a(
       gamezillaHref,
-      "gamezilla.app"
+      appendExternalLinkIndicator({ text: "gamezilla.app" })
     )} is a multiplayer gaming app. Implemented using a full-stack variant of the Elm architecture in TypeScript. Copied from the ${a(
       lamderaHref,
-      "Lamdera"
+      appendExternalLinkIndicator({ text: "Lamdera" })
     )} platform.`,
     imageAlt: "project screenshot or video",
     imageSrc: ["/gamezilla.optimized.webp"],

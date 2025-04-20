@@ -2,6 +2,7 @@
 
 import { tag } from "../library/html/index.js";
 import { viewCard, viewCardContent } from "../ui/card.js";
+import { appendExternalLinkIndicator } from "../ui/external-link-indicator.js";
 import { viewLink } from "../ui/link.js";
 import { unit } from "../ui/theme.js";
 import { viewTypography } from "../ui/typography.js";
@@ -19,7 +20,12 @@ export const viewWorkCard =
             href: work.infoUrl ?? " ",
           },
           [
-            viewTypography({ level: "h3", text: work.name })({
+            viewTypography({
+              level: "h3",
+              text: work.infoUrl
+                ? appendExternalLinkIndicator({ text: work.name })
+                : work.name,
+            })({
               style: {
                 "margin-bottom": unit(1),
               },
