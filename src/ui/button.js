@@ -5,11 +5,7 @@ import { HEAD } from "./head.js";
 import { THEME } from "./theme.js";
 
 /**
- * @typedef {"h1" | "h2" | "h3" | "title-sm" | "body-md" | "body-xs"} Level
- */
-
-/**
- * @typedef {{tag:string; startDecorator: import("../library/html/index.js").View | null, size: "sm" | "lg"; variant: "soft" | "plain" | "contained"; disabled: boolean; text: string}} Props
+ * @typedef {{tag:string; startDecorator: import("../library/html/index.js").View | null, size: "sm" | "lg" | "xl"; variant: "soft" | "plain" | "contained"; disabled: boolean; text: string}} Props
  */
 
 /**
@@ -49,6 +45,9 @@ const toClassName = (props) => {
       break;
     case "lg":
       classNames.push("btn-lg");
+      break;
+    case "xl":
+      classNames.push("btn-xl");
       break;
   }
 
@@ -137,6 +136,18 @@ export const viewButtonStyles = (_props) => (_attrs, _children) => {
       .btn-lg > .btn-start-decorator {
         width: 24px;
         height: 24px;
+      }
+
+      .btn-xl {
+        padding: 14px 28px;
+        font-size: 18px;
+        line-height: 26px;
+        border-radius: 8px;
+      }
+
+      .btn-xl > .btn-start-decorator {
+        width: 28px;
+        height: 28px;
       }
 
       .btn.btn-disabled {

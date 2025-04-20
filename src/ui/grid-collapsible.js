@@ -91,7 +91,7 @@ export const viewGridCollapsible = (props) => () => {
         [
           viewButton({
             disabled: false,
-            size: "lg",
+            size: "xl",
             startDecorator: null,
             tag: "button",
             text: `See ${hiddenCardCount.toLocaleString()} more`,
@@ -106,7 +106,7 @@ export const viewGridCollapsible = (props) => () => {
 
           viewButton({
             disabled: false,
-            size: "lg",
+            size: "xl",
             startDecorator: null,
             tag: "button",
             text: "See less",
@@ -132,7 +132,7 @@ HEAD.push(
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-top: ${unit(3)};
+        padding-top: ${unit(6)};
       }
     `),
   ])
