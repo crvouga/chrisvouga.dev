@@ -1,17 +1,20 @@
 // @ts-check
 
 import { tag, text } from "../../../library/html/index.js";
+import { toYouTubeVideoUrl } from "../../../library/youtube.js";
 import { HEAD } from "../../../ui/head.js";
 
 /**
  * @type {import("../props.js").ProjectCardView}
  */
 export const viewProjectCardMediaVideo = (props) => (attr, _) => {
+  // @ts-ignore
   if (!props.project?.youTubeVideoId) {
     throw new Error("missing youTubeVideoId");
   }
 
   const videoUrl = toYouTubeVideoUrl({
+    // @ts-ignore
     youTubeVideoId: props.project.youTubeVideoId,
   });
 
@@ -111,12 +114,3 @@ HEAD.push(
       `),
   ])
 );
-
-/**
- * Converts a YouTube video ID into a playable embed URL
- * @param {{ youTubeVideoId: string }} param0
- * @returns {string}
- */
-const toYouTubeVideoUrl = ({ youTubeVideoId }) => {
-  return `https://www.youtube.com/embed/${youTubeVideoId}?autoplay=1&loop=1&mute=1&playlist=${youTubeVideoId}`;
-};

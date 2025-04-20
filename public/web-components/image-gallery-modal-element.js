@@ -75,6 +75,14 @@ class ImageGalleryModalElement extends HTMLElement {
         background-color: var(--skeleton-color, #f0f0f0);
       }
       
+      .gallery-modal-video {
+        max-width: 90%;
+        max-height: 80vh;
+        width: 80%;
+        height: 80vh;
+        border: none;
+      }
+      
       .gallery-modal-counter {
         position: absolute;
         bottom: 20px;
@@ -170,6 +178,11 @@ class ImageGalleryModalElement extends HTMLElement {
           top: 15px;
           right: 15px;
         }
+        
+        .gallery-modal-video {
+          width: 90%;
+          height: 50vh;
+        }
       }
       
       loading-spinner {
@@ -189,6 +202,8 @@ class ImageGalleryModalElement extends HTMLElement {
     this.currentIndex = 0;
     /** @type {string[]} */
     this.images = [];
+    /** @type {string[]} */
+    this.mediaTypes = [];
 
     // Add event listeners
     closeButton.addEventListener("click", () => this.closeModal());
@@ -243,15 +258,45 @@ class ImageGalleryModalElement extends HTMLElement {
   }
 
   /**
-   * Set the images for the gallery
-   * @param {string[]} images - Array of image URLs
-   * @param {string} [alt="Gallery image"] - Alt text for images
+   * Check if URL is a YouTube video
+   * @param {string} url - URL to check
+   * @returns {boolean} - True if URL is a YouTube video
    */
-  setImages(images, alt = "Gallery image") {
-    if (!Array.isArray(images)) {
-      throw new Error("Images must be an array of URLs");
+  isYouTubeUrl(url) {
+    return url.includes("youtube.com/") || url.includes("youtu.be/");
+  }
+
+  /**
+   * Extract YouTube video ID from URL
+   * @param {string} url - YouTube URL
+   * @returns {string} - YouTube video ID
+   */
+  getYouTubeVideoId(url) {
+    let videoId = "";
+    if (url.includes("youtube.com/watch")) {
+      const urlParams = new URL(url).searchParams;
+      videoId = urlParams.get("v") || "";
+    } else if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1].split("?")[0];
+    } else if (url.includes("youtube.com/embed/")) {
+      videoId = url.split("youtube.com/embed/")[1].split("?")[0];
     }
-    this.images = images;
+    return videoId;
+  }
+
+  /**
+   * Set the media items for the gallery
+   * @param {string[]} media - Array of image URLs or YouTube URLs
+   * @param {string} [alt="Gallery media"] - Alt text for images
+   */
+  setImages(media, alt = "Gallery media") {
+    if (!Array.isArray(media)) {
+      throw new Error("Media must be an array of URLs");
+    }
+    this.images = media;
+    this.mediaTypes = media.map((url) =>
+      this.isYouTubeUrl(url) ? "video" : "image"
+    );
     this.imageAlt = alt;
   }
 
@@ -261,7 +306,7 @@ class ImageGalleryModalElement extends HTMLElement {
    */
   openModal(index = 0) {
     if (this.images.length === 0) {
-      console.error("No images have been set for the gallery");
+      console.error("No media items have been set for the gallery");
       return;
     }
 
@@ -297,44 +342,64 @@ class ImageGalleryModalElement extends HTMLElement {
   }
 
   /**
-   * Update the displayed image
+   * Update the displayed media (image or video)
    */
   updateImage() {
     this.imageContainer.innerHTML = "";
+    const currentUrl = this.images[this.currentIndex];
+    const mediaType = this.mediaTypes[this.currentIndex];
 
-    // Create loading spinner
-    const spinner = document.createElement("loading-spinner");
-    spinner.setAttribute("data-spinner-color", "#ffffff");
-    spinner.setAttribute(
-      "data-spinner-color-light",
-      "rgba(255, 255, 255, 0.2)"
-    );
-    spinner.setAttribute("data-spinner-size", "60px");
-    this.imageContainer.appendChild(spinner);
-
-    const img = document.createElement("img");
-    img.src = this.images[this.currentIndex];
-    img.alt = this.imageAlt || "Gallery image";
-    img.className = "gallery-modal-image";
-    img.style.display = "none"; // Hide image until loaded
-
-    img.onload = function () {
-      // Use the correct type for 'this' in the event handler
-      const imgElement = this;
-      if (imgElement instanceof HTMLImageElement) {
-        // Hide spinner and show image
-        const container = imgElement.parentElement;
-        if (container) {
-          const spinnerElement = container.querySelector("loading-spinner");
-          if (spinnerElement) {
-            spinnerElement.remove();
-          }
-        }
-        imgElement.style.display = "block";
+    if (mediaType === "video") {
+      // Handle YouTube video
+      const videoId = this.getYouTubeVideoId(currentUrl);
+      if (videoId) {
+        const iframe = document.createElement("iframe");
+        iframe.className = "gallery-modal-video";
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        iframe.title = this.imageAlt || "YouTube video";
+        iframe.allow =
+          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.setAttribute("allowfullscreen", "");
+        this.imageContainer.appendChild(iframe);
+      } else {
+        console.error("Invalid YouTube URL:", currentUrl);
       }
-    };
+    } else {
+      // Handle image
+      // Create loading spinner
+      const spinner = document.createElement("loading-spinner");
+      spinner.setAttribute("data-spinner-color", "#ffffff");
+      spinner.setAttribute(
+        "data-spinner-color-light",
+        "rgba(255, 255, 255, 0.2)"
+      );
+      spinner.setAttribute("data-spinner-size", "60px");
+      this.imageContainer.appendChild(spinner);
 
-    this.imageContainer.appendChild(img);
+      const img = document.createElement("img");
+      img.src = currentUrl;
+      img.alt = this.imageAlt || "Gallery image";
+      img.className = "gallery-modal-image";
+      img.style.display = "none"; // Hide image until loaded
+
+      img.onload = function () {
+        // Use the correct type for 'this' in the event handler
+        const imgElement = this;
+        if (imgElement instanceof HTMLImageElement) {
+          // Hide spinner and show image
+          const container = imgElement.parentElement;
+          if (container) {
+            const spinnerElement = container.querySelector("loading-spinner");
+            if (spinnerElement) {
+              spinnerElement.remove();
+            }
+          }
+          imgElement.style.display = "block";
+        }
+      };
+
+      this.imageContainer.appendChild(img);
+    }
 
     // Update counter
     this.counter.textContent = `${this.currentIndex + 1} / ${

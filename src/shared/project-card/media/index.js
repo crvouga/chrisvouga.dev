@@ -4,16 +4,13 @@ import { tag, text } from "../../../library/html/index.js";
 import { HEAD } from "../../../ui/head.js";
 import { THEME } from "../../../ui/theme.js";
 import { viewProjectCardMediaImage } from "./image.js";
-import { viewProjectCardMediaVideo } from "./video.js";
 
 /**
  * @type {import("../props.js").ProjectCardView}
  */
 export const viewProjectCardMedia = (props) => (attr, children) => {
   return tag("div", { ...attr, class: "project-card-media" }, [
-    props.project.youTubeVideoId
-      ? viewProjectCardMediaVideo(props)()
-      : viewProjectCardMediaImage(props)({}, []),
+    viewProjectCardMediaImage(props)({}, []),
     ...(children ?? []),
   ]);
 };

@@ -58,6 +58,7 @@ export const viewProjectCardStatus = (props) => (_a, _c) => {
  * @type {import("../../../library/html/index.js").ViewWithProps<import("../props.js").ProjectCardProps & {text:string}>}
  */
 export const viewProjectCardStatusSingle = (props) => (_a, _c) => {
+  const color = THEME.colors.neutralMuted;
   return tag(
     "div",
     {
@@ -72,14 +73,14 @@ export const viewProjectCardStatusSingle = (props) => (_a, _c) => {
         style: {
           width: 18,
           height: 18,
-          fill: THEME.colors.warning,
+          fill: color,
         },
       }),
       viewTypography({
         level: "body-xs",
         text: props.text,
       })({
-        style: { color: THEME.colors.warning },
+        style: { color: color },
       }),
     ]
   );

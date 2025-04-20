@@ -2,6 +2,8 @@
  * @typedef {{t: "private";} | {t: "public"; url: string;}} Code
  */
 
+import { toYouTubeVideoUrl } from "../library/youtube.js";
+
 /**
  * @typedef {{t: "public",  url: string,} | { t: "not-deployed-anymore",} | {t: "private"}} Deployment
  */
@@ -123,8 +125,13 @@ export const projects = [
     )} platform.`,
     imageAlt: "project screenshot or video",
     imageSrc: ["/gamezilla.optimized.webp"],
-    galleryImageSrc: ["/gamezilla.png"],
-    youTubeVideoId: "VSLpdPvHbD4",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "VSLpdPvHbD4",
+        autoplay: true,
+      }),
+      "/gamezilla.png",
+    ],
     topics: ["typescript", "react", "postgres", "tailwind", "websocket", "bun"],
     setting: "side",
   },
@@ -142,6 +149,11 @@ export const projects = [
     imageAlt: "project screenshot or video",
     imageSrc: ["/studyhall.optimized.webp"],
     galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "BC4K0u7Zm4k",
+        autoplay: true,
+        mute: true,
+      }),
       "/studyhall/1.png",
       "/studyhall/2.png",
       "/studyhall/3.png",
@@ -183,8 +195,14 @@ export const projects = [
       "Watch trailers, write reviews and make movie lists with your friends.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/pickflix.optimized.webp"],
-    galleryImageSrc: ["/pickflix.png"],
-    youTubeVideoId: "-atthbuMFIM",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "-atthbuMFIM",
+        autoplay: true,
+        mute: true,
+      }),
+      "/pickflix.png",
+    ],
     topics: [
       "express",
       "heroku",
@@ -319,8 +337,14 @@ export const projects = [
     description: "Play the game Connect Four online with your friends",
     imageAlt: "project screenshot or video",
     imageSrc: ["/connect-four.optimized.webp"],
-    galleryImageSrc: ["/connect-four.png"],
-    youTubeVideoId: "9_TbyftkaQw",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "9_TbyftkaQw",
+        autoplay: true,
+        mute: true,
+      }),
+      "/connect-four.png",
+    ],
     topics: [
       "css",
       "greensock",
@@ -457,8 +481,14 @@ export const projects = [
       "The official website and e-commerce store for the band alibi.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/band.optimized.webp"],
-    galleryImageSrc: ["/band.png"],
-    youTubeVideoId: "vChYAGXsLuI",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "vChYAGXsLuI",
+        autoplay: true,
+        mute: true,
+      }),
+      "/band.png",
+    ],
     topics: [
       "css",
       "firebase",
@@ -484,8 +514,14 @@ export const projects = [
     description: "A marketing website for a hospice courier company.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/courier.optimized.webp"],
-    galleryImageSrc: ["/courier.png"],
-    youTubeVideoId: "kFwPTJcM6I0",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "kFwPTJcM6I0",
+        autoplay: true,
+        mute: true,
+      }),
+      "/courier.png",
+    ],
     topics: ["css", "material-ui", "nextjs", "react", "typescript"],
     setting: "work",
   },
@@ -529,8 +565,14 @@ export const projects = [
       "Pure functional implementation of the classic game Snake with smooth snake movement",
     imageAlt: "project screenshot or video",
     imageSrc: ["/snake.optimized.webp"],
-    galleryImageSrc: ["/snake.png"],
-    youTubeVideoId: "7El3RdkzlHs",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "7El3RdkzlHs",
+        autoplay: true,
+        mute: true,
+      }),
+      "/snake.png",
+    ],
     topics: ["css", "javascript", "ramda", "react"],
     setting: "side",
   },
@@ -548,8 +590,14 @@ export const projects = [
     description: "Match Three is a Candy Crush type game",
     imageAlt: "project screenshot or video",
     imageSrc: ["/match-three.optimized.webp"],
-    galleryImageSrc: ["/match-three.png"],
-    youTubeVideoId: "VBrlDgmXSoA",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "VBrlDgmXSoA",
+        autoplay: true,
+        mute: true,
+      }),
+      "/match-three.png",
+    ],
     topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
     setting: "side",
   },
@@ -568,8 +616,14 @@ export const projects = [
       "Cheese is an app that lets people make fake GCU ids so they can sneak into GCU events.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/cheese.optimized.webp"],
-    galleryImageSrc: ["/cheese.png"],
-    youTubeVideoId: "hv3tRBHF7w4",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "hv3tRBHF7w4",
+        autoplay: true,
+        mute: true,
+      }),
+      "/cheese.png",
+    ],
     topics: ["css", "typescript", "material-ui", "react", "firebase"],
     setting: "side",
   },
@@ -587,8 +641,14 @@ export const projects = [
     description: "An implementation of the classic memory game Simon Says.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/simon-says.optimized.webp"],
-    galleryImageSrc: ["/simon-says.png"],
-    youTubeVideoId: "WrUFzlKL0E0",
+    galleryImageSrc: [
+      toYouTubeVideoUrl({
+        youTubeVideoId: "WrUFzlKL0E0",
+        autoplay: true,
+        mute: true,
+      }),
+      "/simon-says.png",
+    ],
     topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
     setting: "side",
   },
