@@ -169,6 +169,8 @@ class ImageGalleryModalElement extends HTMLElement {
     closeButton.addEventListener("click", () => this.closeModal());
     prevButton.addEventListener("click", () => this.prevImage());
     nextButton.addEventListener("click", () => this.nextImage());
+
+    // Add click event listener to the modal backdrop to close it
     container.addEventListener("click", (event) => {
       if (event.target === container) {
         this.closeModal();

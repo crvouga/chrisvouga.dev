@@ -44,6 +44,9 @@ const viewProjectCardMediaImageMain = (props) => (attr, _) => {
           { ...attr, class: "project-card-media-image" },
           []
         ),
+        tag("span", { class: "project-card-media-image-overlay" }, [
+          text("View Gallery"),
+        ]),
       ]
     ),
     viewImageGalleryModal({
@@ -72,9 +75,29 @@ HEAD.push(
         margin: 0;
         border: none;
         background: none;
+        position: relative;
+        overflow: hidden;
       }
-      .project-card-media-image-button:hover {
-        opacity: 0.75;
+      .project-card-media-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .project-card-media-image-button:hover .project-card-media-image-overlay {
+        opacity: 1;
+      }
+      .project-card-media-image-button:hover .project-card-media-image {
+        opacity: 0.9;
         transition: opacity 0.2s ease;
       }
     `),
