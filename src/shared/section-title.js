@@ -17,7 +17,7 @@ export const viewSectionTitle = (p) => (_a, _c) => {
             text: p.subtitle,
           })({
             style: {
-              "max-width": "600px",
+              "max-width": "720px",
             },
           }),
         ]
