@@ -344,7 +344,6 @@ class ImageGalleryModalElement extends HTMLElement {
       this.preloadContainer.appendChild(img);
     });
   }
-
   /**
    * Open the modal gallery at a specific index
    * @param {number} [index=0] - The index of the image to show
@@ -357,8 +356,14 @@ class ImageGalleryModalElement extends HTMLElement {
 
     this.currentIndex = index || 0;
     this.modal.style.display = "flex";
+
+    // Store the current scroll position before disabling scrolling
+    this.scrollPosition =
+      window.pageYOffset || document.documentElement.scrollTop;
+
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
+    document.body.style.top = `-${this.scrollPosition}px`;
     document.body.style.width = "100%";
     document.body.style.height = "100%";
     this.isModalOpen = true;
@@ -378,10 +383,17 @@ class ImageGalleryModalElement extends HTMLElement {
    */
   closeModal(pushState = true) {
     this.modal.style.display = "none";
+
+    // Restore scrolling and scroll position
     document.body.style.overflow = "";
     document.body.style.position = "";
+    document.body.style.top = "";
     document.body.style.width = "";
     document.body.style.height = "";
+
+    // Restore the scroll position
+    window.scrollTo(0, this.scrollPosition || 0);
+
     this.isModalOpen = false;
 
     // If we're closing via a user action (not browser back button)
