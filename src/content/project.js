@@ -40,11 +40,11 @@ export const projectToLinkHref = (project) => {
   return null;
 };
 
-const gamezillaHref = "https://www.gamezilla.app/";
-const lamderaHref = "https://lamdera.com/";
+const GAMEZILLA_HREF = "https://www.gamezilla.app/";
+const LAMDERA_HREF = "https://lamdera.com/";
 
 /** @type {Project} */
-const projectTriangulator = {
+const PROJECT_TRIANGULATOR = {
   title: "Triangulator",
   deployment: { t: "private" },
   code: { t: "private" },
@@ -96,20 +96,20 @@ const projectTriangulator = {
 };
 
 /** @type {Project} */
-const projectGamezilla = {
+const PROJECT_GAMEZILLA = {
   title: "gamezilla.app",
   deployment: {
     t: "public",
-    url: gamezillaHref,
+    url: GAMEZILLA_HREF,
   },
   code: {
     t: "private",
   },
   description: `${a(
-    gamezillaHref,
+    GAMEZILLA_HREF,
     appendExternalLinkIndicator({ text: "gamezilla.app" })
   )} is a multiplayer gaming app. Implemented using a full-stack variant of the Elm architecture in TypeScript. Copied from the ${a(
-    lamderaHref,
+    LAMDERA_HREF,
     appendExternalLinkIndicator({ text: "Lamdera" })
   )} platform.`,
   imageAlt: "project screenshot or video",
@@ -126,7 +126,7 @@ const projectGamezilla = {
 };
 
 /** @type {Project} */
-const projectStudyHall = {
+const PROJECT_STUDY_HALL = {
   title: "Study Hall",
   deployment: {
     t: "public",
@@ -174,7 +174,7 @@ const projectStudyHall = {
 };
 
 /** @type {Project} */
-const projectPickflix = {
+const PROJECT_PICKFLIX = {
   title: "Pickflix",
   deployment: {
     t: "public",
@@ -215,7 +215,7 @@ const projectPickflix = {
 };
 
 /** @type {Project} */
-const projectSunDevils = {
+const PROJECT_SUN_DEVILS = {
   title: "Sun devils",
   deployment: { t: "public", url: "https://sundevils.com/" },
   code: { t: "private" },
@@ -235,7 +235,7 @@ const projectSunDevils = {
 };
 
 /** @type {Project} */
-const projectHeadlessCombobox = {
+const PROJECT_HEADLESS_COMBOBOX = {
   title: "headless-combobox",
   deployment: {
     t: "public",
@@ -256,7 +256,7 @@ const projectHeadlessCombobox = {
 };
 
 /** @type {Project} */
-const projectMoviefinderRust = {
+const PROJECT_MOVIEFINDER_RUST = {
   title: "moviefinder.app",
   deployment: {
     t: "public",
@@ -275,7 +275,7 @@ const projectMoviefinderRust = {
 };
 
 /** @type {Project} */
-const projectTodoApp = {
+const PROJECT_TODO_APP = {
   title: "Fullstack Todo App",
   code: {
     t: "public",
@@ -303,7 +303,7 @@ const projectTodoApp = {
 };
 
 /** @type {Project} */
-const projectImageService = {
+const PROJECT_IMAGE_SERVICE = {
   title: "Image service",
   code: {
     t: "public",
@@ -322,7 +322,7 @@ const projectImageService = {
 };
 
 /** @type {Project} */
-const projectConnectFour = {
+const PROJECT_CONNECT_FOUR = {
   title: "Connect Four: AI & Multiplayer",
   deployment: {
     t: "public",
@@ -359,7 +359,7 @@ const projectConnectFour = {
 };
 
 /** @type {Project} */
-const projectAirr = {
+const PROJECT_AIRR = {
   title: "Airr Product Demo",
   code: {
     t: "private",
@@ -401,7 +401,7 @@ const projectAirr = {
 };
 
 /** @type {Project} */
-const projectScreenshotService = {
+const PROJECT_SCREENSHOT_SERVICE = {
   title: "Screenshots as a Service",
   code: {
     t: "public",
@@ -438,7 +438,7 @@ const projectScreenshotService = {
 };
 
 /** @type {Project} */
-const projectOrchard = {
+const PROJECT_ORCHARD = {
   title: "Orchard",
   code: {
     t: "private",
@@ -457,7 +457,7 @@ const projectOrchard = {
 };
 
 /** @type {Project} */
-const projectQuizMaker = {
+const PROJECT_QUIZ_MAKER = {
   title: "LTI compatible quiz maker",
   code: {
     t: "public",
@@ -476,7 +476,7 @@ const projectQuizMaker = {
 };
 
 /** @type {Project} */
-const projectBandWebsite = {
+const PROJECT_BAND_WEBSITE = {
   title: "Band Website with E-commerce",
   deployment: {
     t: "public",
@@ -512,7 +512,7 @@ const projectBandWebsite = {
 };
 
 /** @type {Project} */
-const projectCourierWebsite = {
+const PROJECT_COURIER_WEBSITE = {
   title: "Courier Company Website",
   deployment: {
     t: "public",
@@ -537,7 +537,7 @@ const projectCourierWebsite = {
 };
 
 /** @type {Project} */
-const projectAnimeBlog = {
+const PROJECT_ANIME_BLOG = {
   title: "Anime Blog",
   description: "A jamstack blog about anime.",
   imageAlt: "project screenshot or video",
@@ -564,7 +564,7 @@ const projectAnimeBlog = {
 };
 
 /** @type {Project} */
-const projectSnakeGame = {
+const PROJECT_SNAKE_GAME = {
   title: "Smooth Snake Game",
   deployment: {
     t: "public",
@@ -591,7 +591,7 @@ const projectSnakeGame = {
 };
 
 /** @type {Project} */
-const projectMatchThree = {
+const PROJECT_MATCH_THREE = {
   title: "Match Three",
   deployment: {
     url: "https://matchthree.chrisvouga.dev/",
@@ -617,7 +617,7 @@ const projectMatchThree = {
 };
 
 /** @type {Project} */
-const projectCheese = {
+const PROJECT_CHEESE = {
   title: "Cheese",
   deployment: {
     t: "not-deployed-anymore",
@@ -644,7 +644,7 @@ const projectCheese = {
 };
 
 /** @type {Project} */
-const projectSimonSays = {
+const PROJECT_SIMON_SAYS = {
   title: "Simon Says",
   deployment: {
     t: "public",
@@ -670,7 +670,7 @@ const projectSimonSays = {
 };
 
 /** @type {Project} */
-const projectSmartDogDoor = {
+const PROJECT_SMART_DOG_DOOR = {
   title: "Smart Dog Door",
   deployment: { t: "not-deployed-anymore" },
   code: {
@@ -688,28 +688,28 @@ const projectSmartDogDoor = {
 
 /** @type {Project[]} */
 export const PROJECTS = [
-  projectTriangulator,
-  projectGamezilla,
-  projectStudyHall,
-  projectPickflix,
-  projectSunDevils,
-  projectHeadlessCombobox,
-  projectMoviefinderRust,
-  projectTodoApp,
-  projectImageService,
-  projectConnectFour,
-  projectAirr,
-  projectScreenshotService,
-  projectSmartDogDoor,
-  projectOrchard,
-  projectQuizMaker,
-  projectBandWebsite,
-  projectCourierWebsite,
-  projectAnimeBlog,
-  projectSnakeGame,
-  projectMatchThree,
-  projectSimonSays,
-  projectCheese,
+  PROJECT_TRIANGULATOR,
+  PROJECT_GAMEZILLA,
+  PROJECT_STUDY_HALL,
+  PROJECT_PICKFLIX,
+  PROJECT_SUN_DEVILS,
+  PROJECT_HEADLESS_COMBOBOX,
+  PROJECT_MOVIEFINDER_RUST,
+  PROJECT_TODO_APP,
+  PROJECT_IMAGE_SERVICE,
+  PROJECT_CONNECT_FOUR,
+  PROJECT_AIRR,
+  PROJECT_SCREENSHOT_SERVICE,
+  PROJECT_SMART_DOG_DOOR,
+  PROJECT_ORCHARD,
+  PROJECT_QUIZ_MAKER,
+  PROJECT_BAND_WEBSITE,
+  PROJECT_COURIER_WEBSITE,
+  PROJECT_ANIME_BLOG,
+  PROJECT_SNAKE_GAME,
+  PROJECT_MATCH_THREE,
+  PROJECT_SIMON_SAYS,
+  PROJECT_CHEESE,
 ];
 
 /** @type {Project[]} */
