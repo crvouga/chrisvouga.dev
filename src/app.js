@@ -126,7 +126,7 @@ HEAD.push(
     * { 
       font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; 
       color: ${THEME.colors.text};
-      touch-action: manipulation; /* Prevents double-tap to zoom */
+      touch-action: manipulation !important; /* Prevents double-tap to zoom */
     }
     body {
       margin: 0;
