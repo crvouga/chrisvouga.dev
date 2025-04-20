@@ -30,6 +30,9 @@ class ImageGalleryModalElement extends HTMLElement {
     // Create image container
     const imageContainer = document.createElement("div");
     imageContainer.className = "gallery-modal-image-container";
+    imageContainer.addEventListener("click", (_event) => {
+      this.closeModal(false);
+    });
 
     // Create counter
     const counter = document.createElement("div");
