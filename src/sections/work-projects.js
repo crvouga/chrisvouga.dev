@@ -1,6 +1,6 @@
 // @ts-check
 
-import { data } from "../content/index.js";
+import { CONTENT } from "../content/content.js";
 import { viewProjectCard } from "../shared/project-card/index.js";
 import { viewSection } from "../shared/section.js";
 import { viewGridCollapsible } from "../ui/grid-collapsible.js";
@@ -13,7 +13,7 @@ export const viewWorkProjectsSection = (a, _) => {
     title: "Work Projects",
   })(a, [
     viewGridCollapsible({
-      children: data.workProjects.map((project) =>
+      children: CONTENT.WORK_PROJECTS.map((project) =>
         viewProjectCard({ project })()
       ),
       jsVarSafeNamespace: "workProjectsSection",

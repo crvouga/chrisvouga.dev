@@ -3,6 +3,7 @@
  */
 
 import { toYouTubeVideoUrl } from "../library/youtube.js";
+import { a } from "./a.js";
 
 /**
  * @typedef {{t: "public",  url: string,} | { t: "not-deployed-anymore",} | {t: "private"}} Deployment
@@ -38,22 +39,11 @@ export const projectToLinkHref = (project) => {
   return null;
 };
 
-/**
- * @param {string} href
- * @param {string} text
- * @returns {string}
- */
-const a = (href, text) => {
-  return `<a style="color: white;" target="_blank" rel="noreferrer noopener" href="${href}">${text}</a>`;
-};
-
 const gamezillaHref = "https://www.gamezilla.app/";
 const lamderaHref = "https://lamdera.com/";
 
-/**
- * @type {import("./project.js").Project[]}
- */
-export const projects = [
+/** @type {Project[]} */
+export const PROJECTS = [
   {
     title: "Triangulator",
     deployment: { t: "private" },
@@ -660,3 +650,13 @@ export const projects = [
     setting: "side",
   },
 ];
+
+/** @type {Project[]} */
+export const WORK_PROJECTS = PROJECTS.filter(
+  (project) => project.setting === "work"
+);
+
+/** @type {Project[]} */
+export const SIDE_PROJECTS = PROJECTS.filter(
+  (project) => project.setting === "side"
+);

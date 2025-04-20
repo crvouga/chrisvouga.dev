@@ -1,4 +1,4 @@
-import { data } from "../content/index.js";
+import { CONTENT } from "../content/content.js";
 import { tag, text } from "../library/html/index.js";
 import { viewLink } from "../ui/link.js";
 import { unit, THEME } from "../ui/theme.js";
@@ -23,7 +23,7 @@ export const viewFooterSection = () => {
         {
           target: "_blank",
           rel: "noopener noreferrer",
-          href: data.siteSourceCodeUrl,
+          href: CONTENT.SITE_SOURCE_CODE_URL,
           style: {
             color: THEME.colors.neutralMuted,
             display: "flex",

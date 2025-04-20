@@ -1,4 +1,4 @@
-import { data } from "../content/index.js";
+import { CONTENT } from "../content/content.js";
 import { tag, text } from "../library/html/index.js";
 import { viewContactLink } from "../shared/contact-link/index.js";
 import { viewGithubButton } from "../shared/github-button.js";
@@ -62,7 +62,7 @@ const viewContactLinks = (_a, _c) => {
   return tag("div", { class: "contact-section-links" }, [
     viewContactLink({
       label: "Email",
-      value: data.emailAddress,
+      value: CONTENT.EMAIL_ADDRESS,
     })(),
   ]);
 };

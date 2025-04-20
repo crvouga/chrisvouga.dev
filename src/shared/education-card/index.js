@@ -8,7 +8,7 @@ import { viewTypography } from "../../ui/typography.js";
 import { viewEducationCardImage } from "./image.js";
 
 /**
- * @type {import("../../library/html/index.js").ViewWithProps<{education: import("../../content/education.js").Education}>}
+ * @type {import("../../library/html/index.js").ViewWithProps<{education: import("../../content/school.js").School}>}
  */
 export const viewEducationCard =
   ({ education }) =>

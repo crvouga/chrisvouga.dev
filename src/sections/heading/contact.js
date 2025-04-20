@@ -1,4 +1,4 @@
-import { data } from "../../content/index.js";
+import { CONTENT } from "../../content/content.js";
 import { tag, text } from "../../library/html/index.js";
 import { viewContactLink } from "../../shared/contact-link/index.js";
 import { viewGithubButton } from "../../shared/github-button.js";
@@ -16,7 +16,7 @@ export const viewHeadingContact = () => () => {
       class: "heading-contact",
     },
     [
-      viewContactLink({ label: "Email", value: data.emailAddress })(),
+      viewContactLink({ label: "Email", value: CONTENT.EMAIL_ADDRESS })(),
       tag(
         "div",
         {

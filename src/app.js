@@ -1,10 +1,10 @@
 // @ts-check
-import { data } from "./content/index.js";
+import { CONTENT } from "./content/content.js";
 import { tag, text } from "./library/html/index.js";
 import { replaceAll } from "./library/replace-all.js";
 import { viewAboutMeSection } from "./sections/about-me.js";
 import { viewContactSection } from "./sections/contact.js";
-import { viewEducationSection } from "./sections/education.js";
+import { viewSchoolSection } from "./sections/school.js";
 import { viewFooterSection } from "./sections/footer.js";
 import { viewHeadingSection } from "./sections/heading/index.js";
 import { viewProjectsSection } from "./sections/projects.js";
@@ -21,7 +21,7 @@ export const viewApp = () => {
       viewHeadingSection(),
       viewWorkSection(),
       viewProjectsSection(),
-      viewEducationSection(),
+      viewSchoolSection(),
       viewAboutMeSection(),
       viewContactSection(),
       viewFooterSection(),
@@ -61,13 +61,13 @@ export const viewDoc = (_a, c) => {
         },
         []
       ),
-      tag("title", {}, [text(data.metaTitle)]),
+      tag("title", {}, [text(CONTENT.META_TITLE)]),
       tag(
         "meta",
         {
           name: "description",
           content: replaceAll(
-            replaceAll(data.metaDescription, "\n", ""),
+            replaceAll(CONTENT.META_DESCRIPTION, "\n", ""),
             "\t",
             ""
           ),

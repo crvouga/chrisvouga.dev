@@ -1,4 +1,4 @@
-import { data } from "../content/index.js";
+import { CONTENT } from "../content/content.js";
 import { viewButton } from "../ui/button.js";
 import { github } from "../ui/icons.js";
 
@@ -17,6 +17,6 @@ export const viewGithubButton = () => () => {
   })({
     target: "_blank",
     rel: "noreferrer noopener",
-    href: data.Github.url,
+    href: CONTENT.GITHUB_URL,
   });
 };

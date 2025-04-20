@@ -1,6 +1,6 @@
 // @ts-check
 
-import { data } from "../content/index.js";
+import { CONTENT } from "../content/content.js";
 import { viewSection } from "../shared/section.js";
 import { THEME } from "../ui/theme.js";
 import { viewTypography } from "../ui/typography.js";
@@ -18,6 +18,6 @@ export const viewAboutMeSection = (a, _) => {
         "max-width": THEME.breakpoints.md,
       },
     },
-    [viewTypography({ level: "body-md", text: data.aboutMe })()]
+    [viewTypography({ level: "body-md", text: CONTENT.ABOUT_ME })()]
   );
 };

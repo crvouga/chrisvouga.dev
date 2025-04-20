@@ -1,4 +1,4 @@
-import { data } from "../../content/index.js";
+import { CONTENT } from "../../content/content.js";
 import { viewProjectCard } from "../../shared/project-card/index.js";
 import { viewSection } from "../../shared/section.js";
 import { viewGridCollapsible } from "../../ui/grid-collapsible.js";
@@ -11,7 +11,7 @@ export const viewSideProjectsSection = () => {
     title: "Side Projects",
   })({}, [
     viewGridCollapsible({
-      children: data.sideProjects.map((project) =>
+      children: CONTENT.SIDE_PROJECTS.map((project) =>
         viewProjectCard({ project })()
       ),
       jsVarSafeNamespace: "sideProjectsSection",

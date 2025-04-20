@@ -1,4 +1,4 @@
-import { data } from "../content/index.js";
+import { CONTENT } from "../content/content.js";
 import { viewButton } from "../ui/button.js";
 import { linkedIn } from "../ui/icons.js";
 
@@ -17,6 +17,6 @@ export const viewLinkedInButton = () => () => {
   })({
     target: "_blank",
     rel: "noreferrer noopener",
-    href: data.Linkedin.url,
+    href: CONTENT.LINKEDIN_URL,
   });
 };

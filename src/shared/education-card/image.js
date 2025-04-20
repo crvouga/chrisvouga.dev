@@ -9,7 +9,7 @@ import { viewImage } from "../../ui/image.js";
 import { THEME } from "../../ui/theme.js";
 
 /**
- * @type {import("../../library/html/index.js").ViewWithProps<{ education: import("../../content/education.js").Education }>}
+ * @type {import("../../library/html/index.js").ViewWithProps<{ education: import("../../content/school.js").School }>}
  */
 export const viewEducationCardImage = (props) => (attr, _) => {
   const alt = props.education.institutionName;
