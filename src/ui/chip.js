@@ -5,7 +5,7 @@ import { HEAD } from "./head.js";
 import { THEME } from "./theme.js";
 
 /**
- * @typedef {{size: "sm"; startDecorator: import("../library/html/index.js").View; variant: "outlined" | "basic"; text: string}} ChipProps
+ * @typedef {{size: "sm"; startDecorator?: import("../library/html/index.js").View; variant: "outlined" | "basic"; text: string}} ChipProps
  */
 
 /**
@@ -61,9 +61,13 @@ export const viewChip = (props) => (attr, _children) => {
       class: `chip ${variantClass}`,
     },
     [
-      props.startDecorator({
-        class: "chip-decorator",
-      }),
+      ...(props.startDecorator
+        ? [
+            props.startDecorator({
+              class: "chip-decorator",
+            }),
+          ]
+        : []),
       tag(
         "span",
         {

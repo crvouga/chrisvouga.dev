@@ -21,11 +21,18 @@ export const viewProjectCardContentMain = (props) => (a, _c) => {
       },
     },
     [
-      viewProjectCardContentTitle(props)({
-        style: {
-          "margin-bottom": unit(1),
+      tag(
+        "div",
+        {
+          style: {
+            display: "flex",
+            "flex-direction": "row",
+            gap: unit(1),
+            "margin-bottom": unit(1.5),
+          },
         },
-      }),
+        [viewProjectCardContentTitle(props)({})]
+      ),
       viewTypography({
         level: "body-md",
         text: props.project.description,
