@@ -27,10 +27,6 @@ class ImageGalleryModalElement extends HTMLElement {
     nextButton.textContent = "❯";
     nextButton.setAttribute("aria-label", "Next image");
 
-    // Create content container
-    const contentContainer = document.createElement("div");
-    contentContainer.className = "gallery-modal-content";
-
     // Create image container
     const imageContainer = document.createElement("div");
     imageContainer.className = "gallery-modal-image-container";
@@ -40,14 +36,11 @@ class ImageGalleryModalElement extends HTMLElement {
     counter.className = "gallery-modal-counter";
     counter.textContent = "1 / 1";
 
-    // Append elements to content container
-    contentContainer.appendChild(imageContainer);
-    contentContainer.appendChild(counter);
-
     // Append all elements to the main container
+    container.appendChild(imageContainer);
+    container.appendChild(counter);
     container.appendChild(closeButton);
     container.appendChild(prevButton);
-    container.appendChild(contentContainer);
     container.appendChild(nextButton);
 
     // Create styles
@@ -62,38 +55,37 @@ class ImageGalleryModalElement extends HTMLElement {
         height: 100%;
         background-color: rgba(0, 0, 0, 0.9);
         z-index: 1000;
-        justify-content: center;
-        align-items: center;
       }
-      
-      .gallery-modal-content {
-        position: relative;
-        max-width: 90%;
-        max-height: 90%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      
+            
       .gallery-modal-image-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-        max-width: 100%;
-        max-height: 80vh;
       }
       
       .gallery-modal-image {
-        max-width: 100%;
+        max-width: 90%;
         max-height: 80vh;
         object-fit: contain;
         background-color: var(--skeleton-color, #f0f0f0);
       }
       
       .gallery-modal-counter {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
         color: white;
-        margin-top: 0.5rem;
         font-size: 1rem;
+        text-align: center;
+        padding: 5px 10px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
       }
       
       .gallery-modal-close {

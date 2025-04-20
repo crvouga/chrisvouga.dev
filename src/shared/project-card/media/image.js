@@ -2,6 +2,7 @@
 
 import { fragment, tag, text } from "../../../library/html/index.js";
 import { stringToJsVarSafe } from "../../../library/js-var.js";
+import { HEAD } from "../../../ui/head.js";
 import {
   openImageGalleryModalJs,
   viewImageGalleryModal,
