@@ -5,23 +5,23 @@ import { viewCard, viewCardContent } from "../../ui/card.js";
 import { viewLink } from "../../ui/link.js";
 import { unit } from "../../ui/theme.js";
 import { viewTypography } from "../../ui/typography.js";
-import { viewEducationCardImage } from "./image.js";
+import { viewSchoolCardImage } from "./image.js";
 
 /**
- * @type {import("../../library/html/index.js").ViewWithProps<{education: import("../../content/school.js").School}>}
+ * @type {import("../../library/html/index.js").ViewWithProps<{school: import("../../content/school.js").School}>}
  */
-export const viewEducationCard =
-  ({ education }) =>
+export const viewSchoolCard =
+  ({ school }) =>
   () => {
     return viewCard({}, [
-      viewEducationCardImage({ education })(),
+      viewSchoolCardImage({ school })(),
       viewCardContent({}, [
         viewLink(
           {
-            href: education.infoUrl ?? " ",
+            href: school.infoUrl ?? " ",
           },
           [
-            viewTypography({ level: "h3", text: education.institutionName })({
+            viewTypography({ level: "h3", text: school.institutionName })({
               style: {
                 "margin-bottom": unit(1),
               },
@@ -41,12 +41,12 @@ export const viewEducationCard =
           [
             viewTypography({
               level: "title-sm",
-              text: education.degree,
+              text: school.degree,
             })(),
 
             viewTypography({
               level: "title-sm",
-              text: `${education.yearStart} - ${education.yearEnd}`,
+              text: `${school.yearStart} - ${school.yearEnd}`,
             })({
               style: {
                 "margin-bottom": unit(2),

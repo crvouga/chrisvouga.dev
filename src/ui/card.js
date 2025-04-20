@@ -45,6 +45,8 @@ HEAD.push(
         height: 100%;
         display: flex;
         flex-direction: column;
+      
+        
       }
       `
     ),
