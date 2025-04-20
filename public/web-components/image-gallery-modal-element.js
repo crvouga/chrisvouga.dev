@@ -93,12 +93,24 @@ class ImageGalleryModalElement extends HTMLElement {
         top: 15px;
         right: 25px;
         color: white;
-        font-size: 40px;
+        font-size: 30px;
         font-weight: bold;
         cursor: pointer;
-        background: none;
+        background: rgba(0, 0, 0, 0.5);
         border: none;
+        padding: 0;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
         z-index: 1001;
+        transition: background-color 0.2s;
+      }
+      
+      .gallery-modal-close:hover {
+        background: rgba(0, 0, 0, 0.8);
       }
       
       .gallery-modal-nav {
@@ -111,7 +123,12 @@ class ImageGalleryModalElement extends HTMLElement {
         cursor: pointer;
         background: rgba(0, 0, 0, 0.5);
         border: none;
-        padding: 10px 15px;
+        padding: 0;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
         z-index: 1001;
         transition: background-color 0.2s;
@@ -142,14 +159,22 @@ class ImageGalleryModalElement extends HTMLElement {
       @media (max-width: 768px) {
         .gallery-modal-nav {
           font-size: 24px;
-          padding: 8px 12px;
+          width: 40px;
+          height: 40px;
         }
         
         .gallery-modal-close {
-          font-size: 30px;
-          top: 10px;
+          font-size: 24px;
+          width: 40px;
+          height: 40px;
+          top: 15px;
           right: 15px;
         }
+      }
+      
+      loading-spinner {
+        width: 60px;
+        height: 60px;
       }
     `;
 
@@ -276,17 +301,39 @@ class ImageGalleryModalElement extends HTMLElement {
    */
   updateImage() {
     this.imageContainer.innerHTML = "";
+
+    // Create loading spinner
+    const spinner = document.createElement("loading-spinner");
+    spinner.setAttribute("data-spinner-color", "#ffffff");
+    spinner.setAttribute(
+      "data-spinner-color-light",
+      "rgba(255, 255, 255, 0.2)"
+    );
+    spinner.setAttribute("data-spinner-size", "60px");
+    this.imageContainer.appendChild(spinner);
+
     const img = document.createElement("img");
     img.src = this.images[this.currentIndex];
     img.alt = this.imageAlt || "Gallery image";
-    img.className = "gallery-modal-image animate-pulse";
+    img.className = "gallery-modal-image";
+    img.style.display = "none"; // Hide image until loaded
+
     img.onload = function () {
       // Use the correct type for 'this' in the event handler
       const imgElement = this;
       if (imgElement instanceof HTMLImageElement) {
-        imgElement.classList.remove("animate-pulse");
+        // Hide spinner and show image
+        const container = imgElement.parentElement;
+        if (container) {
+          const spinnerElement = container.querySelector("loading-spinner");
+          if (spinnerElement) {
+            spinnerElement.remove();
+          }
+        }
+        imgElement.style.display = "block";
       }
     };
+
     this.imageContainer.appendChild(img);
 
     // Update counter

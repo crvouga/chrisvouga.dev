@@ -76,8 +76,13 @@ export const viewDoc = (_a, c) => {
       ),
       tag("link", { rel: "shortcut icon", href: "/favicon.ico" }, []),
       tag("link", { rel: "icon", href: "/favicon.ico" }, []),
-      tag("script", { src: "./toaster-element.js" }, []),
-      tag("script", { src: "./image-gallery-modal-element.js" }, []),
+      tag("script", { src: "./web-components/toaster-element.js" }, []),
+      tag("script", { src: "./web-components/loading-spinner-element.js" }, []),
+      tag(
+        "script",
+        { src: "./web-components/image-gallery-modal-element.js" },
+        []
+      ),
       ...HEAD,
     ]),
     tag("body", {}, [
