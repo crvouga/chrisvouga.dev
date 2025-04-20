@@ -49,7 +49,6 @@ export const viewGridCollapsible = (props) => () => {
           const hiddenCards = Array.from(document.querySelectorAll('${hiddenCardSelector}'));
 
           if (isExpandedNew) {
-            // Save the current scroll position when expanding
             root.setAttribute('data-scroll-position', window.scrollY);
             
             if(seeMoreButton) {
@@ -66,7 +65,6 @@ export const viewGridCollapsible = (props) => () => {
               });
             }
           } else {
-            // Restore the scroll position when collapsing
             if(seeMoreButton) {
               seeMoreButton.style.display = 'block';
             }
@@ -81,7 +79,6 @@ export const viewGridCollapsible = (props) => () => {
               });
             }
             
-            // Get the saved scroll position and restore it
             const savedScrollPosition = parseInt(root.getAttribute('data-scroll-position') || '0');
             window.scrollTo({
               top: savedScrollPosition,
