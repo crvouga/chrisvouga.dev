@@ -115,6 +115,7 @@ class ImageGalleryModalElement extends HTMLElement {
         border-radius: 50%;
         z-index: 1001;
         transition: background-color 0.2s;
+        touch-action: manipulation;
       }
       
       .gallery-modal-close:hover {
@@ -140,6 +141,7 @@ class ImageGalleryModalElement extends HTMLElement {
         border-radius: 50%;
         z-index: 1001;
         transition: background-color 0.2s;
+        touch-action: manipulation;
       }
       
       .gallery-modal-nav:hover {
