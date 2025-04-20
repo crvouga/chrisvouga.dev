@@ -1,7 +1,6 @@
-import { tag, text } from "../../library/html/index.js";
+import { fragment, tag, text } from "../../library/html/index.js";
 import { HEAD } from "../../ui/head.js";
 import { viewImage } from "../../ui/image.js";
-import { THEME } from "../../ui/theme.js";
 
 /**
  * @type {import("../../library/html/index.js").ViewWithProps<{ school: import("../../content/school.js").School }>}
@@ -10,13 +9,26 @@ export const viewSchoolCardImage = (props) => (attr, _) => {
   const alt = props.school.imageAlt || props.school.institutionName;
   const src = props.school.imageSrc;
 
-  return tag("div", { class: "school-card-image-container" }, [
-    viewImage({ src, alt })(
+  return fragment([
+    tag(
+      "button",
       {
-        ...attr,
-        class: "school-card-image",
+        type: "button",
+        onclick: `window.openImageGalleryModal({ images: [{ src: "${src}", alt: "${alt}" }] })`,
+        "aria-label": `View ${alt} in full screen`,
+        class: "school-card-image-button",
       },
-      []
+      [
+        tag("div", { class: "school-card-image-container" }, [
+          viewImage({ src, alt })(
+            {
+              ...attr,
+              class: "school-card-image",
+            },
+            []
+          ),
+        ]),
+      ]
     ),
   ]);
 };
@@ -36,7 +48,6 @@ HEAD.push(
         height: 100%;
         max-height: 100%;
         object-fit: cover;
-        border-bottom: 1px solid ${THEME.colors.paperBorder};
       }
     `),
   ])
