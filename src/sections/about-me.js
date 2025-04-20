@@ -10,7 +10,7 @@ import { viewTypography } from "../ui/typography.js";
  */
 export const viewAboutMeSection = (a, _) => {
   return viewSection({
-    title: "A little bit about me...",
+    title: CONTENT.ABOUT_ME_SECTION_TITLE,
   })(
     {
       ...a,

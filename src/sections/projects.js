@@ -10,7 +10,7 @@ import { viewGridCollapsible } from "../ui/grid-collapsible.js";
  */
 export const viewProjectsSection = (a, _) => {
   return viewSection({
-    title: "Projects",
+    title: CONTENT.PROJECT_SECTION_TITLE,
   })(a, [
     viewGridCollapsible({
       maxVisibleCardCount: 6,

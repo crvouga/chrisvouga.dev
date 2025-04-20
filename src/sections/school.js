@@ -9,7 +9,7 @@ import { viewGridCollapsible } from "../ui/grid-collapsible.js";
  * @type {import("../library/html/index.js").View}
  */
 export const viewSchoolSection = () => {
-  return viewSection({ title: "School" })({}, [
+  return viewSection({ title: CONTENT.SCHOOL_SECTION_TITLE })({}, [
     viewGridCollapsible({
       children: CONTENT.SCHOOL.map((education) =>
         viewSchoolCard({ school: education })()
