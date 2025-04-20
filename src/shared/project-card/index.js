@@ -31,8 +31,20 @@ export const viewProjectCard = (props) => (a, _c) => {
       [
         viewProjectCardContentMain(propsNew)({}),
         tag("div", { style: { flex: 1, width: "100%", "flex-shrink": 0 } }, []),
-        viewProjectCardStatus(propsNew)({}),
-        viewProjectCardActions(propsNew)({}),
+        tag(
+          "div",
+          {
+            style: {
+              display: "flex",
+              "flex-direction": "column",
+              gap: unit(0),
+            },
+          },
+          [
+            viewProjectCardStatus(propsNew)({}),
+            viewProjectCardActions(propsNew)({}),
+          ]
+        ),
       ]
     ),
   ]);

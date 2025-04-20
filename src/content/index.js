@@ -116,7 +116,7 @@ const projects = [
     description: `${a(
       gamezillaHref,
       "gamezilla.app"
-    )} is a work-in-progress multiplayer gaming app. Implemented using a full-stack variant of the Elm architecture in TypeScript. Copied from the ${a(
+    )} is a multiplayer gaming app. Implemented using a full-stack variant of the Elm architecture in TypeScript. Copied from the ${a(
       lamderaHref,
       "Lamdera"
     )} platform.`,
@@ -232,7 +232,7 @@ const projects = [
       t: "public",
       url: "https://github.com/crvouga/moviefinder.app",
     },
-    description: "A work-in-progress movie search app with a tiktok-like UI.",
+    description: "A movie search app with a tiktok-like UI.",
     imageAlt: "project screenshot or video",
     imageSrc: ["/moviefinder-app.optimized.webp"],
     topics: ["rust", "tailwind", "postgres", "datastar"],

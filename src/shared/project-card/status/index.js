@@ -63,7 +63,7 @@ export const viewProjectCardStatusSingle = (props) => (_a, _c) => {
     {
       style: {
         display: "flex",
-        gap: unit(1),
+        gap: unit(0.75),
         "align-items": "center",
       },
     },

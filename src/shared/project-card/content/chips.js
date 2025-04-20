@@ -9,16 +9,18 @@ import { unit } from "../../../ui/theme.js";
  * @type {import("../props.js").ProjectCardView}
  */
 export const viewProjectCardContentChips = (props) => () => {
-  return tag("div", { class: "project-card-content-chips" }, [
-    ...props.project.topics.sort().map((topic) => {
-      const src = topicToImageSrc[topic];
-      return viewChip({
-        size: "sm",
-        startDecorator: viewAvatar({ src, alt: topic }),
-        variant: "outlined",
-        text: topicToName[topic],
-      })();
-    }),
+  return tag("div", {}, [
+    tag("div", { class: "project-card-content-chips" }, [
+      ...props.project.topics.sort().map((topic) => {
+        const src = topicToImageSrc[topic];
+        return viewChip({
+          size: "sm",
+          startDecorator: viewAvatar({ src, alt: topic }),
+          variant: "outlined",
+          text: topicToName[topic],
+        })();
+      }),
+    ]),
   ]);
 };
 
