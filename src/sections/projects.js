@@ -12,13 +12,12 @@ export const viewProjectsSection = (a, _) => {
   return viewSection({
     title: "Projects",
     subtitle:
-      "This is a list of all the different projects I've worked on over the years. Including work projects and side projects.",
+      "This is a list of all the different projects I've worked on over the years. Including work and side projects.",
   })(a, [
     viewGridCollapsible({
       maxVisibleCardCount: 6,
       children: [
-        ...data.workProjects.map((project) => viewProjectCard({ project })()),
-        ...data.sideProjects.map((project) => viewProjectCard({ project })()),
+        ...data.projects.map((project) => viewProjectCard({ project })()),
       ],
       jsVarSafeNamespace: "projectsSection",
     })(),

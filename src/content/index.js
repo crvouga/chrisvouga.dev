@@ -104,7 +104,28 @@ const projects = [
     ],
     setting: "work",
   },
-
+  {
+    title: "gamezilla.app",
+    deployment: {
+      t: "public",
+      url: gamezillaHref,
+    },
+    code: {
+      t: "private",
+    },
+    description: `${a(
+      gamezillaHref,
+      "gamezilla.app"
+    )} is a work-in-progress multiplayer gaming app. Implemented using a full-stack variant of the Elm architecture in TypeScript. Copied from the ${a(
+      lamderaHref,
+      "Lamdera"
+    )} platform.`,
+    imageAlt: "project screenshot or video",
+    imageSrc: ["/gamezilla.optimized.webp"],
+    youTubeVideoId: "VSLpdPvHbD4",
+    topics: ["typescript", "react", "postgres", "tailwind", "websocket", "bun"],
+    setting: "side",
+  },
   {
     title: "Study Hall",
     deployment: {
@@ -131,104 +152,6 @@ const projects = [
     ],
     setting: "work",
   },
-  {
-    title: "Sun devils",
-    deployment: { t: "public", url: "https://sundevils.com/" },
-    code: { t: "private" },
-    description:
-      "The official website for the ASU Sun Devils. My contributions include developing interactive React components like the upcoming game feed and news feed.",
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/sun-devils.optimized.webp"],
-    topics: ["bootstrap", "drupal", "javascript", "react", "css", "php"],
-    setting: "work",
-  },
-  {
-    title: "Orchard",
-    code: {
-      t: "private",
-    },
-    deployment: {
-      t: "public",
-      url: "https://asuorchard.asu.edu/",
-    },
-    description:
-      "Orchard is a learning tool developed by ASU that enables teachers to create highly customizable assignments for their students. My contributions include integrating Orchard with ASU's LMS using LTI 1.3.",
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/orchard.optimized.webp"],
-    topics: ["php", "mysql", "drupal", "bootstrap", "javascript"],
-    setting: "work",
-  },
-  {
-    title: "Airr Product Demo",
-    code: {
-      t: "private",
-    },
-    deployment: {
-      t: "public",
-      url: "https://experience-airr.heysia.ai/",
-    },
-    description:
-      "A product demo for Airr. A product offered by One Origin to automate the process of consuming transcripts.",
-    imageAlt: "project screenshot or video",
-    imageSrc: [
-      "/airr/1.optimized.webp",
-      "/airr/2.optimized.webp",
-      "/airr/3.optimized.webp",
-      "/airr/4.optimized.webp",
-      "/airr/5.optimized.webp",
-      "/airr/6.optimized.webp",
-      "/airr/7.optimized.webp",
-    ],
-    topics: [
-      "typescript",
-      "nodejs",
-      "postgres",
-      "react",
-      "tailwind",
-      "trpc",
-      "vercel",
-    ],
-    setting: "work",
-  },
-  {
-    title: "Courier Company Website",
-    deployment: {
-      t: "public",
-      url: "https://gps-couriers-website.vercel.app/",
-    },
-    code: {
-      t: "private",
-    },
-    description: "A marketing website for a hospice courier company.",
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/courier.optimized.webp"],
-    youTubeVideoId: "kFwPTJcM6I0",
-    topics: ["css", "material-ui", "nextjs", "react", "typescript"],
-    setting: "work",
-  },
-  {
-    title: "gamezilla.app",
-    deployment: {
-      t: "public",
-      url: gamezillaHref,
-    },
-    code: {
-      t: "private",
-    },
-    description: `${a(
-      gamezillaHref,
-      "gamezilla.app"
-    )} is a work-in-progress multiplayer gaming app. Implemented using a full-stack variant of the Elm architecture in TypeScript. Copied from the ${a(
-      lamderaHref,
-      "Lamdera"
-    )} platform.`,
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/gamezilla.optimized.webp"],
-    youTubeVideoId: "VSLpdPvHbD4",
-    topics: ["typescript", "react", "postgres", "tailwind", "websocket", "bun"],
-    setting: "side",
-  },
-
   {
     title: "Pickflix",
     deployment: {
@@ -261,6 +184,24 @@ const projects = [
     ],
     setting: "side",
   },
+  {
+    title: "Sun devils",
+    deployment: { t: "public", url: "https://sundevils.com/" },
+    code: { t: "private" },
+    description:
+      "The official website for the ASU Sun Devils. My contributions include developing interactive React components like the upcoming game feed and news feed.",
+    imageAlt: "project screenshot or video",
+    imageSrc: [
+      "/sun-devils.optimized.webp",
+      "/sun-devils/1.optimized.webp",
+      "/sun-devils/2.optimized.webp",
+      "/sun-devils/3.optimized.webp",
+      "/sun-devils/4.optimized.webp",
+      "/sun-devils/5.optimized.webp",
+    ],
+    topics: ["bootstrap", "drupal", "javascript", "react", "css", "php"],
+    setting: "work",
+  },
 
   {
     title: "headless-combobox",
@@ -278,6 +219,23 @@ const projects = [
     ],
     description: `Purely functional, headless, framework-agnostic, zero dependency, accessible, TypeScript combobox library. Used to create comboboxes in any UI framework.`,
     topics: ["typescript"],
+    setting: "side",
+  },
+
+  {
+    title: "moviefinder.app",
+    deployment: {
+      t: "public",
+      url: "https://www.moviefinder.app/",
+    },
+    code: {
+      t: "public",
+      url: "https://github.com/crvouga/moviefinder.app",
+    },
+    description: "A work-in-progress movie search app with a tiktok-like UI.",
+    imageAlt: "project screenshot or video",
+    imageSrc: ["/moviefinder-app.optimized.webp"],
+    topics: ["rust", "tailwind", "postgres", "datastar"],
     setting: "side",
   },
 
@@ -304,23 +262,6 @@ const projects = [
       "nodejs",
       "mongodb",
     ],
-    setting: "side",
-  },
-
-  {
-    title: "moviefinder.app",
-    deployment: {
-      t: "public",
-      url: "https://www.moviefinder.app/",
-    },
-    code: {
-      t: "public",
-      url: "https://github.com/crvouga/moviefinder.app",
-    },
-    description: "A work-in-progress movie search app with a tiktok-like UI.",
-    imageAlt: "project screenshot or video",
-    imageSrc: ["/moviefinder-app.optimized.webp"],
-    topics: ["rust", "tailwind", "postgres", "datastar"],
     setting: "side",
   },
 
@@ -371,6 +312,39 @@ const projects = [
   },
 
   {
+    title: "Airr Product Demo",
+    code: {
+      t: "private",
+    },
+    deployment: {
+      t: "public",
+      url: "https://experience-airr.heysia.ai/",
+    },
+    description:
+      "A product demo for Airr. A product offered by One Origin to automate the process of consuming transcripts.",
+    imageAlt: "project screenshot or video",
+    imageSrc: [
+      "/airr/1.optimized.webp",
+      "/airr/2.optimized.webp",
+      "/airr/3.optimized.webp",
+      "/airr/4.optimized.webp",
+      "/airr/5.optimized.webp",
+      "/airr/6.optimized.webp",
+      "/airr/7.optimized.webp",
+    ],
+    topics: [
+      "typescript",
+      "nodejs",
+      "postgres",
+      "react",
+      "tailwind",
+      "trpc",
+      "vercel",
+    ],
+    setting: "work",
+  },
+
+  {
     title: "Screenshots as a Service",
     code: {
       t: "public",
@@ -397,6 +371,23 @@ const projects = [
       "supabase",
     ],
     setting: "side",
+  },
+
+  {
+    title: "Orchard",
+    code: {
+      t: "private",
+    },
+    deployment: {
+      t: "public",
+      url: "https://asuorchard.asu.edu/",
+    },
+    description:
+      "Orchard is a learning tool developed by ASU that enables teachers to create highly customizable assignments for their students. My contributions include integrating Orchard with ASU's LMS using LTI 1.3.",
+    imageAlt: "project screenshot or video",
+    imageSrc: ["/orchard.optimized.webp"],
+    topics: ["php", "mysql", "drupal", "bootstrap", "javascript"],
+    setting: "work",
   },
 
   {
@@ -444,7 +435,22 @@ const projects = [
     ],
     setting: "side",
   },
-
+  {
+    title: "Courier Company Website",
+    deployment: {
+      t: "public",
+      url: "https://gps-couriers-website.vercel.app/",
+    },
+    code: {
+      t: "private",
+    },
+    description: "A marketing website for a hospice courier company.",
+    imageAlt: "project screenshot or video",
+    imageSrc: ["/courier.optimized.webp"],
+    youTubeVideoId: "kFwPTJcM6I0",
+    topics: ["css", "material-ui", "nextjs", "react", "typescript"],
+    setting: "work",
+  },
   {
     title: "Anime Blog",
     description: "A jamstack blog about anime.",
