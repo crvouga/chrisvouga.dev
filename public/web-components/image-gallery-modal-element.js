@@ -393,6 +393,16 @@ class ImageGalleryModalElement extends HTMLElement {
       // Handle YouTube video
       const videoId = this.getYouTubeVideoId(currentUrl);
       if (videoId) {
+        // Create loading spinner
+        const spinner = document.createElement("loading-spinner");
+        spinner.setAttribute("data-spinner-color", "#ffffff");
+        spinner.setAttribute(
+          "data-spinner-color-light",
+          "rgba(255, 255, 255, 0.2)"
+        );
+        spinner.setAttribute("data-spinner-size", "60px");
+        this.imageContainer.appendChild(spinner);
+
         const iframe = document.createElement("iframe");
         iframe.className = "gallery-modal-video";
         iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
@@ -400,6 +410,14 @@ class ImageGalleryModalElement extends HTMLElement {
         iframe.allow =
           "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         iframe.setAttribute("allowfullscreen", "");
+        iframe.style.display = "none"; // Hide iframe until loaded
+
+        // Remove spinner when iframe is loaded
+        iframe.addEventListener("load", () => {
+          spinner.remove();
+          iframe.style.display = "block";
+        });
+
         this.imageContainer.appendChild(iframe);
       } else {
         console.error("Invalid YouTube URL:", currentUrl);
