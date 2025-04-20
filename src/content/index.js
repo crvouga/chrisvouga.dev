@@ -8,7 +8,7 @@ const a = (href, text) => {
 };
 
 const bandHref = "https://www.instagram.com/tripolartheband/";
-
+const gamezillaHref = "https://www.gamezilla.app/";
 const lamderaHref = "https://lamdera.com/";
 
 /**
@@ -50,7 +50,7 @@ const education = [
 /**
  * @type {import("./project.js").Project[]}
  */
-const workProjects = [
+const projects = [
   {
     title: "Triangulator",
     deployment: { t: "private" },
@@ -58,7 +58,37 @@ const workProjects = [
     description:
       "Triangulator is a product developed by ASU that automates the process of determining course transfers between universities. My contributions include being one of the leading developers on the project.",
     imageAlt: "project screenshot or video",
-    imageSrc: ["/triangulator.optimized.webp"],
+    imageSrc: [
+      "/triangulator.optimized.webp",
+      "/triangulator/assigned-reject-reason.optimized.webp",
+      "/triangulator/course-search-details-2.optimized.webp",
+      "/triangulator/course-search-details.optimized.webp",
+      "/triangulator/course-search-loading.optimized.webp",
+      "/triangulator/course-search-results.optimized.webp",
+      "/triangulator/course-search.optimized.webp",
+      "/triangulator/find-course.optimized.webp",
+      "/triangulator/inst-admin-all-users.optimized.webp",
+      "/triangulator/inst-admin-assign.optimized.webp",
+      "/triangulator/inst-admin-boost-suggestions.optimized.webp",
+      "/triangulator/inst-admin-dashboard.optimized.webp",
+      "/triangulator/inst-admin-download.optimized.webp",
+      "/triangulator/inst-admin-new-suggestions-2.optimized.webp",
+      "/triangulator/inst-admin-new-suggestions.optimized.webp",
+      "/triangulator/inst-admin-public-profile.optimized.webp",
+      "/triangulator/inst-admin-summary.optimized.webp",
+      "/triangulator/inst-admin-upload-choice.optimized.webp",
+      "/triangulator/inst-admin-upload-course.optimized.webp",
+      "/triangulator/inst-public-profile.optimized.webp",
+      "/triangulator/new-suggestions-assign.optimized.webp",
+      "/triangulator/public-search-filter.optimized.webp",
+      "/triangulator/search-results.optimized.webp",
+      "/triangulator/suggestion-details-reject-reason.optimized.webp",
+      "/triangulator/suggestion-details.optimized.webp",
+      "/triangulator/tri-admin-dashboard.optimized.webp",
+      "/triangulator/tri-admin-new-suggestions.optimized.webp",
+      "/triangulator/tri-admin-suggestion-details.optimized.webp",
+      "/triangulator/tri-admin-summary.optimized.webp",
+    ],
     topics: [
       "typescript",
       "vue",
@@ -72,7 +102,9 @@ const workProjects = [
       "flask",
       "neo4j",
     ],
+    setting: "work",
   },
+
   {
     title: "Study Hall",
     deployment: {
@@ -97,6 +129,7 @@ const workProjects = [
       "express",
       "nodejs",
     ],
+    setting: "work",
   },
   {
     title: "Sun devils",
@@ -107,6 +140,7 @@ const workProjects = [
     imageAlt: "project screenshot or video",
     imageSrc: ["/sun-devils.optimized.webp"],
     topics: ["bootstrap", "drupal", "javascript", "react", "css", "php"],
+    setting: "work",
   },
   {
     title: "Orchard",
@@ -122,6 +156,7 @@ const workProjects = [
     imageAlt: "project screenshot or video",
     imageSrc: ["/orchard.optimized.webp"],
     topics: ["php", "mysql", "drupal", "bootstrap", "javascript"],
+    setting: "work",
   },
   {
     title: "Airr Product Demo",
@@ -153,6 +188,7 @@ const workProjects = [
       "trpc",
       "vercel",
     ],
+    setting: "work",
   },
   {
     title: "Courier Company Website",
@@ -168,14 +204,8 @@ const workProjects = [
     imageSrc: ["/courier.optimized.webp"],
     youTubeVideoId: "kFwPTJcM6I0",
     topics: ["css", "material-ui", "nextjs", "react", "typescript"],
+    setting: "work",
   },
-];
-
-const gamezillaHref = "https://www.gamezilla.app/";
-/**
- * @type {import("./project.js").Project[]}
- */
-const sideProjects = [
   {
     title: "gamezilla.app",
     deployment: {
@@ -196,6 +226,7 @@ const sideProjects = [
     imageSrc: ["/gamezilla.optimized.webp"],
     youTubeVideoId: "VSLpdPvHbD4",
     topics: ["typescript", "react", "postgres", "tailwind", "websocket", "bun"],
+    setting: "side",
   },
 
   {
@@ -228,6 +259,7 @@ const sideProjects = [
       "css",
       "react-query",
     ],
+    setting: "side",
   },
 
   {
@@ -246,6 +278,7 @@ const sideProjects = [
     ],
     description: `Purely functional, headless, framework-agnostic, zero dependency, accessible, TypeScript combobox library. Used to create comboboxes in any UI framework.`,
     topics: ["typescript"],
+    setting: "side",
   },
 
   {
@@ -271,6 +304,7 @@ const sideProjects = [
       "nodejs",
       "mongodb",
     ],
+    setting: "side",
   },
 
   {
@@ -287,6 +321,7 @@ const sideProjects = [
     imageAlt: "project screenshot or video",
     imageSrc: ["/moviefinder-app.optimized.webp"],
     topics: ["rust", "tailwind", "postgres", "datastar"],
+    setting: "side",
   },
 
   {
@@ -303,6 +338,7 @@ const sideProjects = [
     imageAlt: "project screenshot or video",
     imageSrc: [],
     topics: ["go"],
+    setting: "side",
   },
 
   {
@@ -331,6 +367,7 @@ const sideProjects = [
       "javascript",
       "socket-io",
     ],
+    setting: "side",
   },
 
   {
@@ -359,6 +396,7 @@ const sideProjects = [
       "typescript",
       "supabase",
     ],
+    setting: "side",
   },
 
   {
@@ -375,6 +413,7 @@ const sideProjects = [
     imageAlt: "project screenshot or video",
     imageSrc: [],
     topics: ["css", "express", "nodejs", "tailwind", "typescript", "vue"],
+    setting: "side",
   },
 
   {
@@ -403,6 +442,7 @@ const sideProjects = [
       "shopify",
       "typescript",
     ],
+    setting: "side",
   },
 
   {
@@ -427,6 +467,7 @@ const sideProjects = [
       t: "public",
       url: "https://github.com/crvouga/anime",
     },
+    setting: "side",
   },
 
   {
@@ -445,6 +486,7 @@ const sideProjects = [
     imageSrc: ["/snake.optimized.webp"],
     youTubeVideoId: "7El3RdkzlHs",
     topics: ["css", "javascript", "ramda", "react"],
+    setting: "side",
   },
 
   {
@@ -462,6 +504,7 @@ const sideProjects = [
     imageSrc: ["/match-three.optimized.webp"],
     youTubeVideoId: "VBrlDgmXSoA",
     topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
+    setting: "side",
   },
 
   {
@@ -480,6 +523,7 @@ const sideProjects = [
     imageSrc: ["/cheese.optimized.webp"],
     youTubeVideoId: "hv3tRBHF7w4",
     topics: ["css", "typescript", "material-ui", "react", "firebase"],
+    setting: "side",
   },
 
   {
@@ -497,6 +541,7 @@ const sideProjects = [
     imageSrc: ["/simon-says.optimized.webp"],
     youTubeVideoId: "WrUFzlKL0E0",
     topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
+    setting: "side",
   },
 ];
 
@@ -516,6 +561,16 @@ const metaDescription = aboutMe.replace(a(bandHref, "band"), "band");
 //
 //
 //
+
+/**
+ * @type {import("./project.js").Project[]}
+ */
+const workProjects = projects.filter((project) => project.setting === "work");
+
+/**
+ * @type {import("./project.js").Project[]}
+ */
+const sideProjects = projects.filter((project) => project.setting === "side");
 
 export const data = {
   siteSourceCodeUrl: "https://github.com/crvouga/chrisvouga.dev",
@@ -539,6 +594,8 @@ export const data = {
   aboutMe,
 
   phoneNumber: "4802098698",
+
+  projects,
 
   sideProjects,
 

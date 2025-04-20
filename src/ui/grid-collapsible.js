@@ -4,12 +4,15 @@ import { viewGrid, viewGridItem } from "./grid.js";
 import { HEAD } from "./head.js";
 import { unit } from "./theme.js";
 
-const MAX_VISIBLE_CARD_COUNT = 3;
-
 /**
- * @type {import("../library/html/index.js").ViewWithProps<{jsVarSafeNamespace: string, children: import("../library/html/index.js").Html[]}>}
+ * @type {import("../library/html/index.js").ViewWithProps<{
+ *   jsVarSafeNamespace: string,
+ *   children: import("../library/html/index.js").Html[],
+ *   maxVisibleCardCount?: number
+ * }>}
  */
 export const viewGridCollapsible = (props) => () => {
+  const maxVisibleCardCount = props.maxVisibleCardCount ?? 3;
   const namespace = `${props.jsVarSafeNamespace}--toggle-see-more--`;
   const rootId = `${namespace}root`;
   const hiddenCardClass = `${namespace}item-hidden`;
@@ -21,7 +24,7 @@ export const viewGridCollapsible = (props) => () => {
   const seeLessSelector = `#${seeLessButtonId}`;
   //
   const hiddenCardCount = Math.max(
-    props.children.length - MAX_VISIBLE_CARD_COUNT,
+    props.children.length - maxVisibleCardCount,
     0
   );
 
@@ -66,7 +69,7 @@ export const viewGridCollapsible = (props) => () => {
         {},
         props.children.map((child, index) =>
           viewGridItem(
-            index >= MAX_VISIBLE_CARD_COUNT
+            index >= maxVisibleCardCount
               ? {
                   class: hiddenCardClass,
                   style: {

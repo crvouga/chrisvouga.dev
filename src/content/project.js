@@ -16,6 +16,7 @@
  * imageAlt: string;
  * youTubeVideoId?: string;
  * topics: import("./topic.js").Topic[];
+ * setting: "work" | "side";
  * }} Project
  */
 

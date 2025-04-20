@@ -5,7 +5,7 @@ import { HEAD } from "../ui/head.js";
 import { viewSectionTitle } from "./section-title.js";
 
 /**
- * @type {(props: {title:string}) => import("../library/html/index.js").View}
+ * @type {(props: {title:string, subtitle?:string}) => import("../library/html/index.js").View}
  */
 export const viewSection = (props) => (attr, c) => {
   return tag(
