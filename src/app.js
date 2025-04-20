@@ -21,8 +21,6 @@ export const viewApp = () => {
       viewHeadingSection(),
       viewWorkSection(),
       viewProjectsSection(),
-      // viewWorkProjectsSection(),
-      // viewSideProjectsSection(),
       viewEducationSection(),
       viewAboutMeSection(),
       viewContactSection(),

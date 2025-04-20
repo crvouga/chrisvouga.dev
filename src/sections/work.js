@@ -9,7 +9,10 @@ import { viewGridCollapsible } from "../ui/grid-collapsible.js";
  * @type {import("../library/html/index.js").View}
  */
 export const viewWorkSection = () => {
-  return viewSection({ title: "Work" })({}, [
+  return viewSection({
+    title: "Work",
+    subtitle: "List of where I've worked professionally",
+  })({}, [
     viewGridCollapsible({
       children: data.work.map((work) => viewWorkCard({ work })()),
       jsVarSafeNamespace: "workSection",
