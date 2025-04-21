@@ -49,6 +49,7 @@ export const projectToLinkHref = (project) => {
   return null;
 };
 
+const IMAGE_ALT = "A screenshot of the project";
 const GAMEZILLA_HREF = "https://www.gamezilla.app/";
 const LAMDERA_HREF = "https://lamdera.com/";
 
@@ -59,7 +60,7 @@ const PROJECT_TRIANGULATOR = {
   code: { t: "private" },
   description:
     "Triangulator is a product developed by ASU that automates the process of determining course transfers between universities. My contributions include being one of the leading developers on the project.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/triangulator.optimized.webp"],
   galleryImageSrc: [
     "/triangulator/assigned-reject-reason.png",
@@ -121,7 +122,7 @@ const PROJECT_GAMEZILLA = {
     LAMDERA_HREF,
     appendExternalLinkIndicator({ text: "Lamdera" })
   )} platform.`,
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/gamezilla.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -146,7 +147,7 @@ const PROJECT_STUDY_HALL = {
   },
   description:
     "Study Hall is an education platform created by the Study Hall YouTube channel and ASU. My contributions include refactoring the payment system to increase reliability.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/studyhall.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -195,7 +196,7 @@ const PROJECT_PICKFLIX = {
   },
   description:
     "Watch trailers, write reviews and make movie lists with your friends.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/pickflix.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -230,7 +231,7 @@ const PROJECT_SUN_DEVILS = {
   code: { t: "private" },
   description:
     "The official website for the ASU Sun Devils. My contributions include developing interactive React components like the upcoming game feed and news feed.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/sun-devils.optimized.webp"],
   galleryImageSrc: [
     "/sun-devils.png",
@@ -254,7 +255,7 @@ const PROJECT_HEADLESS_COMBOBOX = {
     t: "public",
     url: "https://github.com/crvouga/headless-combobox",
   },
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["https://github.com/crvouga/headless-combobox/raw/main/demo.gif"],
   galleryImageSrc: [
     "https://github.com/crvouga/headless-combobox/raw/main/demo.gif",
@@ -276,7 +277,7 @@ const PROJECT_MOVIEFINDER_RUST = {
     url: "https://github.com/crvouga/moviefinder.app",
   },
   description: "A movie search app with a tiktok-like UI.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/moviefinder-app.optimized.webp"],
   galleryImageSrc: ["/moviefinder-app.png"],
   topics: ["rust", "tailwind", "postgres", "datastar"],
@@ -295,7 +296,7 @@ const PROJECT_TODO_APP = {
     url: "https://todo.chrisvouga.dev",
   },
   description: "Fullstack todo app. Sign in and start tracking things todo.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/todo.optimized.webp"],
   galleryImageSrc: ["/todo.png"],
   topics: [
@@ -323,7 +324,7 @@ const PROJECT_IMAGE_SERVICE = {
     url: "https://imageservice.chrisvouga.dev",
   },
   description: `A zero dependency image service. Used to optimize images for web apps. Designed for longevity and zero-config self-hosting.`,
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
   topics: ["go"],
@@ -342,7 +343,7 @@ const PROJECT_CONNECT_FOUR = {
     url: "https://github.com/crvouga/connect-four",
   },
   description: "Play the game Connect Four online with your friends",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/connect-four.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -379,7 +380,7 @@ const PROJECT_AIRR = {
   },
   description:
     "A product demo for Airr. A product offered by One Origin to automate the process of consuming transcripts.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: [
     "/airr/1.optimized.webp",
     "/airr/2.optimized.webp",
@@ -417,11 +418,11 @@ const PROJECT_SCREENSHOT_SERVICE = {
     url: "https://github.com/crvouga/screenshot-service",
   },
   deployment: {
-    t: "not-deployed-anymore",
-    // url: "https://screenshotservice.chrisvouga.dev",
+    t: "public",
+    url: "https://screenshotservice.chrisvouga.dev",
   },
   description: `A software-as-a service app that lets developers generate screenshots for their websites. It was used for this website.`,
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/screenshot-service.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -458,7 +459,7 @@ const PROJECT_ORCHARD = {
   },
   description:
     "Orchard is a learning tool developed by ASU that enables teachers to create highly customizable assignments for their students. My contributions include integrating Orchard with ASU's LMS using LTI 1.3.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/orchard.optimized.webp"],
   galleryImageSrc: ["/orchard.png"],
   topics: ["php", "mysql", "drupal", "bootstrap", "javascript"],
@@ -477,7 +478,7 @@ const PROJECT_QUIZ_MAKER = {
   },
   description:
     "This app was built to serve as an example of LTI-compatible apps. The app itself is a quiz maker app where instructors can create quizzes and students can take them all inside of a hosting LMS.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
   topics: ["css", "express", "nodejs", "tailwind", "typescript", "vue"],
@@ -496,7 +497,7 @@ const PROJECT_BAND_WEBSITE = {
     url: "https://github.com/crvouga/thebandalibi-com",
   },
   description: "The official website and e-commerce store for the band alibi.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/band.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -531,7 +532,7 @@ const PROJECT_COURIER_WEBSITE = {
     t: "private",
   },
   description: "A marketing website for a hospice courier company.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/courier.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -549,7 +550,7 @@ const PROJECT_COURIER_WEBSITE = {
 const PROJECT_ANIME_BLOG = {
   title: "Anime Blog",
   description: "A jamstack blog about anime.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/anime.optimized.webp"],
   galleryImageSrc: ["/anime.png"],
   topics: [
@@ -585,7 +586,7 @@ const PROJECT_SNAKE_GAME = {
   },
   description:
     "Pure functional implementation of the classic game Snake with smooth snake movement",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/snake.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -611,7 +612,7 @@ const PROJECT_MATCH_THREE = {
     url: "https://github.com/crvouga/match-three",
   },
   description: "Match Three is a Candy Crush type game",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/match-three.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -638,7 +639,7 @@ const PROJECT_CHEESE = {
   },
   description:
     "Cheese is an app that lets people make fake GCU ids so they can sneak into GCU events.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/cheese.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -664,7 +665,7 @@ const PROJECT_SIMON_SAYS = {
     url: "https://github.com/crvouga/simon-says",
   },
   description: "An implementation of the classic memory game Simon Says.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: ["/simon-says.optimized.webp"],
   galleryImageSrc: [
     toYouTubeVideoUrl({
@@ -688,7 +689,7 @@ const PROJECT_SMART_DOG_DOOR = {
   },
   description:
     "A smart dog door that opens when the dog is nearby and closes when cat is close by. Uses computer vision and smart home devices to accomplish this.",
-  imageAlt: "project screenshot or video",
+  imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
   topics: ["python"],
