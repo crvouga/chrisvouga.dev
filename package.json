@@ -5,9 +5,10 @@
     "dev": "npm run start",
     "build": "node ./src/main.js",
     "tc": "npx tsc -w",
-    "optimize-images": "node ./src/optimize-images.js"
+    "optimize-images": "node ./src/optimize-images.js",
+    "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app"
   },
   "devDependencies": {
-    "@types/node": "^22.13.10"
+    "@types/node": "^22.14.1"
   }
 }
