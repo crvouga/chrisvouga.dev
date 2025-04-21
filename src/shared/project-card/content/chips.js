@@ -1,6 +1,5 @@
 import { topicToImageSrc, topicToName } from "../../../content/topic.js";
 import { tag, text } from "../../../library/html/index.js";
-import { viewAvatar } from "../../../ui/avatar.js";
 import { viewChip } from "../../../ui/chip.js";
 import { HEAD } from "../../../ui/head.js";
 import { unit } from "../../../ui/theme.js";
@@ -15,7 +14,16 @@ export const viewProjectCardContentChips = (props) => () => {
         const src = topicToImageSrc[topic];
         return viewChip({
           size: "sm",
-          startDecorator: viewAvatar({ src, alt: topic }),
+          startDecorator: () =>
+            tag("img", {
+              src,
+              alt: topic,
+              style: {
+                width: "16px",
+                height: "16px",
+                objectFit: "cover",
+              },
+            }),
           variant: "outlined",
           text: topicToName[topic],
         })();

@@ -18,7 +18,7 @@ HEAD.push(
         font-size: 12px;
         line-height: 18px;
         max-width: max-content;
-        border-radius: 24px;
+        border-radius: 3px;
         color: ${THEME.colors.neutral};
         display: flex;
         align-items: center;
