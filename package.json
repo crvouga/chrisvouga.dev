@@ -3,6 +3,7 @@
   "scripts": {
     "start": "npx concurrently \"node --watch ./src/main.js\" \"npx serve dist\"",
     "dev": "npm run start",
+    "local": "npm run start",
     "build": "node ./src/main.js",
     "tc": "npx tsc -w",
     "optimize-images": "node ./src/optimize-images.js",
