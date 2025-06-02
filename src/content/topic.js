@@ -57,7 +57,7 @@ export const topicToImageSrc = {
   htmx: "/htmx.svg",
   sqlite: "/sqlite.svg",
   rust: "/rust.svg",
-  datastar: "/datastar-logo.png",
+  datastar: "/datastar-logo.optimized.webp",
   go: "/go.svg",
   trpc: "/trpc.svg",
   vercel: "/vercel-icon.svg",
