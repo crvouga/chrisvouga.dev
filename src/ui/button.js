@@ -68,7 +68,13 @@ export const viewButton = (props) => (attrs, children) => {
     tagName,
     {
       class: toClassName(props),
-      ...(props.disabled ? { disabled: "true", "aria-disabled": "true" } : {}),
+      ...(props.disabled
+        ? {
+            disabled: "true",
+            "aria-disabled": "true",
+            tabindex: "-1",
+          }
+        : {}),
       ...attrs,
     },
     [
@@ -105,7 +111,11 @@ export const viewButtonStyles = (_props) => (_attrs, _children) => {
         overflow: hidden;
         border: none;
         outline: none;
+      }
 
+      .btn:focus-visible {
+        outline: 2px solid ${THEME.colors.softText};
+        outline-offset: 2px;
       }
 
       .btn-sm {
