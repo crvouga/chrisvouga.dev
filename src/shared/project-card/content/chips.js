@@ -1,5 +1,5 @@
-import { topicToImageSrc, topicToName } from "../../../content/topic.js";
-import { tag, text } from "../../../library/html/index.js";
+import { TOPIC_TO_IMAGE_SRC, TOPIC_TO_NAME } from "../../../content/topic.js";
+import { fragment, tag, text } from "../../../library/html/index.js";
 import { viewChip } from "../../../ui/chip.js";
 import { HEAD } from "../../../ui/head.js";
 import { unit } from "../../../ui/theme.js";
@@ -11,21 +11,22 @@ export const viewProjectCardContentChips = (props) => () => {
   return tag("div", {}, [
     tag("div", { class: "project-card-content-chips" }, [
       ...props.project.topics.sort().map((topic) => {
-        const src = topicToImageSrc[topic];
+        const src = TOPIC_TO_IMAGE_SRC[topic];
         return viewChip({
           size: "sm",
           startDecorator: () =>
-            tag("img", {
-              src,
-              alt: topic,
-              style: {
-                width: "16px",
-                height: "16px",
-                objectFit: "cover",
-              },
-            }),
+            src
+              ? tag("img", {
+                  src,
+                  alt: topic,
+                  style: {
+                    width: "16px",
+                    height: "16px",
+                  },
+                })
+              : fragment([]),
           variant: "outlined",
-          text: topicToName[topic],
+          text: TOPIC_TO_NAME[topic],
         })();
       }),
     ]),

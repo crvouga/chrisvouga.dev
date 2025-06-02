@@ -20,10 +20,11 @@ HEAD.push(
         max-width: max-content;
         border-radius: 3px;
         color: ${THEME.colors.neutral};
+        background-color: ${THEME.colors.paper};
+        overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 3px;
       }
 
       .chip-outlined {

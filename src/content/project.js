@@ -131,7 +131,15 @@ const PROJECT_GAMEZILLA = {
     }),
     "/gamezilla.png",
   ],
-  topics: ["typescript", "react", "postgres", "tailwind", "websocket", "bun"],
+  topics: [
+    "typescript",
+    "react",
+    "postgres",
+    "tailwind",
+    "websocket",
+    "bun",
+    "sqlite",
+  ],
   setting: "side",
 };
 

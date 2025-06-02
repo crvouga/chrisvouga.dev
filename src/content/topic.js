@@ -7,10 +7,11 @@
 //
 //
 
-export const topicToImageSrc = {
-  neo4j: "/neo4j.svg",
+export const TOPIC_TO_IMAGE_SRC = {
+  // neo4j: "/neo4j.svg",
+  neo4j: null,
   graphene: "/graphene.svg",
-  flask: "/flask.svg",
+  flask: "/flask-light.svg",
   salesforce: "/salesforce.svg",
   dynamodb: "/aws-dynamodb.svg",
   php: "/php.svg",
@@ -19,16 +20,17 @@ export const topicToImageSrc = {
   heroku: "/heroku-icon.svg",
   jest: "/jest.svg",
   "redux-saga": "/redux-saga.svg",
-  ramda: "/ramda.svg",
+  ramda: "/ramda-light.svg",
   react: "/react.svg",
   firebase: "/firebase.svg",
   docker: "/docker-icon.svg",
   supabase: "/supabase-icon.svg",
   postgres: "/postgresql.svg",
   "material-ui": "/material-ui.svg",
-  nextjs: "/nextjs.svg",
+  nextjs: "/nextjs-light.svg",
   "socket-io": "/socket.io.svg",
-  express: "/express.svg",
+  // express: "/express-light.svg",
+  express: null,
   css: "/css-3.svg",
   shopify: "/shopify.svg",
   sanity: "/sanity.svg",
@@ -49,29 +51,30 @@ export const topicToImageSrc = {
   mysql: "/mysql.svg",
   nuxt: "/nuxt-icon.svg",
   python: "/python.svg",
-  aws: "/aws.svg",
+  // aws: "/aws.svg",
+  aws: null,
   bun: "/bun.svg",
-  websocket: "/websocket.svg",
+  websocket: "/websocket-light.svg",
   alphinejs: "/alpinejs-icon.svg",
   roc: "/roc.svg",
   htmx: "/htmx.svg",
   sqlite: "/sqlite.svg",
-  rust: "/rust.svg",
+  rust: "/rust-light.svg",
   datastar: "/datastar-logo.optimized.webp",
   go: "/go.svg",
   trpc: "/trpc.svg",
-  vercel: "/vercel-icon.svg",
+  vercel: "/vercel-icon-light.svg",
   html: "/html-5.svg",
 };
 
 /**
- * @typedef {keyof typeof topicToImageSrc} Topic
+ * @typedef {keyof typeof TOPIC_TO_IMAGE_SRC} Topic
  */
 
 /**
  * @type {{ [key in Topic]: string; }}
  */
-export const topicToName = {
+export const TOPIC_TO_NAME = {
   html: "HTML",
   neo4j: "Neo4j",
   flask: "Flask",
