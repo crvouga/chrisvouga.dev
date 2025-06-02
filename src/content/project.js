@@ -256,10 +256,8 @@ const PROJECT_HEADLESS_COMBOBOX = {
     url: "https://github.com/crvouga/headless-combobox",
   },
   imageAlt: IMAGE_ALT,
-  imageSrc: ["https://github.com/crvouga/headless-combobox/raw/main/demo.gif"],
-  galleryImageSrc: [
-    "https://github.com/crvouga/headless-combobox/raw/main/demo.gif",
-  ],
+  imageSrc: ["./headless-combobox.optimized.webp"],
+  galleryImageSrc: ["./headless-combobox.png"],
   description: `Purely functional, headless, framework-agnostic, zero dependency, accessible, TypeScript combobox library. Used to create comboboxes in any UI framework.`,
   topics: ["typescript"],
   setting: "side",
