@@ -492,42 +492,6 @@ const PROJECT_QUIZ_MAKER = {
 };
 
 /** @type {Project} */
-const PROJECT_BAND_WEBSITE = {
-  title: "Band Website with E-commerce",
-  deployment: {
-    t: "public",
-    url: "https://thebandalibi.chrisvouga.dev/",
-  },
-  code: {
-    t: "public",
-    url: "https://github.com/crvouga/thebandalibi-com",
-  },
-  description: "The official website and e-commerce store for the band alibi.",
-  imageAlt: IMAGE_ALT,
-  imageSrc: ["/band.optimized.webp"],
-  galleryImageSrc: [
-    toYouTubeVideoUrl({
-      youTubeVideoId: "vChYAGXsLuI",
-      autoplay: true,
-      mute: true,
-    }),
-    "/band.png",
-  ],
-  topics: [
-    "css",
-    "firebase",
-    "material-ui",
-    "nextjs",
-    "react-query",
-    "react",
-    "sanity",
-    "shopify",
-    "typescript",
-  ],
-  setting: "side",
-};
-
-/** @type {Project} */
 const PROJECT_COURIER_WEBSITE = {
   title: "Courier Company Website",
   deployment: {
@@ -719,7 +683,6 @@ export const PROJECTS = [
   PROJECT_SMART_DOG_DOOR,
   PROJECT_ORCHARD,
   PROJECT_QUIZ_MAKER,
-  PROJECT_BAND_WEBSITE,
   PROJECT_COURIER_WEBSITE,
   PROJECT_ANIME_BLOG,
   PROJECT_SNAKE_GAME,
