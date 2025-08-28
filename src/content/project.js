@@ -382,7 +382,8 @@ const PROJECT_AIRR = {
   },
   deployment: {
     t: "public",
-    url: "https://experience-airr.heysia.ai/",
+    // url: "https://experience-airr.heysia.ai/",
+    url: "https://one-origin-airr-production.up.railway.app",
   },
   description:
     "A product demo for Airr. A product offered by One Origin to automate the process of consuming transcripts.",
