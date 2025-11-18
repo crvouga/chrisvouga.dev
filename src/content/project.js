@@ -59,7 +59,7 @@ const PROJECT_TRIANGULATOR = {
   deployment: { t: "private" },
   code: { t: "private" },
   description:
-    "Triangulator is a product developed by ASU that automates the process of determining course transfers between universities. My contributions include being one of the leading developers on the project.",
+    "Triangulator is a product developed by ASU that automates the process of determining course transfers between universities. I served as a lead developer on the project.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/triangulator.optimized.webp"],
   galleryImageSrc: [
@@ -122,7 +122,7 @@ const PROJECT_GAMEZILLA = {
   description: `${a(
     GAMEZILLA_HREF,
     appendExternalLinkIndicator({ text: "gamezilla.app" })
-  )} is a multiplayer gaming app. Implemented using a full-stack variant of the Elm architecture in TypeScript. Copied from the ${a(
+  )} is a multiplayer gaming app implemented using a full-stack variant of the Elm architecture in TypeScript. Migrated from the ${a(
     LAMDERA_HREF,
     appendExternalLinkIndicator({ text: "Lamdera" })
   )} platform.`,
@@ -158,7 +158,7 @@ const PROJECT_STUDY_HALL = {
     t: "private",
   },
   description:
-    "Study Hall is an education platform created by the Study Hall YouTube channel and ASU. My contributions include refactoring the payment system to increase reliability.",
+    "Study Hall is an education platform created by the Study Hall YouTube channel and ASU. I refactored the payment system to improve reliability and maintainability.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/studyhall.optimized.webp"],
   galleryImageSrc: [
@@ -207,7 +207,7 @@ const PROJECT_PICKFLIX = {
     url: "https://github.com/crvouga/pickflix-v1",
   },
   description:
-    "Watch trailers, write reviews and make movie lists with your friends.",
+    "Watch trailers, write reviews, and create movie lists with your friends.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/pickflix.optimized.webp"],
   galleryImageSrc: [
@@ -242,7 +242,7 @@ const PROJECT_SUN_DEVILS = {
   deployment: { t: "public", url: "https://sundevils.com/" },
   code: { t: "private" },
   description:
-    "The official website for the ASU Sun Devils. My contributions include developing interactive React components like the upcoming game feed and news feed.",
+    "The official website for the ASU Sun Devils. I developed interactive React components including the upcoming game feed and news feed.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/sun-devils.optimized.webp"],
   galleryImageSrc: [
@@ -270,7 +270,7 @@ const PROJECT_HEADLESS_COMBOBOX = {
   imageAlt: IMAGE_ALT,
   imageSrc: ["./headless-combobox.optimized.webp"],
   galleryImageSrc: ["./headless-combobox.png"],
-  description: `Purely functional, headless, framework-agnostic, zero dependency, accessible, TypeScript combobox library. Used to create comboboxes in any UI framework.`,
+  description: `A purely functional, headless, framework-agnostic, zero-dependency, accessible TypeScript combobox library for creating comboboxes in any UI framework.`,
   topics: ["typescript"],
   setting: "side",
 };
@@ -286,7 +286,7 @@ const PROJECT_MOVIEFINDER_RUST = {
     t: "public",
     url: "https://github.com/crvouga/moviefinder.app",
   },
-  description: "A movie search app with a tiktok-like UI.",
+  description: "A movie search app with a TikTok-like UI.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/moviefinder-app.optimized.webp"],
   galleryImageSrc: ["/moviefinder-app.png"],
@@ -305,7 +305,7 @@ const PROJECT_TODO_APP = {
     t: "public",
     url: "https://todo.chrisvouga.dev",
   },
-  description: "Fullstack todo app. Sign in and start tracking things todo.",
+  description: "Full-stack todo app. Sign in and start tracking your tasks.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/todo.optimized.webp"],
   galleryImageSrc: ["/todo.png"],
@@ -333,7 +333,7 @@ const PROJECT_IMAGE_SERVICE = {
     t: "public",
     url: "https://imageservice.chrisvouga.dev",
   },
-  description: `A zero dependency image service. Used to optimize images for web apps. Designed for longevity and zero-config self-hosting.`,
+  description: `A zero-dependency image service for optimizing images in web applications. Designed for longevity and zero-config self-hosting.`,
   imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
@@ -352,7 +352,7 @@ const PROJECT_CONNECT_FOUR = {
     t: "public",
     url: "https://github.com/crvouga/connect-four",
   },
-  description: "Play the game Connect Four online with your friends",
+  description: "Play Connect Four online with your friends.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/connect-four.optimized.webp"],
   galleryImageSrc: [
@@ -390,7 +390,7 @@ const PROJECT_AIRR = {
     url: "https://one-origin-airr-production.up.railway.app",
   },
   description:
-    "A product demo for Airr. A product offered by One Origin to automate the process of consuming transcripts.",
+    "A product demo for Airr, a One Origin product that automates the process of consuming and analyzing transcripts.",
   imageAlt: IMAGE_ALT,
   imageSrc: [
     "/airr/1.optimized.webp",
@@ -432,7 +432,7 @@ const PROJECT_SCREENSHOT_SERVICE = {
     t: "public",
     url: "https://screenshotservice.chrisvouga.dev",
   },
-  description: `A software-as-a service app that lets developers generate screenshots for their websites. It was used for this website.`,
+  description: `A software-as-a-service application that enables developers to generate screenshots for their websites. Used to create screenshots for this portfolio.`,
   imageAlt: IMAGE_ALT,
   imageSrc: ["/screenshot-service.optimized.webp"],
   galleryImageSrc: [
@@ -469,7 +469,7 @@ const PROJECT_ORCHARD = {
     url: "https://asuorchard.asu.edu/",
   },
   description:
-    "Orchard is a learning tool developed by ASU that enables teachers to create highly customizable assignments for their students. My contributions include integrating Orchard with ASU's LMS using LTI 1.3.",
+    "Orchard is a learning tool developed by ASU that enables teachers to create highly customizable assignments for their students. I integrated Orchard with ASU's LMS using LTI 1.3.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/orchard.optimized.webp"],
   galleryImageSrc: ["/orchard.png"],
@@ -488,7 +488,7 @@ const PROJECT_QUIZ_MAKER = {
     t: "not-deployed-anymore",
   },
   description:
-    "This app was built to serve as an example of LTI-compatible apps. The app itself is a quiz maker app where instructors can create quizzes and students can take them all inside of a hosting LMS.",
+    "An LTI-compatible quiz maker application. Instructors can create quizzes and students can take them directly within their hosting LMS.",
   imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
@@ -506,7 +506,7 @@ const PROJECT_COURIER_WEBSITE = {
   code: {
     t: "private",
   },
-  description: "A marketing website for a hospice courier company.",
+  description: "A marketing website for a healthcare courier company.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/courier.optimized.webp"],
   galleryImageSrc: [
@@ -524,7 +524,7 @@ const PROJECT_COURIER_WEBSITE = {
 /** @type {Project} */
 const PROJECT_ANIME_BLOG = {
   title: "Anime Blog",
-  description: "A jamstack blog about anime.",
+  description: "A JAMstack blog about anime.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/anime.optimized.webp"],
   galleryImageSrc: ["/anime.png"],
@@ -560,7 +560,7 @@ const PROJECT_SNAKE_GAME = {
     url: "https://github.com/crvouga/snake",
   },
   description:
-    "Pure functional implementation of the classic game Snake with smooth snake movement",
+    "A pure functional implementation of the classic Snake game with smooth movement.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/snake.optimized.webp"],
   galleryImageSrc: [
@@ -586,7 +586,7 @@ const PROJECT_MATCH_THREE = {
     t: "public",
     url: "https://github.com/crvouga/match-three",
   },
-  description: "Match Three is a Candy Crush type game",
+  description: "Match Three is a Candy Crush-style puzzle game.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/match-three.optimized.webp"],
   galleryImageSrc: [
@@ -613,7 +613,7 @@ const PROJECT_CHEESE = {
     url: "https://github.com/crvouga/cheese",
   },
   description:
-    "Cheese is an app that lets people make fake GCU ids so they can sneak into GCU events.",
+    "A web application for generating event identification cards. Built as a learning project to explore image manipulation and client-side processing.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/cheese.optimized.webp"],
   galleryImageSrc: [
@@ -663,7 +663,7 @@ const PROJECT_SMART_DOG_DOOR = {
     url: "https://github.com/crvouga/smart-dog-door-python",
   },
   description:
-    "A smart dog door that opens when the dog is nearby and closes when cat is close by. Uses computer vision and smart home devices to accomplish this.",
+    "A smart dog door that opens when the dog is nearby and closes when a cat is detected. Uses computer vision and smart home devices for automated control.",
   imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
