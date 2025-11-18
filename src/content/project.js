@@ -66,7 +66,7 @@ const PROJECT_NORMALIZER_APP = {
     t: "private",
   },
   description:
-    "A web application that automates data normalization by transforming tabular data (Excel, CSV) from one schema to a user-defined target schema, eliminating the need for manual Excel work or Python scripts.",
+    "A web application that automates data normalization workflows, transforming tabular data (Excel, CSV) between schemas without manual Excel manipulation or custom Python scripts. Streamlines data processing for teams handling diverse data formats.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/normalizer-app.optimized.webp"],
   galleryImageSrc: ["/normalizer-app.png"],
@@ -89,7 +89,7 @@ const PROJECT_TRIANGULATOR = {
   deployment: { t: "private" },
   code: { t: "private" },
   description:
-    "Triangulator is a product developed by ASU that automates the process of determining course transfers between universities. I served as a lead developer on the project.",
+    "Enterprise platform that automates course transfer evaluation between universities, streamlining the complex process of determining credit equivalencies. Led development as the technical lead, architecting scalable solutions for handling large-scale academic data processing.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/triangulator.optimized.webp"],
   galleryImageSrc: [
@@ -153,10 +153,10 @@ const PROJECT_GAMEZILLA = {
   description: `${a(
     GAMEZILLA_HREF,
     appendExternalLinkIndicator({ text: "gamezilla.app" })
-  )} is a multiplayer gaming app implemented using a full-stack variant of the Elm architecture in TypeScript. Migrated from the ${a(
+  )} is a real-time multiplayer gaming platform built with a full-stack TypeScript implementation of the Elm architecture. Successfully migrated from the ${a(
     LAMDERA_HREF,
     appendExternalLinkIndicator({ text: "Lamdera" })
-  )} platform.`,
+  )} platform, demonstrating expertise in complex system migrations and real-time application architecture.`,
   imageAlt: IMAGE_ALT,
   imageSrc: ["/gamezilla.optimized.webp"],
   galleryImageSrc: [
@@ -189,7 +189,7 @@ const PROJECT_STUDY_HALL = {
     t: "private",
   },
   description:
-    "Study Hall is an education platform created by the Study Hall YouTube channel and ASU. I refactored the payment system to improve reliability and maintainability.",
+    "Educational platform developed in partnership with the Study Hall YouTube channel and ASU. Refactored the payment processing system to enhance reliability, maintainability, and user experience, reducing payment failures and improving system stability.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/studyhall.optimized.webp"],
   galleryImageSrc: [
@@ -238,7 +238,7 @@ const PROJECT_PICKFLIX = {
     url: "https://github.com/crvouga/pickflix-v1",
   },
   description:
-    "Watch trailers, write reviews, and create movie lists with your friends.",
+    "Social movie discovery platform enabling users to watch trailers, write reviews, and collaborate on movie lists with friends. Features real-time updates and a comprehensive movie database integration.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/pickflix.optimized.webp"],
   galleryImageSrc: [
@@ -273,7 +273,7 @@ const PROJECT_SUN_DEVILS = {
   deployment: { t: "public", url: "https://sundevils.com/" },
   code: { t: "private" },
   description:
-    "The official website for the ASU Sun Devils. I developed interactive React components including the upcoming game feed and news feed.",
+    "Official website for the ASU Sun Devils athletics program. Developed interactive React components including real-time game schedules and dynamic news feeds, enhancing fan engagement and information accessibility.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/sun-devils.optimized.webp"],
   galleryImageSrc: [
@@ -301,7 +301,7 @@ const PROJECT_HEADLESS_COMBOBOX = {
   imageAlt: IMAGE_ALT,
   imageSrc: ["./headless-combobox.optimized.webp"],
   galleryImageSrc: ["./headless-combobox.png"],
-  description: `A purely functional, headless, framework-agnostic, zero-dependency, accessible TypeScript combobox library for creating comboboxes in any UI framework.`,
+  description: `A production-ready, headless TypeScript combobox library that's framework-agnostic, zero-dependency, and fully accessible. Enables developers to build custom combobox components in any UI framework while maintaining WCAG compliance and flexibility.`,
   topics: ["typescript"],
   setting: "side",
 };
@@ -317,7 +317,7 @@ const PROJECT_MOVIEFINDER_RUST = {
     t: "public",
     url: "https://github.com/crvouga/moviefinder.app",
   },
-  description: "A movie search app with a TikTok-like UI.",
+  description: "Movie discovery application featuring an intuitive TikTok-style vertical scrolling interface. Built with Rust for performance and modern web technologies for a seamless user experience.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/moviefinder-app.optimized.webp"],
   galleryImageSrc: ["/moviefinder-app.png"],
@@ -336,7 +336,7 @@ const PROJECT_TODO_APP = {
     t: "public",
     url: "https://todo.chrisvouga.dev",
   },
-  description: "Full-stack todo app. Sign in and start tracking your tasks.",
+  description: "Full-stack task management application with user authentication and real-time synchronization. Demonstrates end-to-end development capabilities from database design to responsive UI implementation.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/todo.optimized.webp"],
   galleryImageSrc: ["/todo.png"],
@@ -364,7 +364,7 @@ const PROJECT_IMAGE_SERVICE = {
     t: "public",
     url: "https://imageservice.chrisvouga.dev",
   },
-  description: `A zero-dependency image service for optimizing images in web applications. Designed for longevity and zero-config self-hosting.`,
+  description: `Image optimization service built with Go, designed for zero-configuration self-hosting and long-term maintainability. Enables web applications to efficiently serve optimized images without external dependencies.`,
   imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
@@ -383,7 +383,7 @@ const PROJECT_CONNECT_FOUR = {
     t: "public",
     url: "https://github.com/crvouga/connect-four",
   },
-  description: "Play Connect Four online with your friends.",
+  description: "Real-time multiplayer Connect Four game with WebSocket-based synchronization. Features smooth animations, responsive design, and seamless online gameplay for multiple concurrent users.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/connect-four.optimized.webp"],
   galleryImageSrc: [
@@ -421,7 +421,7 @@ const PROJECT_AIRR = {
     url: "https://one-origin-airr-production.up.railway.app",
   },
   description:
-    "A product demo for Airr, a One Origin product that automates the process of consuming and analyzing transcripts.",
+    "Interactive product demonstration for Airr, an enterprise solution that automates transcript consumption and analysis. Showcases advanced data processing capabilities and intuitive user interface design for complex workflow management.",
   imageAlt: IMAGE_ALT,
   imageSrc: [
     "/airr/1.optimized.webp",
@@ -463,7 +463,7 @@ const PROJECT_SCREENSHOT_SERVICE = {
     t: "public",
     url: "https://screenshotservice.chrisvouga.dev",
   },
-  description: `A software-as-a-service application that enables developers to generate screenshots for their websites. Used to create screenshots for this portfolio.`,
+  description: `Software-as-a-Service platform enabling developers to programmatically generate high-quality screenshots of web pages. Provides reliable, scalable screenshot generation with customizable options. Powers the screenshot generation for this portfolio.`,
   imageAlt: IMAGE_ALT,
   imageSrc: ["/screenshot-service.optimized.webp"],
   galleryImageSrc: [
@@ -500,7 +500,7 @@ const PROJECT_ORCHARD = {
     url: "https://asuorchard.asu.edu/",
   },
   description:
-    "Orchard is a learning tool developed by ASU that enables teachers to create highly customizable assignments for their students. I integrated Orchard with ASU's LMS using LTI 1.3.",
+    "Educational platform developed by ASU that empowers instructors to create highly customizable assignments. Architected and implemented the LTI 1.3 integration with ASU's Learning Management System, enabling seamless single sign-on and grade passback functionality.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/orchard.optimized.webp"],
   galleryImageSrc: ["/orchard.png"],
@@ -519,7 +519,7 @@ const PROJECT_QUIZ_MAKER = {
     t: "not-deployed-anymore",
   },
   description:
-    "An LTI-compatible quiz maker application. Instructors can create quizzes and students can take them directly within their hosting LMS.",
+    "LTI-compatible quiz creation platform that integrates seamlessly with Learning Management Systems. Enables instructors to build custom quizzes and assessments while providing students with a native LMS experience.",
   imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
@@ -537,7 +537,7 @@ const PROJECT_COURIER_WEBSITE = {
   code: {
     t: "private",
   },
-  description: "A marketing website for a healthcare courier company.",
+  description: "Professional marketing website for a healthcare courier company, featuring responsive design, optimized performance, and clear communication of services to potential clients.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/courier.optimized.webp"],
   galleryImageSrc: [
@@ -555,7 +555,7 @@ const PROJECT_COURIER_WEBSITE = {
 /** @type {Project} */
 const PROJECT_ANIME_BLOG = {
   title: "Anime Blog",
-  description: "A JAMstack blog about anime.",
+  description: "Modern JAMstack blog built with Vue and Gridsome, featuring a headless CMS integration for content management. Demonstrates static site generation and performance optimization techniques.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/anime.optimized.webp"],
   galleryImageSrc: ["/anime.png"],
@@ -591,7 +591,7 @@ const PROJECT_SNAKE_GAME = {
     url: "https://github.com/crvouga/snake",
   },
   description:
-    "A pure functional implementation of the classic Snake game with smooth movement.",
+    "Classic Snake game implemented using functional programming principles, featuring smooth animations and responsive controls. Showcases clean code architecture and modern React patterns.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/snake.optimized.webp"],
   galleryImageSrc: [
@@ -617,7 +617,7 @@ const PROJECT_MATCH_THREE = {
     t: "public",
     url: "https://github.com/crvouga/match-three",
   },
-  description: "Match Three is a Candy Crush-style puzzle game.",
+  description: "Match-three puzzle game inspired by Candy Crush, featuring engaging gameplay mechanics, smooth animations, and responsive design. Demonstrates game development skills and state management expertise.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/match-three.optimized.webp"],
   galleryImageSrc: [
@@ -644,7 +644,7 @@ const PROJECT_CHEESE = {
     url: "https://github.com/crvouga/cheese",
   },
   description:
-    "A web application for generating event identification cards. Built as a learning project to explore image manipulation and client-side processing.",
+    "Web application for generating customizable event identification cards with client-side image manipulation. Explores advanced browser APIs for image processing and demonstrates creative problem-solving in web development.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/cheese.optimized.webp"],
   galleryImageSrc: [
@@ -670,7 +670,7 @@ const PROJECT_SIMON_SAYS = {
     t: "public",
     url: "https://github.com/crvouga/simon-says",
   },
-  description: "An implementation of the classic memory game Simon Says.",
+  description: "Interactive implementation of the classic Simon Says memory game, featuring visual and audio feedback, progressive difficulty, and polished user interface design.",
   imageAlt: IMAGE_ALT,
   imageSrc: ["/simon-says.optimized.webp"],
   galleryImageSrc: [
@@ -694,7 +694,7 @@ const PROJECT_SMART_DOG_DOOR = {
     url: "https://github.com/crvouga/smart-dog-door-python",
   },
   description:
-    "A smart dog door that opens when the dog is nearby and closes when a cat is detected. Uses computer vision and smart home devices for automated control.",
+    "IoT smart door system that uses computer vision to automatically open for dogs and close when cats are detected. Integrates with smart home platforms for seamless automation, demonstrating expertise in embedded systems and machine learning applications.",
   imageAlt: IMAGE_ALT,
   imageSrc: [],
   galleryImageSrc: [],
