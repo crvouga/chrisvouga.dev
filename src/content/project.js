@@ -63,6 +63,10 @@ const PROJECT_TRIANGULATOR = {
   imageAlt: IMAGE_ALT,
   imageSrc: ["/triangulator.optimized.webp"],
   galleryImageSrc: [
+    toYouTubeVideoUrl({
+      youTubeVideoId: "yQCrMBHQrDM",
+      autoplay: true,
+    }),
     "/triangulator/assigned-reject-reason.png",
     "/triangulator/course-search-details-2.png",
     "/triangulator/course-search-loading.png",
