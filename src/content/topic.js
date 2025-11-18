@@ -65,6 +65,8 @@ export const TOPIC_TO_IMAGE_SRC = {
   trpc: "/trpc.svg",
   vercel: "/vercel-icon-light.svg",
   html: "/html-5.svg",
+  s3: "/aws-s3.svg",
+  zod: "/zod.svg",
 };
 
 /**
@@ -129,4 +131,6 @@ export const TOPIC_TO_NAME = {
   go: "Go",
   trpc: "TRPC",
   vercel: "Vercel",
+  s3: "S3",
+  zod: "Zod",
 };

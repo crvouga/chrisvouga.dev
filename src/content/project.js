@@ -53,6 +53,36 @@ const IMAGE_ALT = "A screenshot of the project";
 const GAMEZILLA_HREF = "https://www.gamezilla.app/";
 const LAMDERA_HREF = "https://lamdera.com/";
 
+/**
+ * @type {Project}
+ */
+const PROJECT_NORMALIZER_APP = {
+  title: "normalizer.app",
+  deployment: {
+    t: "public",
+    url: "https://normalizer.app/",
+  },
+  code: {
+    t: "private",
+  },
+  description:
+    "A web application that automates data normalization by transforming tabular data (Excel, CSV) from one schema to a user-defined target schema, eliminating the need for manual Excel work or Python scripts.",
+  imageAlt: IMAGE_ALT,
+  imageSrc: ["/normalizer-app.optimized.webp"],
+  galleryImageSrc: ["/normalizer-app.png"],
+  topics: [
+    "typescript",
+    "react",
+    "tailwind",
+    "bun",
+    "postgres",
+    "s3",
+    "trpc",
+    "zod",
+  ],
+  setting: "side",
+};
+
 /** @type {Project} */
 const PROJECT_TRIANGULATOR = {
   title: "Triangulator",
@@ -673,6 +703,7 @@ const PROJECT_SMART_DOG_DOOR = {
 
 /** @type {Project[]} */
 export const PROJECTS = [
+  PROJECT_NORMALIZER_APP,
   PROJECT_GAMEZILLA,
   PROJECT_TRIANGULATOR,
   PROJECT_STUDY_HALL,
