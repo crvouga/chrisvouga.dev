@@ -5,6 +5,7 @@
     "dev": "npm run start",
     "local": "npm run start",
     "build": "node ./src/main.js",
+    "test": "node test/server.test.js",
     "tc": "npx tsc -w",
     "optimize-images": "node ./src/optimize-images.js",
     "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app"
