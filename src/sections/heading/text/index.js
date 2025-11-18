@@ -1,8 +1,7 @@
 // @ts-check
 
 import { tag } from "../../../library/html/index.js";
-import { code } from "../../../ui/icons.js";
-import { unit, THEME } from "../../../ui/theme.js";
+import { unit } from "../../../ui/theme.js";
 import { viewTypography } from "../../../ui/typography.js";
 import { viewColored } from "./colored.js";
 
@@ -24,14 +23,6 @@ export const viewHeadingSectionText = () => {
       },
     },
     [
-      code({
-        style: {
-          width: "4rem",
-          height: "4rem",
-          fill: THEME.colors.text,
-          "flex-shrink": 0,
-        },
-      }),
       tag("div", {}, [
         viewTypography({ level: "h1", text: "Chris Vouga" })({
           style: { "font-weight": 900 },

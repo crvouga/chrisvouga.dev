@@ -40,6 +40,7 @@ HEAD.push(
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
+      padding-bottom: ${unit(0.5)};
     }
     
     @media (max-width: ${THEME.breakpoints.sm}) {
