@@ -1,4 +1,3 @@
-// @ts-check
 import { CONTENT } from "./content/content.js";
 import { tag, text } from "./library/html/index.js";
 import { replaceAll } from "./library/replace-all.js";
@@ -18,19 +17,12 @@ import { THEME } from "./ui/theme.js";
 export const viewApp = () => {
   return viewDoc({}, [
     tag("main", { class: "main" }, [
-      // 1. Heading - First impression and introduction
       viewHeadingSection(),
-      // 2. Projects - Showcase technical skills and initiative FIRST (what makes you stand out)
       viewProjectsSection(),
-      // 3. Work - Professional experience (also critical, shows you can deliver in real environments)
       viewWorkSection(),
-      // 4. School - Education foundation (less critical but still relevant)
-      viewSchoolSection(),
-      // 5. About Me - Personal touch and culture fit (less critical for initial screening)
       viewAboutMeSection(),
-      // 6. Contact - How to reach you (important but typically near the end)
+      viewSchoolSection(),
       viewContactSection(),
-      // 7. Footer - Always last
       viewFooterSection(),
     ]),
   ]);
@@ -45,7 +37,7 @@ HEAD.push(
       display: flex;
       align-items: items-center;
       flex-direction: column;
-      gap: 72px;
+      gap: 96px;
       padding: 72px 12px;
       overflow-x: hidden;
     }
