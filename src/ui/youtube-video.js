@@ -11,7 +11,7 @@ import { THEME, unit } from "./theme.js";
 /**
  * @type {import("../library/html/index.js").ViewWithProps<Props>}
  */
-export const viewYouTubeVideo = (props) => (attrs, _children) => {
+export const viewYouTubeVideo = (props) => (attrs) => {
   return tag(
     "div",
     {
