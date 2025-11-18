@@ -11,6 +11,7 @@
     "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app"
   },
   "devDependencies": {
-    "@types/node": "^22.15.29"
+    "@types/node": "^22.15.29",
+    "typescript": "^5.9.3"
   }
 }
