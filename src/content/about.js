@@ -18,3 +18,5 @@ export const ABOUT_YOUTUBE_EMBED_URL = `https://www.youtube.com/embed/${ABOUT_YO
 export const ABOUT_YOUTUBE_VIDEO_TITLE = "Cursor AI gift video";
 export const ABOUT_CURSOR_GIFT_TEXT =
   "I received a gift from Cursor AI — a custom tab button — for being one of the top users of tab autocomplete.";
+export const ABOUT_GITHUB_HEATMAP_TEXT =
+  "This heatmap visualizes my GitHub contributions over the past year, showing my coding activity and consistency. Each square represents a day, with darker colors indicating more contributions. This demonstrates my dedication to programming and my active engagement with software development projects.";

@@ -1,7 +1,7 @@
 // @ts-check
 
 import { CONTENT } from "../content/content.js";
-import { tag } from "../library/html/index.js";
+import { fragment, tag } from "../library/html/index.js";
 import { viewSection } from "../shared/section.js";
 import { THEME, unit } from "../ui/theme.js";
 import { viewTypography } from "../ui/typography.js";
@@ -46,6 +46,32 @@ export const viewAboutMeSection = (a, _) => {
           })(),
         ]
       ),
+      false
+        ? tag(
+            "div",
+            {
+              style: {
+                "padding-top": unit(4),
+                display: "flex",
+                "flex-direction": "column",
+                gap: unit(1),
+              },
+            },
+            [
+              viewTypography({
+                level: "body-md",
+                text: CONTENT.ABOUT_GITHUB_HEATMAP_TEXT,
+              })(),
+              tag(
+                "github-contribution-heatmap",
+                {
+                  "data-username": "crvouga",
+                },
+                []
+              ),
+            ]
+          )
+        : fragment([]),
     ]
   );
 };
