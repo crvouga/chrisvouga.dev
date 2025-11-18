@@ -1,4 +1,9 @@
-import { ABOUT_ME, ABOUT_ME_ATTR_SAFE } from "./about.js";
+import {
+  ABOUT_ME,
+  ABOUT_ME_ATTR_SAFE,
+  ABOUT_YOUTUBE_EMBED_URL,
+  ABOUT_YOUTUBE_VIDEO_ID,
+} from "./about.js";
 import { PROJECTS, SIDE_PROJECTS, WORK_PROJECTS } from "./project.js";
 import { SCHOOL } from "./school.js";
 import { WORK } from "./work.js";
@@ -26,6 +31,8 @@ export const CONTENT = {
   WORK,
   ABOUT_ME_SECTION_TITLE: "About Me",
   ABOUT_ME,
+  ABOUT_YOUTUBE_VIDEO_ID,
+  ABOUT_YOUTUBE_EMBED_URL,
   SCHOOL_SECTION_TITLE: "Education",
   SCHOOL,
   CONTACT_SECTION_TITLE: "Contact",

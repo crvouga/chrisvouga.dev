@@ -7,9 +7,6 @@ import { HEAD } from "../ui/head.js";
 import { THEME } from "../ui/theme.js";
 import { viewTypography } from "../ui/typography.js";
 
-const YOUTUBE_VIDEO_ID = "7rHHSdnvX94";
-const YOUTUBE_EMBED_URL = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`;
-
 /**
  * @type {import("../library/html/index.js").View}
  */
@@ -32,7 +29,7 @@ export const viewAboutMeSection = (a, _) => {
         },
         [
           tag("iframe", {
-            src: YOUTUBE_EMBED_URL,
+            src: CONTENT.ABOUT_YOUTUBE_EMBED_URL,
             class: "about-video",
             allow:
               "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",

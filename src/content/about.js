@@ -12,3 +12,6 @@ I make productive use of AI as a software developer, leveraging tools like Curso
 A fun fact about me is that I play the drums in a ${BAND_A_TAG}.`;
 
 export const ABOUT_ME_ATTR_SAFE = ABOUT_ME.replace(BAND_A_TAG, "band");
+
+export const ABOUT_YOUTUBE_VIDEO_ID = "7rHHSdnvX94";
+export const ABOUT_YOUTUBE_EMBED_URL = `https://www.youtube.com/embed/${ABOUT_YOUTUBE_VIDEO_ID}`;
