@@ -47,7 +47,7 @@ HEAD.push(
     }
     @media (min-width: ${THEME.breakpoints.md}) {
       .contact-section-content {
-        flex-direction: column;
+        flex-direction: row;
       }
     }
     
