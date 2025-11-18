@@ -99,23 +99,6 @@ export const viewDoc = (_a, c) => {
         },
         []
       ),
-      tag(
-        "script",
-        {
-          src: "./web-components/github-contribution-heatmap-element.js",
-          async: "true",
-        },
-        []
-      ),
-      tag(
-        "link",
-        {
-          rel: "stylesheet",
-          href: "https://unpkg.com/github-calendar@latest/dist/github-calendar-responsive.css",
-        },
-        []
-      ),
-
       ...HEAD,
     ]),
     tag("body", {}, [
