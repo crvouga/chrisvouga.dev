@@ -9,8 +9,13 @@ export const THEME = {
     borderLight: "#32383e",
     skeleton: "#2D333B",
     warning: "#EA9A3E",
-    primary300: "rgb(151, 195, 240)",
-    primary500: "rgb(11, 107, 203)",
+    primary100: "rgb(223, 240, 252)",   // Very light variant
+    primary200: "rgb(197, 227, 248)",   // Lighter than 300
+    primary300: "rgb(151, 195, 240)",   // Base light
+    primary400: "rgb(84, 154, 220)",    // In between 300 and 500
+    primary500: "rgb(11, 107, 203)",    // Base dark
+    primary600: "rgb(10, 87, 160)",     // Darker than 500
+    primary700: "rgb(9, 65, 119)",      // Even darker
     //
     softBackground: "rgb(10, 39, 68)",
     softBackgroundHover: "rgb(18, 70, 123)",

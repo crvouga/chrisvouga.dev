@@ -1,9 +1,8 @@
 // @ts-check
 
 import { tag } from "../../../library/html/index.js";
-import { unit } from "../../../ui/theme.js";
+import { THEME, unit } from "../../../ui/theme.js";
 import { viewTypography } from "../../../ui/typography.js";
-import { viewColored } from "./colored.js";
 
 /**
  * @type {import("../../../library/html/index.js").View}
@@ -27,7 +26,9 @@ export const viewHeadingSectionText = () => {
         viewTypography({ level: "h1", text: "Chris Vouga" })({
           style: { "font-weight": 900 },
         }),
-        viewColored({ text: "Software Developer" })(),
+        viewTypography({ level: "h2", text: "Software Developer",  })({
+          style: { "font-weight": 900, "color": THEME.colors.primary400 },
+        }),
       ]),
     ]
   );
