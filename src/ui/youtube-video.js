@@ -11,7 +11,7 @@ import { THEME, unit } from "./theme.js";
 /**
  * @type {import("../library/html/index.js").ViewWithProps<Props>}
  */
-export const viewYouTubeVideo = (props) => (attrs, children) => {
+export const viewYouTubeVideo = (props) => (attrs, _children) => {
   return tag(
     "div",
     {
@@ -66,7 +66,14 @@ HEAD.push(
         align-items: center;
         justify-content: center;
         z-index: 2;
-        transition: opacity 0.5s ease, visibility 0.5s ease;
+        pointer-events: none;
+        animation: fadeOutPlaceholder 0.5s ease 1s forwards;
+      }
+      @keyframes fadeOutPlaceholder {
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
       }
       .youtube-video-placeholder-content {
         display: flex;
@@ -94,11 +101,7 @@ HEAD.push(
         border: none;
         border-radius: 8px;
         z-index: 1;
-      }
-      .youtube-video-container:has(.youtube-video[src]) .youtube-video-placeholder {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
+        background-color: ${THEME.colors.paper};
       }
     `),
   ])
