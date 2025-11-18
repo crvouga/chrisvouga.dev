@@ -3,21 +3,34 @@ import { HEAD } from "./head.js";
 import { THEME } from "./theme.js";
 
 /**
- * @type {import("../library/html/index.js").ViewWithProps<{src: string, alt:string}>}
+ * @type {import("../library/html/index.js").ViewWithProps<{src: string, alt: string, fetchPriority?: "high" | "auto"}>}
  */
 export const viewImage = (props) => (attr, _) => {
+  /**
+   * @type {Record<string, any>}
+   */
+  const imgAttributes = {
+    ...attr,
+    src: props.src,
+    alt: props.alt,
+    class: ["image animate-pulse", attr?.["class"]]
+      .filter(Boolean)
+      .join(" "),
+    onload: "onImageLoad(event)",
+  };
+
+  if (props.fetchPriority) {
+    imgAttributes["fetchpriority"] = props.fetchPriority;
+  }
+
+  if (props.fetchPriority === "high") {
+    imgAttributes["loading"] = "eager";
+  }
+
   return fragment([
     tag(
       "img",
-      {
-        ...attr,
-        src: props.src,
-        alt: props.alt,
-        class: ["image animate-pulse", attr?.["class"]]
-          .filter(Boolean)
-          .join(" "),
-        onload: "onImageLoad(event)",
-      },
+      imgAttributes,
       []
     ),
   ]);

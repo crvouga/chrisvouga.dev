@@ -17,6 +17,7 @@ import { viewImage } from "../../ui/image.js";
  * @property {string[]} galleryImages - Array of image URLs for the gallery
  * @property {string} [jsVarSafeNamespace] - Namespace for JS variables
  * @property {boolean} [showGalleryIndicator=true] - Whether to show the gallery indicator
+ * @property {"high" | "auto"} [fetchPriority] - The fetch priority for the image
  */
 
 /**
@@ -29,6 +30,7 @@ export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
     galleryImages,
     jsVarSafeNamespace = stringToJsVarSafe(alt || "gallery"),
     showGalleryIndicator = true,
+    fetchPriority = "auto",
   } = props;
 
   return fragment([
@@ -44,7 +46,7 @@ export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
         class: "gallery-image-button",
       },
       [
-        viewImage({ src, alt })({ ...attr, class: "gallery-image" }, []),
+        viewImage({ src, alt, fetchPriority })({ ...attr, class: "gallery-image" }, []),
         ...(showGalleryIndicator
           ? [
               tag("div", { class: "gallery-indicator" }, [

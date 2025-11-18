@@ -30,6 +30,7 @@ const viewProjectCardMediaImageMain = (props) => (attr, _) => {
     galleryImages: props.project?.galleryImageSrc ?? [],
     jsVarSafeNamespace,
     showGalleryIndicator: true,
+    fetchPriority: props.fetchPriority ?? "auto",
   })({ ...attr, class: "project-card-media-image" }, []);
 };
 

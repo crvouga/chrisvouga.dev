@@ -135,6 +135,7 @@ const PROJECT_TRIANGULATOR = {
     "graphene",
     "flask",
     "neo4j",
+    "s3",
   ],
   setting: "work",
 };

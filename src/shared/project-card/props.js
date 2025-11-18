@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @typedef {{project: import("../../content/project.js").Project; linkHref?: string | null}} ProjectCardProps
+ * @typedef {{project: import("../../content/project.js").Project; linkHref?: string | null; fetchPriority?: "high" | "auto"}} ProjectCardProps
  */
 
 /**
