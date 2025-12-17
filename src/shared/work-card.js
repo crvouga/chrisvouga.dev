@@ -6,6 +6,7 @@ import { appendExternalLinkIndicator } from "../ui/external-link-indicator.js";
 import { viewLink } from "../ui/link.js";
 import { unit } from "../ui/theme.js";
 import { viewTypography } from "../ui/typography.js";
+import { viewWorkCardMedia } from "./work-card/media/index.js";
 
 /**
  * @type {import("../library/html/index.js").ViewWithProps<{work: import("../content/work.js").Work}>}
@@ -14,6 +15,7 @@ export const viewWorkCard =
   ({ work }) =>
   () => {
     return viewCard({}, [
+      viewWorkCardMedia({ work })({}),
       viewCardContent({}, [
         viewLink(
           {

@@ -43,7 +43,7 @@ export const viewImageGalleryModal = (props) => () => {
       "image-gallery-modal",
       {
         id: elementId,
-        "data-skeleton-color": "#f0f0f0",
+        "data-skeleton-color": props.skeletonColor ?? "#f0f0f0",
       },
       []
     ),

@@ -18,6 +18,7 @@ import { viewImage } from "../../ui/image.js";
  * @property {string} [jsVarSafeNamespace] - Namespace for JS variables
  * @property {boolean} [showGalleryIndicator=true] - Whether to show the gallery indicator
  * @property {"high" | "auto"} [fetchPriority] - The fetch priority for the image
+ * @property {string} [skeletonColor] - Background color for images with transparency
  */
 
 /**
@@ -31,6 +32,7 @@ export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
     jsVarSafeNamespace = stringToJsVarSafe(alt || "gallery"),
     showGalleryIndicator = true,
     fetchPriority = "auto",
+    skeletonColor,
   } = props;
 
   return fragment([
@@ -64,6 +66,7 @@ export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
       imageAlt: alt,
       imageSrc: galleryImages,
       jsVarSafeNamespace,
+      skeletonColor,
     })(),
   ]);
 };

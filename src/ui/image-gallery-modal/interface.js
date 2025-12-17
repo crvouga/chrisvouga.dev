@@ -3,6 +3,7 @@
  * @property {string} jsVarSafeNamespace - Unique namespace for the modal
  * @property {string[]} imageSrc - Array of image URLs to display in the gallery
  * @property {string} [imageAlt] - Alt text for the images
+ * @property {string} [skeletonColor] - Background color for images with transparency
  */
 
 /**
