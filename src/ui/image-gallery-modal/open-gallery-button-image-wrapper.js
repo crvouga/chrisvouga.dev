@@ -66,7 +66,7 @@ export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
       imageAlt: alt,
       imageSrc: galleryImages,
       jsVarSafeNamespace,
-      skeletonColor,
+      ...(skeletonColor ? { skeletonColor } : {}),
     })(),
   ]);
 };

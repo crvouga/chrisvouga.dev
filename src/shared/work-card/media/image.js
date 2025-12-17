@@ -17,7 +17,7 @@ export const viewWorkCardMediaImage = (props) => {
 };
 
 /**
- * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work}>}
+ * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
  */
 const viewWorkCardMediaImageMain = (props) => (attr, _) => {
   const alt = props.work?.imageAlt ?? "";
@@ -67,4 +67,3 @@ HEAD.push(
     `),
   ])
 );
-
