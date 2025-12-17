@@ -52,6 +52,11 @@ export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
           { ...attr, class: "gallery-image" },
           []
         ),
+        tag("div", { class: "gallery-hover-overlay" }, [
+          tag("span", { class: "gallery-hover-text" }, [
+            text("Click to view gallery"),
+          ]),
+        ]),
         ...(showGalleryIndicator
           ? [
               tag("div", { class: "gallery-indicator" }, [
@@ -111,9 +116,38 @@ HEAD.push(
         width: 32px;
         height: 32px;
       }
-      @media (min-width: 769px) {
+      .gallery-hover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      .gallery-hover-text {
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        padding: 0 16px;
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .gallery-hover-overlay {
+          display: flex;
+        }
+        .gallery-indicator {
+          display: none;
+        }
         .gallery-image-button:hover .gallery-image {
           transform: scale(1.03);
+        }
+        .gallery-image-button:hover .gallery-hover-overlay {
+          opacity: 1;
         }
       }
     `),
