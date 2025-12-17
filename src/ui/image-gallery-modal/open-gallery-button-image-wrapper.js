@@ -82,6 +82,7 @@ HEAD.push(
         height: 100%;
         object-fit: cover;
         display: block;
+        transition: transform 0.2s ease;
       }
       .gallery-image-button {
         width: 100%;
@@ -109,6 +110,11 @@ HEAD.push(
         justify-content: center;
         width: 32px;
         height: 32px;
+      }
+      @media (min-width: 769px) {
+        .gallery-image-button:hover .gallery-image {
+          transform: scale(1.03);
+        }
       }
     `),
   ])
