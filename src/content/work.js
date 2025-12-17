@@ -36,6 +36,7 @@ export const WORK = [
       // "/one-origin/2024-q3-&-q4-award-2.jpg",
       "/one-origin/2024-q2-award-1.jpg",
       "/one-origin/2024-q1-award-1.jpg",
+      "/one-origin/desk.jpg",
     ],
   },
   {
