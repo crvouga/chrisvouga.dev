@@ -48,7 +48,10 @@ export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
         class: "gallery-image-button",
       },
       [
-        viewImage({ src, alt, fetchPriority })({ ...attr, class: "gallery-image" }, []),
+        viewImage({ src, alt, fetchPriority })(
+          { ...attr, class: "gallery-image" },
+          []
+        ),
         ...(showGalleryIndicator
           ? [
               tag("div", { class: "gallery-indicator" }, [
