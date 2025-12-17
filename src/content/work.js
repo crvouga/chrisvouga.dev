@@ -40,7 +40,7 @@ export const WORK = [
   },
   {
     name: "Freelancing",
-    jobTitle: "Frontend Developer",
+    jobTitle: "Solo Software Developer",
     jobDescription: `Delivered custom web solutions for small businesses, focusing on responsive design, performance optimization, and user experience. Built static sites and web applications that helped clients establish and grow their online presence.`,
     yearStart: 2020,
     yearEnd: 2022,
