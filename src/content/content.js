@@ -16,6 +16,7 @@ const PAGE_TITLE = "Chris Vouga";
 const PAGE_SUBTITLE = "Software Engineer";
 
 export const CONTENT = {
+  SITE_URL: "https://www.chrisvouga.dev",
   SITE_SOURCE_CODE_URL: "https://github.com/crvouga/chrisvouga.dev",
   SCREENSHOT_SERVICE_PROJECT_ID: "3e158ff9-0b37-41d1-84d0-cae1397adf4b",
   PAGE_TITLE,

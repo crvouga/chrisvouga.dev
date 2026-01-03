@@ -71,6 +71,96 @@ export const viewDoc = (_a, c) => {
         },
         []
       ),
+      // Open Graph meta tags
+      tag(
+        "meta",
+        {
+          property: "og:title",
+          content: CONTENT.META_TITLE,
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          property: "og:description",
+          content: replaceAll(
+            replaceAll(CONTENT.META_DESCRIPTION, "\n", ""),
+            "\t",
+            ""
+          ),
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          property: "og:image",
+          content: `${CONTENT.SITE_URL}/main-site-screenshot.png`,
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          property: "og:url",
+          content: CONTENT.SITE_URL,
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          property: "og:type",
+          content: "website",
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          property: "og:site_name",
+          content: CONTENT.PAGE_TITLE,
+        },
+        []
+      ),
+      // Twitter Card meta tags
+      tag(
+        "meta",
+        {
+          name: "twitter:card",
+          content: "summary_large_image",
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          name: "twitter:title",
+          content: CONTENT.META_TITLE,
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          name: "twitter:description",
+          content: replaceAll(
+            replaceAll(CONTENT.META_DESCRIPTION, "\n", ""),
+            "\t",
+            ""
+          ),
+        },
+        []
+      ),
+      tag(
+        "meta",
+        {
+          name: "twitter:image",
+          content: `${CONTENT.SITE_URL}/main-site-screenshot.png`,
+        },
+        []
+      ),
       tag("link", { rel: "shortcut icon", href: "/favicon.ico" }, []),
       tag("link", { rel: "icon", href: "/favicon.ico" }, []),
       tag(
