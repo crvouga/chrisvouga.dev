@@ -17,12 +17,23 @@
  */
 export const WORK = [
   {
+    name: "Geviti",
+    infoUrl: "https://www.gogeviti.com/",
+    jobTitle: "Senior Software Engineer",
+    jobDescription: `Building features for a comprehensive health and longevity platform that combines bloodwork analysis, personalized supplement protocols, prescription therapies, and care team coordination. Developing tools that help users track their health metrics and optimize their well-being through proactive, data-driven care.`,
+    yearStart: 2026,
+    yearEnd: "Present",
+    imageSrc: [],
+    imageAlt: "",
+    galleryImageSrc: [],
+  },
+  {
     name: "One Origin",
     infoUrl: "https://oneorigin.us/",
-    jobTitle: "Senior Software Developer",
+    jobTitle: "Senior Software Engineer",
     jobDescription: `Lead full-stack development of enterprise software products for Arizona State University, including complex data processing platforms and educational tools. Architect scalable solutions using modern technologies, mentor junior developers, and drive technical decision-making to deliver high-quality products on time.`,
     yearStart: 2022,
-    yearEnd: "Present",
+    yearEnd: 2025,
     imageSrc: ["/one-origin/2025-q1-award-1-enhanced-with-ai.optimized.webp"],
     imageAlt: "One Origin award certificates",
     galleryImageSrc: [
