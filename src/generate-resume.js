@@ -24,7 +24,6 @@ const formatDateRange = (yearStart, yearEnd) => {
   return `${yearStart} - ${yearEnd}`;
 };
 
-
 /**
  * Clean HTML tags from text (simple approach)
  * @param {string} text
@@ -40,6 +39,7 @@ const stripHtmlTags = (text) => {
  *   title: string;
  *   email: string;
  *   phone: string;
+ *   website: string;
  *   github: string;
  *   linkedin: string;
  *   summary: string;
@@ -75,6 +75,7 @@ const generateResumeHTML = (data) => {
     title,
     email,
     phone,
+    website,
     github,
     linkedin,
     summary,
@@ -257,16 +258,21 @@ const generateResumeHTML = (data) => {
       <div class="contact-info">
         <span>${email}</span>
         <span>${phone}</span>
+        <a href="${website}">${website}</a>
         <a href="${github}">GitHub</a>
         <a href="${linkedin}">LinkedIn</a>
       </div>
     </div>
   </div>
   
-  ${summary ? `<div class="section">
+  ${
+    summary
+      ? `<div class="section">
     <div class="section-title">Summary</div>
     <div class="summary">${summary}</div>
-  </div>` : ""}
+  </div>`
+      : ""
+  }
   
   <div class="section">
     <div class="section-title">Work Experience</div>
@@ -281,7 +287,11 @@ const generateResumeHTML = (data) => {
         <div>
           <span class="item-title">${work.jobTitle}</span>
           <span> • </span>
-          <span class="item-company">${work.url ? `<a href="${work.url}">${work.company}</a>` : work.company}</span>
+          <span class="item-company">${
+            work.url
+              ? `<a href="${work.url}">${work.company}</a>`
+              : work.company
+          }</span>
         </div>
         <span class="item-date">${work.dateRange}</span>
       </div>
@@ -313,7 +323,9 @@ const generateResumeHTML = (data) => {
       .join("")}
   </div>
   
-  ${projects.length > 0 ? `<div class="section">
+  ${
+    projects.length > 0
+      ? `<div class="section">
     <div class="section-title">Projects</div>
     ${projects
       .map(
@@ -323,14 +335,28 @@ const generateResumeHTML = (data) => {
         (project) => `
     <div class="project-item">
       <div class="item-header">
-        <span class="item-title">${project.url ? `<a href="${project.url}">${project.title}</a>` : project.title}</span>
+        <span class="item-title">${
+          project.url
+            ? `<a href="${project.url}">${project.title}</a>`
+            : project.title
+        }</span>
       </div>
       <div class="item-description">${project.description}</div>
-      ${project.topics && project.topics.length > 0 ? `<div class="project-topics">${project.topics.map(/** @param {string} topic */ topic => `<span>${topic}</span>`).join("")}</div>` : ""}
+      ${
+        project.topics && project.topics.length > 0
+          ? `<div class="project-topics">${project.topics
+              .map(
+                /** @param {string} topic */ (topic) => `<span>${topic}</span>`
+              )
+              .join("")}</div>`
+          : ""
+      }
     </div>`
       )
       .join("")}
-  </div>` : ""}
+  </div>`
+      : ""
+  }
 </body>
 </html>`;
 };
@@ -343,8 +369,12 @@ const generateResume = async () => {
     // Transform content for resume
     // Shorten summary for resume format (keep first 2-3 sentences)
     const fullSummary = stripHtmlTags(CONTENT.ABOUT_ME).trim();
-    const summarySentences = fullSummary.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const summary = summarySentences.slice(0, 3).join(". ").trim() + (summarySentences.length > 3 ? "." : "");
+    const summarySentences = fullSummary
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0);
+    const summary =
+      summarySentences.slice(0, 3).join(". ").trim() +
+      (summarySentences.length > 3 ? "." : "");
 
     const workExperience = CONTENT.WORK.map((work) => ({
       company: work.name,
@@ -367,27 +397,29 @@ const generateResume = async () => {
       "Orchard",
       "ASU Earned Admissions",
     ];
-    
+
     // Get work projects excluding the ones we don't want
     const filteredWorkProjects = CONTENT.WORK_PROJECTS.filter(
       (project) => !excludedProjects.includes(project.title)
     );
-    
+
     // Get normalizer.app from side projects
     const normalizerApp = CONTENT.SIDE_PROJECTS.find(
       (project) => project.title === "normalizer.app"
     );
-    
+
     // Combine and take up to 6 projects
     const allProjects = normalizerApp
       ? [normalizerApp, ...filteredWorkProjects]
       : filteredWorkProjects;
-    
+
     const projects = allProjects.slice(0, 6).map((project) => ({
       title: project.title,
       description: stripHtmlTags(project.description),
       url: projectToLinkHref(project),
-      topics: project.topics.map((topic) => TOPIC_TO_NAME[topic] || topic).filter(Boolean),
+      topics: project.topics
+        .map((topic) => TOPIC_TO_NAME[topic] || topic)
+        .filter(Boolean),
     }));
 
     const resumeData = {
@@ -395,6 +427,7 @@ const generateResume = async () => {
       title: CONTENT.PAGE_SUBTITLE,
       email: CONTENT.EMAIL_ADDRESS,
       phone: formatPhoneNumber(CONTENT.PHONE_NUMBER),
+      website: CONTENT.SITE_URL,
       github: CONTENT.GITHUB_URL,
       linkedin: CONTENT.LINKEDIN_URL,
       summary,
@@ -439,4 +472,3 @@ const generateResume = async () => {
 };
 
 generateResume();
-
