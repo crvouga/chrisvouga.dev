@@ -1,8 +1,10 @@
 // @ts-check
 
 import { tag } from "../library/html/index.js";
-import { viewCard, viewCardContent } from "../ui/card.js";
+import { viewButton } from "../ui/button.js";
+import { viewCard, viewCardActions, viewCardContent } from "../ui/card.js";
 import { appendExternalLinkIndicator } from "../ui/external-link-indicator.js";
+import { web } from "../ui/icons.js";
 import { viewLink } from "../ui/link.js";
 import { unit } from "../ui/theme.js";
 import { viewTypography } from "../ui/typography.js";
@@ -69,6 +71,25 @@ export const viewWorkCard =
             "margin-bottom": unit(2),
           },
         }),
+
+        ...(work.infoUrl
+          ? [
+              viewCardActions({}, [
+                viewButton({
+                  tag: "a",
+                  startDecorator: web,
+                  variant: "soft",
+                  disabled: false,
+                  text: "Website",
+                  size: "sm",
+                })({
+                  href: work.infoUrl,
+                  target: "_blank",
+                  rel: "noreferrer noopener",
+                }),
+              ]),
+            ]
+          : []),
       ]),
     ]);
   };
