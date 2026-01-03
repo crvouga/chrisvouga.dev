@@ -12,6 +12,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
+ * Resume PDF filename
+ */
+export const RESUME_FILENAME = "chris-vouga-resume.pdf";
+
+/**
  * Format date range for resume
  * @param {number} yearStart
  * @param {number | "Present"} yearEnd
@@ -441,7 +446,7 @@ const generateResume = async () => {
     await mkdir(publicPath, { recursive: true });
 
     // Generate PDF
-    const pdfPath = `${publicPath}/resume.pdf`;
+    const pdfPath = `${publicPath}/${RESUME_FILENAME}`;
     await page.pdf({
       path: pdfPath,
       format: "Letter",

@@ -1,3 +1,4 @@
+import { RESUME_FILENAME } from "../generate-resume.js";
 import { text } from "../library/html/index.js";
 import { renderAttrs } from "../library/html/render.js";
 import { viewButton } from "../ui/button.js";
@@ -24,8 +25,8 @@ export const viewResumeButton = () => () => {
     startDecorator: download,
     text: "Resume",
   })({
-    href: "/resume.pdf",
-    download: "resume.pdf",
+    href: `/${RESUME_FILENAME}`,
+    download: RESUME_FILENAME,
     target: "_blank",
     rel: "noreferrer noopener",
   });
