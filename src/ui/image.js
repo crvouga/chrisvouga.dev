@@ -12,11 +12,10 @@ export const viewImage = (props) => (attr, _) => {
   const imgAttributes = {
     ...attr,
     src: props.src,
-    alt: props.alt,
-    class: ["image animate-pulse", attr?.["class"]]
-      .filter(Boolean)
-      .join(" "),
-    onload: "onImageLoad(event)",
+    alt: props.alt || "",
+    class: ["image animate-pulse", attr?.["class"]].filter(Boolean).join(" "),
+    onload: "this.classList.remove('animate-pulse')",
+    onerror: "onImageError(event)",
   };
 
   if (props.fetchPriority) {
@@ -27,20 +26,45 @@ export const viewImage = (props) => (attr, _) => {
     imgAttributes["loading"] = "eager";
   }
 
-  return fragment([
-    tag(
-      "img",
-      imgAttributes,
-      []
-    ),
-  ]);
+  return fragment([tag("img", imgAttributes, [])]);
 };
 
 HEAD.push(
   tag("script", {}, [
     text(`
-      function onImageLoad(e) {
-        e.target.classList.remove('animate-pulse');
+      function onImageError(e) {
+        // Prevent the broken image icon from showing
+        // Set to transparent 1x1 pixel so background skeleton shows through
+        e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'1\' height=\'1\'%3E%3C/svg%3E';
+        e.target.alt = '';
+        // Keep the skeleton animation visible - don't remove animate-pulse class
+        // The transparent image allows the background-color to show through
+      }
+
+      // Check for cached images after DOM is ready
+      function checkCachedImages() {
+        const images = document.querySelectorAll('.image.animate-pulse');
+        images.forEach(function(img) {
+          // If image is already loaded (cached), remove pulse animation immediately
+          if (img.complete && img.naturalHeight !== 0) {
+            img.classList.remove('animate-pulse');
+          }
+        });
+      }
+
+      // Run check after DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          // Use requestAnimationFrame to ensure DOM is fully processed
+          requestAnimationFrame(function() {
+            checkCachedImages();
+          });
+        });
+      } else {
+        // DOM is already ready, check immediately
+        requestAnimationFrame(function() {
+          checkCachedImages();
+        });
       }
       `),
   ])

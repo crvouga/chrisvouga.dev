@@ -23,11 +23,6 @@ HEAD.push(
         overflow: hidden;
         flex-shrink: 0;
         border-bottom: 1px solid ${THEME.colors.paperBorder};
-        background-color: #000000;
-      }
-      .work-card-media .image,
-      .work-card-media .gallery-image {
-        background-color: #000000 !important;
       }
     `),
   ])

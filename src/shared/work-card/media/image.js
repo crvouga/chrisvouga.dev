@@ -31,7 +31,6 @@ const viewWorkCardMediaImageMain = (props) => (attr, _) => {
     jsVarSafeNamespace,
     showGalleryIndicator: true,
     fetchPriority: props.fetchPriority ?? "auto",
-    skeletonColor: "#000000",
   })({ ...attr, class: "work-card-media-image" }, []);
 };
 
@@ -43,7 +42,6 @@ HEAD.push(
         height: 100%;
         object-fit: cover;
         display: block;
-        background-color: #000000;
       }
     `),
   ])

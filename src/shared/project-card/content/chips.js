@@ -18,11 +18,13 @@ export const viewProjectCardContentChips = (props) => () => {
             src
               ? tag("img", {
                   src,
-                  alt: topic,
+                  alt: "",
                   style: {
                     width: "16px",
                     height: "16px",
                   },
+                  onerror: "onChipImageError(event)",
+                  onload: "onChipImageLoad(event)",
                 })
               : fragment([]),
           variant: "outlined",
