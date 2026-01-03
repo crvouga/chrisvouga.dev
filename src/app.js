@@ -214,6 +214,10 @@ HEAD.push(
       color: ${THEME.colors.text};
       touch-action: manipulation !important; /* Prevents double-tap to zoom */
     }
+    html {
+      overflow-y: scroll; /* Always reserve scrollbar space to prevent layout shifts */
+    }
+
     body {
       margin: 0;
       padding: 0;
@@ -237,16 +241,12 @@ HEAD.push(
     }
 
     body {
-        scrollbar-width: thin;           
+        scrollbar-width: auto; /* Always show scrollbar in Firefox */
         scrollbar-color: ${THEME.colors.paperBorder} ${THEME.colors.background};  
     }
 
     body {
-        -ms-overflow-style: none; 
-    }
-    
-    body::-webkit-scrollbar {
-        display: none;
+        -ms-overflow-style: scrollbar; /* Always show scrollbar in IE/Edge */
     }
   `),
   ])
