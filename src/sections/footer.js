@@ -95,6 +95,8 @@ HEAD.push(
       align-items: center;
       justify-content: center;
       width: 100%;
+      max-width: 1150px;
+      margin: auto;
     }
     
     .footer-content {
@@ -127,27 +129,29 @@ HEAD.push(
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        max-width: ${THEME.breakpoints.md};
-        margin: 0 auto;
+        width: 100%;
+        padding: 0 ${unit(4)};
       }
       
       .footer-column {
         align-items: center;
         justify-content: center;
+        flex: 0 1 auto;
+      }
+      
+      .footer-column:nth-child(2) {
         flex: 1;
-      }
-      
-      .footer-column:first-child {
-        flex: 0 0 auto;
-      }
-      
-      .footer-column:last-child {
-        align-items: center;
-        flex: 0 0 auto;
+        justify-content: center;
       }
       
       .footer-buttons {
         justify-content: center;
+      }
+    }
+    
+    @media (min-width: 1200px) {
+      .footer-content {
+        padding: 0;
       }
     }
     `),
