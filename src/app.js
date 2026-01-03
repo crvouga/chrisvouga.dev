@@ -18,8 +18,8 @@ export const viewApp = () => {
   return viewDoc({}, [
     tag("main", { class: "main" }, [
       viewHeadingSection(),
-      viewProjectsSection(),
       viewWorkSection(),
+      viewProjectsSection(),
       viewAboutMeSection(),
       viewSchoolSection(),
       viewContactSection(),

@@ -13,7 +13,7 @@ import { WORK } from "./work.js";
 
 const PAGE_TITLE = "Chris Vouga";
 
-const PAGE_SUBTITLE = "Software Developer";
+const PAGE_SUBTITLE = "Software Engineer";
 
 export const CONTENT = {
   SITE_SOURCE_CODE_URL: "https://github.com/crvouga/chrisvouga.dev",

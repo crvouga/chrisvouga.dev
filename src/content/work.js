@@ -23,9 +23,9 @@ export const WORK = [
     jobDescription: `Building features for a comprehensive health and longevity platform that combines bloodwork analysis, personalized supplement protocols, prescription therapies, and care team coordination. Developing tools that help users track their health metrics and optimize their well-being through proactive, data-driven care.`,
     yearStart: 2026,
     yearEnd: "Present",
-    imageSrc: ["/geviti.optimized.webp"],
+    imageSrc: ["/geviti-screenshot.optimized.webp"],
     imageAlt: "Geviti website screenshot",
-    galleryImageSrc: ["/geviti.png"],
+    galleryImageSrc: ["/geviti-screenshot.png"],
   },
   {
     name: "One Origin",
@@ -35,12 +35,12 @@ export const WORK = [
     yearStart: 2022,
     yearEnd: 2025,
     imageSrc: [
-      "/one-origin.optimized.webp",
+      "/one-origin-screenshot.optimized.webp",
       "/one-origin/2025-q1-award-1-enhanced-with-ai.optimized.webp",
     ],
     imageAlt: "One Origin website screenshot and award certificates",
     galleryImageSrc: [
-      "/one-origin.png",
+      "/one-origin-screenshot.png",
       // "/one-origin/2025-q1-award-1.jpg",
       "/one-origin/2025-q1-award-1-enhanced-with-ai.png",
       // "/one-origin/2025-q1-award-2.jpg",
@@ -56,7 +56,7 @@ export const WORK = [
   },
   {
     name: "Freelancing",
-    jobTitle: "Solo Software Developer",
+    jobTitle: "Solo Software Engineer",
     jobDescription: `Delivered custom web solutions for small businesses, focusing on responsive design, performance optimization, and user experience. Built static sites and web applications that helped clients establish and grow their online presence.`,
     yearStart: 2020,
     yearEnd: 2022,

@@ -2,7 +2,7 @@
 import { chromium } from "playwright";
 import path from "path";
 import { mkdir } from "fs/promises";
-import { WORK } from "./content/work.js";
+import { PROJECTS } from "./content/project.js";
 
 /**
  * The directory to save screenshots.
@@ -17,12 +17,18 @@ const PUBLIC_DIR = path.resolve("./public");
 const VIEWPORT = { width: 1920, height: 1080 };
 
 /**
- * Converts a company name to a filename-safe string.
- * @param {string} name - The company name.
+ * Converts a project title to a filename-safe string.
+ * @param {string} title - The project title.
  * @returns {string} The filename-safe string.
  */
-const nameToFilename = (name) => {
-  return name.toLowerCase().replace(/\s+/g, "-");
+const titleToFilename = (title) => {
+  return title
+    .toLowerCase()
+    .replace(/\./g, "-") // Replace dots with hyphens
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, "-") // Replace special chars with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 };
 
 /**
@@ -79,40 +85,43 @@ const takeScreenshot = async (url, filename) => {
 };
 
 /**
- * Main function to screenshot all work websites.
+ * Main function to screenshot all project websites.
  * @returns {Promise<void>}
  */
 const main = async () => {
-  console.log("Starting screenshot capture for work websites...\n");
+  console.log("Starting screenshot capture for project websites...\n");
 
   // Ensure public directory exists
   await mkdir(PUBLIC_DIR, { recursive: true });
 
-  // Filter work entries that have infoUrl
-  const workEntriesWithUrl = WORK.filter((work) => work.infoUrl);
+  // Filter projects with public deployments
+  const projectsWithPublicDeployment = PROJECTS.filter(
+    (project) => project.deployment.t === "public"
+  );
 
-  if (workEntriesWithUrl.length === 0) {
-    console.log("No work entries with infoUrl found.");
+  if (projectsWithPublicDeployment.length === 0) {
+    console.log("No projects with public deployments found.");
     return;
   }
 
   console.log(
-    `Found ${workEntriesWithUrl.length} work entr${
-      workEntriesWithUrl.length === 1 ? "y" : "ies"
-    } with URLs.\n`
+    `Found ${projectsWithPublicDeployment.length} project${
+      projectsWithPublicDeployment.length === 1 ? "" : "s"
+    } with public deployments.\n`
   );
 
-  for (const work of workEntriesWithUrl) {
-    const filename = nameToFilename(work.name);
-    const url = work.infoUrl;
+  for (const project of projectsWithPublicDeployment) {
+    const filename = titleToFilename(project.title);
+    const url =
+      project.deployment.t === "public" ? project.deployment.url : null;
 
     if (!url) {
-      console.log(`Skipping ${work.name}: no infoUrl`);
+      console.log(`Skipping ${project.title}: no deployment URL`);
       continue;
     }
 
     try {
-      console.log(`\nProcessing: ${work.name}`);
+      console.log(`\nProcessing: ${project.title}`);
       console.log(`URL: ${url}`);
       console.log(`Filename: ${filename}-screenshot.png`);
 
@@ -122,8 +131,8 @@ const main = async () => {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error(`✗ Failed to process ${work.name}:`, errorMessage);
-      console.error(`  Continuing with next entry...\n`);
+      console.error(`✗ Failed to process ${project.title}:`, errorMessage);
+      console.error(`  Continuing with next project...\n`);
     }
   }
 

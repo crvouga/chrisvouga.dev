@@ -26,8 +26,8 @@ export const viewHeadingSectionText = () => {
         viewTypography({ level: "h1", text: "Chris Vouga" })({
           style: { "font-weight": 900 },
         }),
-        viewTypography({ level: "h2", text: "Software Developer",  })({
-          style: { "font-weight": 900, "color": THEME.colors.primary400 },
+        viewTypography({ level: "h2", text: "Software Engineer" })({
+          style: { "font-weight": 900, color: THEME.colors.primary400 },
         }),
       ]),
     ]

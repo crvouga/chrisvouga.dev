@@ -68,8 +68,8 @@ const PROJECT_NORMALIZER_APP = {
   description:
     "A web application that automates data normalization workflows, transforming tabular data (Excel, CSV) between schemas without manual Excel manipulation or custom Python scripts. Streamlines data processing for teams handling diverse data formats.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/normalizer-app.optimized.webp"],
-  galleryImageSrc: ["/normalizer-app.png"],
+  imageSrc: ["/normalizer-app-screenshot.optimized.webp"],
+  galleryImageSrc: ["/normalizer-app-screenshot.png"],
   topics: [
     "typescript",
     "react",
@@ -158,8 +158,12 @@ const PROJECT_GAMEZILLA = {
     appendExternalLinkIndicator({ text: "Lamdera" })
   )} platform, demonstrating expertise in complex system migrations and real-time application architecture.`,
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/gamezilla.optimized.webp"],
+  imageSrc: [
+    "/gamezilla-app-screenshot.optimized.webp",
+    "/gamezilla.optimized.webp",
+  ],
   galleryImageSrc: [
+    "/gamezilla-app-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "VSLpdPvHbD4",
       autoplay: true,
@@ -191,8 +195,12 @@ const PROJECT_STUDY_HALL = {
   description:
     "Educational platform developed in partnership with the Study Hall YouTube channel and ASU. Refactored the payment processing system to enhance reliability, maintainability, and user experience, reducing payment failures and improving system stability.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/studyhall.optimized.webp"],
+  imageSrc: [
+    "/study-hall-screenshot.optimized.webp",
+    "/studyhall.optimized.webp",
+  ],
   galleryImageSrc: [
+    "/study-hall-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "BC4K0u7Zm4k",
       autoplay: true,
@@ -240,14 +248,14 @@ const PROJECT_PICKFLIX = {
   description:
     "Social movie discovery platform enabling users to watch trailers, write reviews, and collaborate on movie lists with friends. Features real-time updates and a comprehensive movie database integration.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/pickflix.optimized.webp"],
+  imageSrc: ["/pickflix-screenshot.optimized.webp"],
   galleryImageSrc: [
+    "/pickflix-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "-atthbuMFIM",
       autoplay: true,
       mute: true,
     }),
-    "/pickflix.png",
   ],
   topics: [
     "express",
@@ -275,9 +283,9 @@ const PROJECT_SUN_DEVILS = {
   description:
     "Official website for the ASU Sun Devils athletics program. Developed interactive React components including real-time game schedules and dynamic news feeds, enhancing fan engagement and information accessibility.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/sun-devils.optimized.webp"],
+  imageSrc: ["/sun-devils-screenshot.optimized.webp"],
   galleryImageSrc: [
-    "/sun-devils.png",
+    "/sun-devils-screenshot.png",
     "/sun-devils/2.png",
     "/sun-devils/3.png",
     "/sun-devils/4.png",
@@ -292,15 +300,15 @@ const PROJECT_HEADLESS_COMBOBOX = {
   title: "headless-combobox",
   deployment: {
     t: "public",
-    url: "https://www.npmjs.com/package/headless-combobox",
+    url: "https://svelte.headlesscombobox.chrisvouga.dev",
   },
   code: {
     t: "public",
     url: "https://github.com/crvouga/headless-combobox",
   },
   imageAlt: IMAGE_ALT,
-  imageSrc: ["./headless-combobox.optimized.webp"],
-  galleryImageSrc: ["./headless-combobox.png"],
+  imageSrc: ["./headless-combobox-screenshot.optimized.webp"],
+  galleryImageSrc: ["./headless-combobox-screenshot.png"],
   description: `A production-ready, headless TypeScript combobox library that's framework-agnostic, zero-dependency, and fully accessible. Enables developers to build custom combobox components in any UI framework while maintaining WCAG compliance and flexibility.`,
   topics: ["typescript"],
   setting: "side",
@@ -317,10 +325,11 @@ const PROJECT_MOVIEFINDER_RUST = {
     t: "public",
     url: "https://github.com/crvouga/moviefinder.app",
   },
-  description: "Movie discovery application featuring an intuitive TikTok-style vertical scrolling interface. Built with Rust for performance and modern web technologies for a seamless user experience.",
+  description:
+    "Movie discovery application featuring an intuitive TikTok-style vertical scrolling interface. Built with Rust for performance and modern web technologies for a seamless user experience.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/moviefinder-app.optimized.webp"],
-  galleryImageSrc: ["/moviefinder-app.png"],
+  imageSrc: ["/moviefinder-app-screenshot.optimized.webp"],
+  galleryImageSrc: ["/moviefinder-app-screenshot.png"],
   topics: ["rust", "tailwind", "postgres", "datastar"],
   setting: "side",
 };
@@ -336,10 +345,14 @@ const PROJECT_TODO_APP = {
     t: "public",
     url: "https://todo.chrisvouga.dev",
   },
-  description: "Full-stack task management application with user authentication and real-time synchronization. Demonstrates end-to-end development capabilities from database design to responsive UI implementation.",
+  description:
+    "Full-stack task management application with user authentication and real-time synchronization. Demonstrates end-to-end development capabilities from database design to responsive UI implementation.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/todo.optimized.webp"],
-  galleryImageSrc: ["/todo.png"],
+  imageSrc: [
+    "/fullstack-todo-app-screenshot.optimized.webp",
+    "/todo.optimized.webp",
+  ],
+  galleryImageSrc: ["/fullstack-todo-app-screenshot.png", "/todo.png"],
   topics: [
     "typescript",
     "vue",
@@ -366,8 +379,8 @@ const PROJECT_IMAGE_SERVICE = {
   },
   description: `Image optimization service built with Go, designed for zero-configuration self-hosting and long-term maintainability. Enables web applications to efficiently serve optimized images without external dependencies.`,
   imageAlt: IMAGE_ALT,
-  imageSrc: [],
-  galleryImageSrc: [],
+  imageSrc: ["/image-service-screenshot.optimized.webp"],
+  galleryImageSrc: ["/image-service-screenshot.png"],
   topics: ["go"],
   setting: "side",
 };
@@ -383,10 +396,15 @@ const PROJECT_CONNECT_FOUR = {
     t: "public",
     url: "https://github.com/crvouga/connect-four",
   },
-  description: "Real-time multiplayer Connect Four game with WebSocket-based synchronization. Features smooth animations, responsive design, and seamless online gameplay for multiple concurrent users.",
+  description:
+    "Real-time multiplayer Connect Four game with WebSocket-based synchronization. Features smooth animations, responsive design, and seamless online gameplay for multiple concurrent users.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/connect-four.optimized.webp"],
+  imageSrc: [
+    "/connect-four-ai-multiplayer-screenshot.optimized.webp",
+    "/connect-four.optimized.webp",
+  ],
   galleryImageSrc: [
+    "/connect-four-ai-multiplayer-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "9_TbyftkaQw",
       autoplay: true,
@@ -424,6 +442,7 @@ const PROJECT_AIRR = {
     "Interactive product demonstration for Airr, an enterprise solution that automates transcript consumption and analysis. Showcases advanced data processing capabilities and intuitive user interface design for complex workflow management.",
   imageAlt: IMAGE_ALT,
   imageSrc: [
+    "/airr-product-demo-screenshot.optimized.webp",
     "/airr/1.optimized.webp",
     "/airr/2.optimized.webp",
     "/airr/3.optimized.webp",
@@ -432,6 +451,7 @@ const PROJECT_AIRR = {
     "/airr/6.optimized.webp",
   ],
   galleryImageSrc: [
+    "/airr-product-demo-screenshot.png",
     "/airr/1.png",
     "/airr/2.png",
     "/airr/3.png",
@@ -465,8 +485,12 @@ const PROJECT_SCREENSHOT_SERVICE = {
   },
   description: `Software-as-a-Service platform enabling developers to programmatically generate high-quality screenshots of web pages. Provides reliable, scalable screenshot generation with customizable options. Powers the screenshot generation for this portfolio.`,
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/screenshot-service.optimized.webp"],
+  imageSrc: [
+    "/screenshots-as-a-service-screenshot.optimized.webp",
+    "/screenshot-service.optimized.webp",
+  ],
   galleryImageSrc: [
+    "/screenshots-as-a-service-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "lCEzYGJ0rN8",
       autoplay: true,
@@ -537,10 +561,15 @@ const PROJECT_COURIER_WEBSITE = {
   code: {
     t: "private",
   },
-  description: "Professional marketing website for a healthcare courier company, featuring responsive design, optimized performance, and clear communication of services to potential clients.",
+  description:
+    "Professional marketing website for a healthcare courier company, featuring responsive design, optimized performance, and clear communication of services to potential clients.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/courier.optimized.webp"],
+  imageSrc: [
+    "/courier-company-website-screenshot.optimized.webp",
+    "/courier.optimized.webp",
+  ],
   galleryImageSrc: [
+    "/courier-company-website-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "kFwPTJcM6I0",
       autoplay: true,
@@ -555,10 +584,11 @@ const PROJECT_COURIER_WEBSITE = {
 /** @type {Project} */
 const PROJECT_ANIME_BLOG = {
   title: "Anime Blog",
-  description: "Modern JAMstack blog built with Vue and Gridsome, featuring a headless CMS integration for content management. Demonstrates static site generation and performance optimization techniques.",
+  description:
+    "Modern JAMstack blog built with Vue and Gridsome, featuring a headless CMS integration for content management. Demonstrates static site generation and performance optimization techniques.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/anime.optimized.webp"],
-  galleryImageSrc: ["/anime.png"],
+  imageSrc: ["/anime-blog-screenshot.optimized.webp", "/anime.optimized.webp"],
+  galleryImageSrc: ["/anime-blog-screenshot.png", "/anime.png"],
   topics: [
     "css",
     "javascript",
@@ -593,8 +623,12 @@ const PROJECT_SNAKE_GAME = {
   description:
     "Classic Snake game implemented using functional programming principles, featuring smooth animations and responsive controls. Showcases clean code architecture and modern React patterns.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/snake.optimized.webp"],
+  imageSrc: [
+    "/smooth-snake-game-screenshot.optimized.webp",
+    "/snake.optimized.webp",
+  ],
   galleryImageSrc: [
+    "/smooth-snake-game-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "7El3RdkzlHs",
       autoplay: true,
@@ -617,16 +651,17 @@ const PROJECT_MATCH_THREE = {
     t: "public",
     url: "https://github.com/crvouga/match-three",
   },
-  description: "Match-three puzzle game inspired by Candy Crush, featuring engaging gameplay mechanics, smooth animations, and responsive design. Demonstrates game development skills and state management expertise.",
+  description:
+    "Match-three puzzle game inspired by Candy Crush, featuring engaging gameplay mechanics, smooth animations, and responsive design. Demonstrates game development skills and state management expertise.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/match-three.optimized.webp"],
+  imageSrc: ["/match-three-screenshot.optimized.webp"],
   galleryImageSrc: [
+    "/match-three-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "VBrlDgmXSoA",
       autoplay: true,
       mute: true,
     }),
-    "/match-three.png",
   ],
   topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
   setting: "side",
@@ -670,16 +705,17 @@ const PROJECT_SIMON_SAYS = {
     t: "public",
     url: "https://github.com/crvouga/simon-says",
   },
-  description: "Interactive implementation of the classic Simon Says memory game, featuring visual and audio feedback, progressive difficulty, and polished user interface design.",
+  description:
+    "Interactive implementation of the classic Simon Says memory game, featuring visual and audio feedback, progressive difficulty, and polished user interface design.",
   imageAlt: IMAGE_ALT,
-  imageSrc: ["/simon-says.optimized.webp"],
+  imageSrc: ["/simon-says-screenshot.optimized.webp"],
   galleryImageSrc: [
+    "/simon-says-screenshot.png",
     toYouTubeVideoUrl({
       youTubeVideoId: "WrUFzlKL0E0",
       autoplay: true,
       mute: true,
     }),
-    "/simon-says.png",
   ],
   topics: ["css", "javascript", "ramda", "react", "redux", "redux-saga"],
   setting: "side",

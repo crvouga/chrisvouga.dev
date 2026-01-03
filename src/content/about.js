@@ -4,7 +4,7 @@ const BAND_HREF = "https://www.instagram.com/tripolartheband/";
 const BAND_A_TAG = a(BAND_HREF, "band");
 
 export const ABOUT_ME = `
-I'm a full-stack software developer based in the Phoenix Valley, specializing in building scalable web applications and leading development teams.
+I'm a full-stack software engineer based in the Phoenix Valley, specializing in building scalable web applications and leading development teams.
 With a bachelor's degree in mathematics and statistics from ASU, I bring strong analytical thinking and problem-solving skills to software development.
 I have extensive experience across the full stack, from modern frontend frameworks to robust backend systems, and I'm passionate about writing clean, maintainable code.
 I continuously explore emerging technologies to stay at the forefront of software development.
