@@ -40,8 +40,6 @@ const stripHtmlTags = (text) => {
  *   email: string;
  *   phone: string;
  *   website: string;
- *   github: string;
- *   linkedin: string;
  *   summary: string;
  *   workExperience: Array<{
  *     company: string;
@@ -76,8 +74,6 @@ const generateResumeHTML = (data) => {
     email,
     phone,
     website,
-    github,
-    linkedin,
     summary,
     workExperience,
     education,
@@ -259,8 +255,6 @@ const generateResumeHTML = (data) => {
         <span>${email}</span>
         <span>${phone}</span>
         <a href="${website}">${website}</a>
-        <a href="${github}">GitHub</a>
-        <a href="${linkedin}">LinkedIn</a>
       </div>
     </div>
   </div>
@@ -428,8 +422,6 @@ const generateResume = async () => {
       email: CONTENT.EMAIL_ADDRESS,
       phone: formatPhoneNumber(CONTENT.PHONE_NUMBER),
       website: CONTENT.SITE_URL,
-      github: CONTENT.GITHUB_URL,
-      linkedin: CONTENT.LINKEDIN_URL,
       summary,
       workExperience,
       education,
