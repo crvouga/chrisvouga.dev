@@ -1,5 +1,5 @@
-# Use Node.js as the build environment
-FROM node:18-alpine AS build
+# Use Node.js as the build environment (Debian-based for Playwright compatibility)
+FROM node:18-slim AS build
 
 # Set working directory
 WORKDIR /app
@@ -9,6 +9,12 @@ COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm install
+
+# Install Playwright system dependencies
+RUN npx playwright install-deps chromium
+
+# Install Playwright browsers
+RUN npx playwright install chromium
 
 # Copy all files
 COPY . .

@@ -12,7 +12,7 @@
     "screenshot-work": "node ./src/screenshot-work-websites.js",
     "screenshot-projects": "node ./src/screenshot-project-websites.js",
     "screenshot-main": "node ./src/screenshot-main-site.js",
-    "codegen": "npm run screenshot-work && npm run screenshot-projects && npm run optimize-images && npm run generate-resume && npm run screenshot-main",
+    "generate-all": "npm run screenshot-work && npm run screenshot-projects && npm run optimize-images && npm run generate-resume && npm run screenshot-main",
     "generate-resume": "node ./src/generate-resume.js",
     "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app"
   },
