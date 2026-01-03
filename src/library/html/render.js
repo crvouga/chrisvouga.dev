@@ -24,7 +24,7 @@ const minifyHtml = (html) => {
   /** @type {string[]} */
   const preserved = [];
   let preservedIndex = 0;
-  
+
   // Replace script and style content with placeholders
   const withPlaceholders = html.replace(
     /<(script|style)([^>]*)>([\s\S]*?)<\/\1>/gi,
@@ -35,7 +35,7 @@ const minifyHtml = (html) => {
       return placeholder;
     }
   );
-  
+
   // Minify the HTML (excluding preserved content)
   let minified = withPlaceholders
     // Remove whitespace between tags
@@ -48,12 +48,12 @@ const minifyHtml = (html) => {
     .replace(/<\s+/g, "<")
     // Remove leading/trailing whitespace
     .trim();
-  
+
   // Restore preserved content
   preserved.forEach((content, index) => {
     minified = minified.replace(`__PRESERVED_${index}__`, content);
   });
-  
+
   return minified;
 };
 

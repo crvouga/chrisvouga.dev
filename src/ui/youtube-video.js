@@ -22,15 +22,21 @@ export const viewYouTubeVideo = (props) => (attrs) => {
       "data-video-src": props.src,
     },
     [
-      tag("div", { 
-        class: "youtube-video-placeholder",
-        "data-container-id": videoId,
-        style: "cursor: pointer;",
-      }, [
-        tag("div", { class: "youtube-video-placeholder-content" }, [
-          tag("div", { class: "youtube-video-placeholder-icon" }, [text("▶")]),
-        ]),
-      ]),
+      tag(
+        "div",
+        {
+          class: "youtube-video-placeholder",
+          "data-container-id": videoId,
+          style: "cursor: pointer;",
+        },
+        [
+          tag("div", { class: "youtube-video-placeholder-content" }, [
+            tag("div", { class: "youtube-video-placeholder-icon" }, [
+              text("▶"),
+            ]),
+          ]),
+        ]
+      ),
       tag("iframe", {
         "data-src": props.src,
         class: "youtube-video",
