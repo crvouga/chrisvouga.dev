@@ -3,6 +3,7 @@
 import { tag, text } from "../../../library/html/index.js";
 import { stringToJsVarSafe } from "../../../library/js-var.js";
 import { HEAD } from "../../../ui/head.js";
+import { THEME } from "../../../ui/theme.js";
 import { viewOpenGalleryButtonImageWrapper } from "../../../ui/image-gallery-modal/open-gallery-button-image-wrapper.js";
 
 /**
@@ -60,7 +61,7 @@ HEAD.push(
       .project-card-media-gradient {
         width: 100%;
         height: 100%;
-        background: linear-gradient(to right bottom, #2196f3, #8e24aa);
+        background: linear-gradient(to right bottom, ${THEME.colors.paper}, ${THEME.colors.skeleton});
       }
     `),
   ])
