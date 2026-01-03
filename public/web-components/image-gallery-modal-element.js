@@ -232,12 +232,15 @@ class ImageGalleryModalElement extends HTMLElement {
       
       // Don't close if clicking on images, videos, buttons, counter, or spinner
       if (
+        !target ||
         target instanceof HTMLImageElement ||
         target instanceof HTMLIFrameElement ||
-        target.tagName === "BUTTON" ||
         target === counter ||
-        target.closest("button") ||
-        target.closest("loading-spinner")
+        (target instanceof HTMLElement && (
+          target.tagName === "BUTTON" ||
+          target.closest("button") ||
+          target.closest("loading-spinner")
+        ))
       ) {
         return;
       }
