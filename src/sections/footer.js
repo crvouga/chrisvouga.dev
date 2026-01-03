@@ -15,55 +15,41 @@ export const viewFooterSection = () => {
   return tag(
     "footer",
     {
+      class: "footer",
       style: {
         width: "100%",
         padding: `${unit(8)} 0`,
-        display: "flex",
-        "flex-direction": "column",
-        "align-items": "center",
-        "justify-content": "center",
-        gap: unit(4),
       },
     },
     [
       tag(
         "div",
         {
-          style: {
-            display: "flex",
-            "flex-direction": "column",
-            "align-items": "center",
-            gap: unit(4),
-            "max-width": THEME.breakpoints.sm,
-            width: "100%",
-          },
+          class: "footer-content",
         },
         [
           tag(
             "div",
             {
-              style: {
-                display: "flex",
-                "flex-direction": "column",
-                "align-items": "center",
-                gap: unit(2),
-              },
+              class: "footer-column",
             },
             [
               viewContactLink({
                 label: "Email",
                 value: CONTENT.EMAIL_ADDRESS,
               })(),
+            ]
+          ),
+          tag(
+            "div",
+            {
+              class: "footer-column",
+            },
+            [
               tag(
                 "div",
                 {
-                  style: {
-                    display: "flex",
-                    "align-items": "center",
-                    gap: unit(2),
-                    "flex-wrap": "wrap",
-                    "justify-content": "center",
-                  },
+                  class: "footer-buttons",
                 },
                 [
                   viewGithubButton({})(),
@@ -73,20 +59,27 @@ export const viewFooterSection = () => {
               ),
             ]
           ),
-          viewLink(
+          tag(
+            "div",
             {
-              target: "_blank",
-              rel: "noopener noreferrer",
-              href: CONTENT.SITE_SOURCE_CODE_URL,
-              style: {
-                color: THEME.colors.neutralMuted,
-                display: "flex",
-                "align-items": "center",
-                "justify-content": "center",
-                gap: unit(1),
-              },
+              class: "footer-column",
             },
-            [text("Source code")]
+            [
+              viewLink(
+                {
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  href: CONTENT.SITE_SOURCE_CODE_URL,
+                  style: {
+                    color: THEME.colors.neutralMuted,
+                    display: "flex",
+                    "align-items": "center",
+                    gap: unit(1),
+                  },
+                },
+                [text("Source code")]
+              ),
+            ]
           ),
         ]
       ),
@@ -97,9 +90,64 @@ export const viewFooterSection = () => {
 HEAD.push(
   tag("style", {}, [
     text(`
-    @media (min-width: ${THEME.breakpoints.xs}) {
-      footer {
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+    
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: ${unit(4)};
+      width: 100%;
+      padding: 0 ${unit(3)};
+    }
+    
+    .footer-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: ${unit(2)};
+    }
+    
+    .footer-buttons {
+      display: flex;
+      align-items: center;
+      gap: ${unit(2)};
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    @media (min-width: ${THEME.breakpoints.sm}) {
+      .footer-content {
         flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        max-width: ${THEME.breakpoints.md};
+        margin: 0 auto;
+      }
+      
+      .footer-column {
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+      }
+      
+      .footer-column:first-child {
+        flex: 0 0 auto;
+      }
+      
+      .footer-column:last-child {
+        align-items: center;
+        flex: 0 0 auto;
+      }
+      
+      .footer-buttons {
+        justify-content: center;
       }
     }
     `),
