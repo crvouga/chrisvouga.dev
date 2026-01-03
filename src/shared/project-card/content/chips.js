@@ -23,8 +23,6 @@ export const viewProjectCardContentChips = (props) => () => {
                     width: "16px",
                     height: "16px",
                   },
-                  onerror: "onChipImageError(event)",
-                  onload: "onChipImageLoad(event)",
                 })
               : fragment([]),
           variant: "outlined",
