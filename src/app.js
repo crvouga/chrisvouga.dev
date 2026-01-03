@@ -9,6 +9,7 @@ import { viewSchoolSection } from "./sections/school.js";
 import { viewWorkSection } from "./sections/work.js";
 import { HEAD } from "./ui/head.js";
 import { THEME } from "./ui/theme.js";
+import { viewImage } from "./ui/image.js";
 
 /**
  * @returns {import("./library/html/index.js").Html}
@@ -200,6 +201,14 @@ export const viewDoc = (_a, c) => {
         },
         []
       ),
+      // Main site screenshot - first visible image for crawlers
+      tag("div", { class: "main-site-screenshot-container" }, [
+        viewImage({
+          src: "/main-site-screenshot.png",
+          alt: `${CONTENT.PAGE_TITLE} - ${CONTENT.PAGE_SUBTITLE} portfolio website screenshot`,
+          fetchPriority: "high",
+        })({ class: "main-site-screenshot" }, []),
+      ]),
 
       ...(c ?? []),
     ]),
@@ -224,6 +233,24 @@ HEAD.push(
       background-color: ${THEME.colors.background};
       overflow-x: hidden;
       overflow-y: auto;
+    }
+    
+    .main-site-screenshot-container {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+    
+    .main-site-screenshot-container .main-site-screenshot {
+      width: 100%;
+      height: auto;
+      display: block;
     }
     
     ::-webkit-scrollbar {
