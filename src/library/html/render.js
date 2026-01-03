@@ -21,13 +21,14 @@ export const render = (elem) => {
  */
 const minifyHtml = (html) => {
   // Extract script and style content to preserve them
+  /** @type {string[]} */
   const preserved = [];
   let preservedIndex = 0;
   
   // Replace script and style content with placeholders
   const withPlaceholders = html.replace(
     /<(script|style)([^>]*)>([\s\S]*?)<\/\1>/gi,
-    (match, tag, attrs, content) => {
+    (_match, tag, attrs, content) => {
       const placeholder = `__PRESERVED_${preservedIndex}__`;
       preserved[preservedIndex] = `<${tag}${attrs}>${content}</${tag}>`;
       preservedIndex++;

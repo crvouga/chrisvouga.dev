@@ -13,11 +13,6 @@ import { THEME, unit } from "./theme.js";
  */
 export const viewYouTubeVideo = (props) => (attrs) => {
   const videoId = `youtube-video-${Math.random().toString(36).substr(2, 9)}`;
-  // Escape quotes properly for HTML attribute
-  const escapedSrc = props.src
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "&#39;")
-    .replace(/"/g, "&quot;");
   return tag(
     "div",
     {
