@@ -738,12 +738,32 @@ const PROJECT_SMART_DOG_DOOR = {
   setting: "side",
 };
 
+/** @type {Project} */
+const PROJECT_ASU_EARNED_ADMISSIONS = {
+  title: "ASU Earned Admissions",
+  deployment: {
+    t: "public",
+    url: "https://ea.asu.edu/",
+  },
+  code: {
+    t: "private",
+  },
+  description:
+    "Educational platform enabling learners to earn college credits and qualify for admission to over 100 ASU degree programs. Refactored the main backend codebase for improved maintainability and scalability. Built Salesforce automation to sync data between Salesforce and ASU's Canvas LMS. Developed a new opt-in flow for the earned admissions program.",
+  imageAlt: IMAGE_ALT,
+  imageSrc: ["/asu-earned-admission-screenshot.optimized.webp"],
+  galleryImageSrc: ["/asu-earned-admission-screenshot.png"],
+  topics: ["salesforce", "nodejs", "typescript", "express", "dynamodb", "aws"],
+  setting: "work",
+};
+
 /** @type {Project[]} */
 export const PROJECTS = [
   PROJECT_NORMALIZER_APP,
   PROJECT_GAMEZILLA,
   PROJECT_TRIANGULATOR,
   PROJECT_STUDY_HALL,
+  PROJECT_ASU_EARNED_ADMISSIONS,
   PROJECT_PICKFLIX,
   PROJECT_SUN_DEVILS,
   PROJECT_HEADLESS_COMBOBOX,
