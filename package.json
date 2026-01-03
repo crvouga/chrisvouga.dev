@@ -11,7 +11,8 @@
     "optimize-images": "node ./src/optimize-images.js",
     "screenshot-work": "node ./src/screenshot-work-websites.js",
     "screenshot-projects": "node ./src/screenshot-project-websites.js",
-    "codegen": "npm run screenshot-work && npm run screenshot-projects && npm run optimize-images",
+    "codegen": "npm run screenshot-work && npm run screenshot-projects && npm run optimize-images && npm run generate-resume",
+    "generate-resume": "node ./src/generate-resume.js",
     "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app"
   },
   "devDependencies": {
