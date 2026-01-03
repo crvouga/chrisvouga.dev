@@ -76,6 +76,31 @@ export const viewDoc = (_a, c) => {
       tag("link", { rel: "shortcut icon", href: "/favicon.ico" }, []),
       tag("link", { rel: "icon", href: "/favicon.ico" }, []),
       tag(
+        "link",
+        {
+          rel: "preconnect",
+          href: "https://fonts.googleapis.com",
+        },
+        []
+      ),
+      tag(
+        "link",
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossorigin: "anonymous",
+        },
+        []
+      ),
+      tag(
+        "link",
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+        },
+        []
+      ),
+      tag(
         "script",
         {
           src: "./web-components/toaster-element.js",

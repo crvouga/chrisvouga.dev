@@ -6,7 +6,7 @@ import { THEME } from "../../../ui/theme.js";
 import { viewWorkCardMediaImage } from "./image.js";
 
 /**
- * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work}>}
+ * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
  */
 export const viewWorkCardMedia = (props) => (attr, children) => {
   return tag("div", { ...attr, class: "work-card-media" }, [

@@ -13,7 +13,12 @@ export const viewWorkSection = () => {
     title: CONTENT.WORK_SECTION_TITLE,
   })({}, [
     viewGridCollapsible({
-      children: CONTENT.WORK.map((work) => viewWorkCard({ work })()),
+      children: CONTENT.WORK.map((work, index) =>
+        viewWorkCard({
+          work,
+          fetchPriority: index === 0 ? "high" : "auto",
+        })()
+      ),
       jsVarSafeNamespace: "workSection",
     })(),
   ]);

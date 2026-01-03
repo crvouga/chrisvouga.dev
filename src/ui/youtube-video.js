@@ -12,20 +12,32 @@ import { THEME, unit } from "./theme.js";
  * @type {import("../library/html/index.js").ViewWithProps<Props>}
  */
 export const viewYouTubeVideo = (props) => (attrs) => {
+  const videoId = `youtube-video-${Math.random().toString(36).substr(2, 9)}`;
+  // Escape quotes properly for HTML attribute
+  const escapedSrc = props.src
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "&#39;")
+    .replace(/"/g, "&quot;");
   return tag(
     "div",
     {
       ...attrs,
       class: "youtube-video-container",
+      id: videoId,
+      "data-video-src": props.src,
     },
     [
-      tag("div", { class: "youtube-video-placeholder" }, [
+      tag("div", { 
+        class: "youtube-video-placeholder",
+        "data-container-id": videoId,
+        style: "cursor: pointer;",
+      }, [
         tag("div", { class: "youtube-video-placeholder-content" }, [
           tag("div", { class: "youtube-video-placeholder-icon" }, [text("▶")]),
         ]),
       ]),
       tag("iframe", {
-        src: props.src,
+        "data-src": props.src,
         class: "youtube-video",
         allow:
           "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
@@ -33,10 +45,81 @@ export const viewYouTubeVideo = (props) => (attrs) => {
         frameborder: "0",
         title: props.title || "YouTube video",
         loading: "lazy",
+        style: "display: none;",
       }),
     ]
   );
 };
+
+HEAD.push(
+  tag("script", {}, [
+    text(`
+      function loadYouTubeIframe(containerId, videoSrc) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        const placeholder = container.querySelector('.youtube-video-placeholder');
+        const iframe = container.querySelector('.youtube-video');
+        
+        if (iframe && iframe.getAttribute('data-src')) {
+          iframe.src = iframe.getAttribute('data-src');
+          iframe.style.display = 'block';
+          if (placeholder) {
+            placeholder.style.display = 'none';
+          }
+        }
+      }
+      
+      // Load YouTube iframe when it's about to enter viewport
+      function initYouTubeLazyLoad() {
+        // Set up click handlers for placeholders
+        document.querySelectorAll('.youtube-video-placeholder').forEach(placeholder => {
+          const containerId = placeholder.getAttribute('data-container-id');
+          if (containerId) {
+            placeholder.addEventListener('click', function() {
+              const container = document.getElementById(containerId);
+              if (container) {
+                const videoSrc = container.getAttribute('data-video-src');
+                if (videoSrc) {
+                  loadYouTubeIframe(containerId, videoSrc);
+                }
+              }
+            });
+          }
+        });
+        
+        // Set up intersection observer for auto-loading
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const container = entry.target;
+                const iframe = container.querySelector('.youtube-video');
+                const videoSrc = container.getAttribute('data-video-src');
+                if (iframe && videoSrc && !iframe.src) {
+                  loadYouTubeIframe(container.id, videoSrc);
+                }
+                observer.unobserve(container);
+              }
+            });
+          }, { rootMargin: '50px' });
+          
+          document.querySelectorAll('.youtube-video-container').forEach(container => {
+            observer.observe(container);
+          });
+        }
+      }
+      
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initYouTubeLazyLoad);
+      } else {
+        // DOM already loaded, run immediately
+        setTimeout(initYouTubeLazyLoad, 0);
+      }
+    `),
+  ])
+);
 
 HEAD.push(
   tag("style", {}, [
@@ -66,14 +149,7 @@ HEAD.push(
         align-items: center;
         justify-content: center;
         z-index: 2;
-        pointer-events: none;
-        animation: fadeOutPlaceholder 0.5s ease 1s forwards;
-      }
-      @keyframes fadeOutPlaceholder {
-        to {
-          opacity: 0;
-          visibility: hidden;
-        }
+        transition: opacity 0.3s ease;
       }
       .youtube-video-placeholder-content {
         display: flex;

@@ -8,7 +8,52 @@ import { assertEquals } from "../test.js";
  * @returns {string}
  */
 export const render = (elem) => {
-  return prependDocType(renderMain(elem));
+  const html = renderMain(elem);
+  const minified = minifyHtml(html);
+  return prependDocType(minified);
+};
+
+/**
+ * Minifies HTML by removing unnecessary whitespace
+ * Preserves content inside script and style tags
+ * @param {string} html
+ * @returns {string}
+ */
+const minifyHtml = (html) => {
+  // Extract script and style content to preserve them
+  const preserved = [];
+  let preservedIndex = 0;
+  
+  // Replace script and style content with placeholders
+  const withPlaceholders = html.replace(
+    /<(script|style)([^>]*)>([\s\S]*?)<\/\1>/gi,
+    (match, tag, attrs, content) => {
+      const placeholder = `__PRESERVED_${preservedIndex}__`;
+      preserved[preservedIndex] = `<${tag}${attrs}>${content}</${tag}>`;
+      preservedIndex++;
+      return placeholder;
+    }
+  );
+  
+  // Minify the HTML (excluding preserved content)
+  let minified = withPlaceholders
+    // Remove whitespace between tags
+    .replace(/>\s+</g, "><")
+    // Collapse multiple spaces to single space
+    .replace(/[ \t]+/g, " ")
+    // Remove spaces before closing tags
+    .replace(/\s+>/g, ">")
+    // Remove spaces after opening tags
+    .replace(/<\s+/g, "<")
+    // Remove leading/trailing whitespace
+    .trim();
+  
+  // Restore preserved content
+  preserved.forEach((content, index) => {
+    minified = minified.replace(`__PRESERVED_${index}__`, content);
+  });
+  
+  return minified;
 };
 
 /**

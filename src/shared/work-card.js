@@ -11,13 +11,16 @@ import { viewTypography } from "../ui/typography.js";
 import { viewWorkCardMedia } from "./work-card/media/index.js";
 
 /**
- * @type {import("../library/html/index.js").ViewWithProps<{work: import("../content/work.js").Work}>}
+ * @type {import("../library/html/index.js").ViewWithProps<{work: import("../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
  */
 export const viewWorkCard =
-  ({ work }) =>
+  ({ work, fetchPriority }) =>
   () => {
+    const mediaProps = fetchPriority
+      ? { work, fetchPriority }
+      : { work };
     return viewCard({}, [
-      viewWorkCardMedia({ work })({}),
+      viewWorkCardMedia(mediaProps)({}),
       viewCardContent({}, [
         viewLink(
           {

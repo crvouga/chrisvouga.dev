@@ -6,7 +6,7 @@ import { HEAD } from "../../../ui/head.js";
 import { viewOpenGalleryButtonImageWrapper } from "../../../ui/image-gallery-modal/open-gallery-button-image-wrapper.js";
 
 /**
- * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work}>}
+ * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
  */
 export const viewWorkCardMediaImage = (props) => {
   const src = props.work?.imageSrc?.[0];
