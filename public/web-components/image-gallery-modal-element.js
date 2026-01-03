@@ -30,9 +30,6 @@ class ImageGalleryModalElement extends HTMLElement {
     // Create image container
     const imageContainer = document.createElement("div");
     imageContainer.className = "gallery-modal-image-container";
-    imageContainer.addEventListener("click", (_event) => {
-      this.closeModal(false);
-    });
 
     // Create counter
     const counter = document.createElement("div");
@@ -104,14 +101,14 @@ class ImageGalleryModalElement extends HTMLElement {
         top: 15px;
         right: 25px;
         color: white;
-        font-size: 30px;
+        font-size: 40px;
         font-weight: bold;
         cursor: pointer;
         background: rgba(0, 0, 0, 0.5);
         border: none;
         padding: 0;
-        width: 50px;
-        height: 50px;
+        width: 70px;
+        height: 70px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -130,14 +127,14 @@ class ImageGalleryModalElement extends HTMLElement {
         top: 50%;
         transform: translateY(-50%);
         color: white;
-        font-size: 30px;
+        font-size: 40px;
         font-weight: bold;
         cursor: pointer;
         background: rgba(0, 0, 0, 0.5);
         border: none;
         padding: 0;
-        width: 50px;
-        height: 50px;
+        width: 70px;
+        height: 70px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -171,15 +168,15 @@ class ImageGalleryModalElement extends HTMLElement {
       
       @media (max-width: 768px) {
         .gallery-modal-nav {
-          font-size: 24px;
-          width: 40px;
-          height: 40px;
+          font-size: 32px;
+          width: 60px;
+          height: 60px;
         }
         
         .gallery-modal-close {
-          font-size: 24px;
-          width: 40px;
-          height: 40px;
+          font-size: 32px;
+          width: 60px;
+          height: 60px;
           top: 15px;
           right: 15px;
         }
@@ -231,7 +228,22 @@ class ImageGalleryModalElement extends HTMLElement {
 
     // Add click event listener to the modal backdrop to close it
     container.addEventListener("click", (event) => {
-      if (event.target === container) {
+      const target = event.target;
+      
+      // Don't close if clicking on images, videos, buttons, counter, or spinner
+      if (
+        target instanceof HTMLImageElement ||
+        target instanceof HTMLIFrameElement ||
+        target.tagName === "BUTTON" ||
+        target === counter ||
+        target.closest("button") ||
+        target.closest("loading-spinner")
+      ) {
+        return;
+      }
+      
+      // Close if clicking on the backdrop (container) or image container (empty space around image)
+      if (target === container || target === imageContainer) {
         this.closeModal();
       }
     });
