@@ -35,8 +35,38 @@ const stripHtmlTags = (text) => {
 };
 
 /**
+ * @typedef {{
+ *   name: string;
+ *   title: string;
+ *   email: string;
+ *   phone: string;
+ *   github: string;
+ *   linkedin: string;
+ *   summary: string;
+ *   workExperience: Array<{
+ *     company: string;
+ *     jobTitle: string;
+ *     dateRange: string;
+ *     description: string;
+ *     url: string | null;
+ *   }>;
+ *   education: Array<{
+ *     degree: string;
+ *     institution: string;
+ *     dateRange: string;
+ *   }>;
+ *   projects: Array<{
+ *     title: string;
+ *     description: string;
+ *     url: string | null;
+ *     topics: string[];
+ *   }>;
+ * }} ResumeData
+ */
+
+/**
  * Generate HTML resume template
- * @param {object} data
+ * @param {ResumeData} data
  * @returns {string}
  */
 const generateResumeHTML = (data) => {
@@ -242,6 +272,9 @@ const generateResumeHTML = (data) => {
     <div class="section-title">Work Experience</div>
     ${workExperience
       .map(
+        /**
+         * @param {{company: string; jobTitle: string; dateRange: string; description: string; url: string | null}} work
+         */
         (work) => `
     <div class="work-item">
       <div class="item-header">
@@ -262,6 +295,9 @@ const generateResumeHTML = (data) => {
     <div class="section-title">Education</div>
     ${education
       .map(
+        /**
+         * @param {{degree: string; institution: string; dateRange: string}} edu
+         */
         (edu) => `
     <div class="education-item">
       <div class="item-header">
@@ -281,13 +317,16 @@ const generateResumeHTML = (data) => {
     <div class="section-title">Projects</div>
     ${projects
       .map(
+        /**
+         * @param {{title: string; description: string; url: string | null; topics: string[]}} project
+         */
         (project) => `
     <div class="project-item">
       <div class="item-header">
         <span class="item-title">${project.url ? `<a href="${project.url}">${project.title}</a>` : project.title}</span>
       </div>
       <div class="item-description">${project.description}</div>
-      ${project.topics && project.topics.length > 0 ? `<div class="project-topics">${project.topics.map(topic => `<span>${topic}</span>`).join("")}</div>` : ""}
+      ${project.topics && project.topics.length > 0 ? `<div class="project-topics">${project.topics.map(/** @param {string} topic */ topic => `<span>${topic}</span>`).join("")}</div>` : ""}
     </div>`
       )
       .join("")}
