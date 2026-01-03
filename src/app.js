@@ -2,7 +2,6 @@ import { CONTENT } from "./content/content.js";
 import { tag, text } from "./library/html/index.js";
 import { replaceAll } from "./library/replace-all.js";
 import { viewAboutMeSection } from "./sections/about-me.js";
-import { viewContactSection } from "./sections/contact.js";
 import { viewFooterSection } from "./sections/footer.js";
 import { viewHeadingSection } from "./sections/heading/index.js";
 import { viewProjectsSection } from "./sections/projects.js";
@@ -22,9 +21,8 @@ export const viewApp = () => {
       viewProjectsSection(),
       viewAboutMeSection(),
       viewSchoolSection(),
-      viewContactSection(),
-      viewFooterSection(),
     ]),
+    viewFooterSection(),
   ]);
 };
 
