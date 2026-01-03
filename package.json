@@ -9,10 +9,12 @@
     "tc": "npx tsc -w",
     "typecheck": "tsc",
     "optimize-images": "node ./src/optimize-images.js",
+    "screenshot-work": "node ./src/screenshot-work-websites.js",
     "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",
+    "playwright": "^1.48.0",
     "typescript": "^5.9.3"
   }
 }
