@@ -3,6 +3,7 @@ import { tag, text } from "../../library/html/index.js";
 import { viewContactLink } from "../../shared/contact-link/index.js";
 import { viewGithubButton } from "../../shared/github-button.js";
 import { viewLinkedInButton } from "../../shared/linkedin-button.js";
+import { viewResumeButton } from "../../shared/resume-button.js";
 import { HEAD } from "../../ui/head.js";
 import { THEME, unit } from "../../ui/theme.js";
 
@@ -22,7 +23,11 @@ export const viewHeadingContact = () => () => {
         {
           class: "heading-contact-button",
         },
-        [viewGithubButton({})(), viewLinkedInButton({})()]
+        [
+          viewGithubButton({})(),
+          viewLinkedInButton({})(),
+          viewResumeButton({})(),
+        ]
       ),
     ]
   );
