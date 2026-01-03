@@ -35,7 +35,7 @@ HEAD.push(
       function onImageError(e) {
         // Prevent the broken image icon from showing
         // Set to transparent 1x1 pixel so background skeleton shows through
-        e.target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'1\' height=\'1\'%3E%3C/svg%3E';
+        e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E";
         e.target.alt = '';
         // Keep the skeleton animation visible - don't remove animate-pulse class
         // The transparent image allows the background-color to show through

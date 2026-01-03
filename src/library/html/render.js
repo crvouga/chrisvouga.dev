@@ -117,14 +117,20 @@ export const renderAttrs = (attrs) => {
       const value = attrs[key];
 
       if (key === "style" && isRecord(value)) {
-        return `${key}="${renderStyles(value)}"`;
+        const styles = renderStyles(value).replace(/"/g, "&quot;");
+        return `${key}="${styles}"`;
       }
 
-      if (typeof value === "string" || value === "number") {
+      if (typeof value === "string") {
+        const escaped = value.replace(/"/g, "&quot;");
+        return `${key}="${escaped}"`;
+      }
+
+      if (typeof value === "number") {
         return `${key}="${value}"`;
       }
 
-      return `${key}="${attrs[key]}"`;
+      return `${key}="${String(attrs[key]).replace(/"/g, "&quot;")}"`;
     })
     .join(" ");
 };

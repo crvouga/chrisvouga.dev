@@ -76,14 +76,7 @@ export const __code = (attrs, _children) => {
 export const code = (attrs, _children) => {
   return icon(
     attrs,
-    `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-  <g clip-rule="evenodd" fill-rule="evenodd" transform="translate(-4 -4)">
-    <path d="m9.67917 17.5911 3.10583-11.5911 1.4489.38823-3.1058 11.61177z" />
-    <path d="m8.03033 7.96965 1.06066 1.06066-2.96967 2.96969 2.96967 2.9696-1.06066 1.0607-4.03033-4.0303z" />
-    <path d="m15.9697 7.96965-1.0607 1.06066 2.9697 2.96969-2.9697 2.9696 1.0607 1.0607 4.0303-4.0303z" />
-  </g>
-</svg>`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-rule="evenodd" fill-rule="evenodd" transform="translate(-4 -4)"><path d="m9.67917 17.5911 3.10583-11.5911 1.4489.38823-3.1058 11.61177z" /><path d="m8.03033 7.96965 1.06066 1.06066-2.96967 2.96969 2.96967 2.9696-1.06066 1.0607-4.03033-4.0303z" /><path d="m15.9697 7.96965-1.0607 1.06066 2.9697 2.96969-2.9697 2.9696 1.0607 1.0607 4.0303-4.0303z" /></g></svg>`
   );
 };
 
