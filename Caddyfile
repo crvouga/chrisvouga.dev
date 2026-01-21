@@ -1,0 +1,174 @@
+# Redirect non-www to www for main domain
+chrisvouga.dev {
+    redir https://www.chrisvouga.dev{uri} permanent
+}
+
+# Portfolio Site - Main domain
+www.chrisvouga.dev {
+    reverse_proxy portfolio:80
+
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # Enable compression
+    encode gzip zstd
+}
+
+# Pickflix
+pickflix.chrisvouga.dev {
+    reverse_proxy pickflix:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Headless Combobox
+headless-combobox.chrisvouga.dev {
+    reverse_proxy headless-combobox:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Moviefinder App
+moviefinder-app-rust.chrisvouga.dev {
+    reverse_proxy moviefinder-app-rust:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Todo App
+todo.chrisvouga.dev {
+    reverse_proxy todo-app:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Image Service
+imageservice.chrisvouga.dev {
+    reverse_proxy image-service:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Connect Four
+connectfour.chrisvouga.dev {
+    reverse_proxy connect-four:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Screenshot Service
+screenshotservice.chrisvouga.dev {
+    reverse_proxy screenshot-service:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Anime Blog
+anime.chrisvouga.dev {
+    reverse_proxy anime-blog:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Snake Game
+snake.chrisvouga.dev {
+    reverse_proxy snake-game:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Match Three
+matchthree.chrisvouga.dev {
+    reverse_proxy match-three:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Simon Says
+simonsays.chrisvouga.dev {
+    reverse_proxy simon-says:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
