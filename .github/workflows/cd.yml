@@ -9,6 +9,105 @@ on:
       - main
 
 jobs:
+  infrastructure:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write  # For OIDC if using remote state
+    outputs:
+      droplet_ip: ${{ steps.terraform-output.outputs.droplet_ip }}
+      reserved_ip: ${{ steps.terraform-output.outputs.reserved_ip }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Generate SSH Key Pair
+        id: ssh-key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t ed25519 -f ~/.ssh/do_deploy_key -N "" -C "github-actions-deploy"
+          echo "private_key<<EOF" >> $GITHUB_OUTPUT
+          cat ~/.ssh/do_deploy_key >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "public_key=$(cat ~/.ssh/do_deploy_key.pub)" >> $GITHUB_OUTPUT
+          echo "public_key_path=$HOME/.ssh/do_deploy_key.pub" >> $GITHUB_OUTPUT
+
+      - name: Terraform Init
+        working-directory: infrastructure
+        env:
+          TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+          TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
+          TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key
+          TF_VAR_droplet_name: chrisvouga-dev
+          TF_VAR_droplet_region: ${{ secrets.DO_REGION || 'nyc1' }}
+          TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
+          TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infrastructure
+        env:
+          TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+          TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
+          TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key
+          TF_VAR_droplet_name: chrisvouga-dev
+          TF_VAR_droplet_region: ${{ secrets.DO_REGION || 'nyc1' }}
+          TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
+          TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: infrastructure
+        env:
+          TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+          TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
+          TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key
+          TF_VAR_droplet_name: chrisvouga-dev
+          TF_VAR_droplet_region: ${{ secrets.DO_REGION || 'nyc1' }}
+          TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
+          TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
+        run: terraform apply -auto-approve tfplan
+
+      - name: Get Terraform Outputs
+        id: terraform-output
+        working-directory: infrastructure
+        run: |
+          echo "droplet_ip=$(terraform output -raw droplet_ip)" >> $GITHUB_OUTPUT
+          echo "reserved_ip=$(terraform output -raw reserved_ip 2>/dev/null || echo '')" >> $GITHUB_OUTPUT
+
+      - name: Save SSH Private Key
+        run: |
+          echo "${{ steps.ssh-key.outputs.private_key }}" > /tmp/do_deploy_key
+          chmod 600 /tmp/do_deploy_key
+
+      - name: Wait for Droplet to be Ready
+        env:
+          DROPLET_IP: ${{ steps.terraform-output.outputs.droplet_ip }}
+        run: |
+          echo "Waiting for droplet to be ready..."
+          for i in {1..30}; do
+            if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -i /tmp/do_deploy_key root@$DROPLET_IP "echo 'Droplet is ready'" 2>/dev/null; then
+              echo "Droplet is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Droplet not ready yet, waiting 10 seconds..."
+            sleep 10
+          done
+
+      - name: Setup Server
+        env:
+          DROPLET_IP: ${{ steps.terraform-output.outputs.droplet_ip }}
+        run: |
+          scp -o StrictHostKeyChecking=no -i /tmp/do_deploy_key scripts/setup-server.sh root@$DROPLET_IP:/tmp/
+          ssh -o StrictHostKeyChecking=no -i /tmp/do_deploy_key root@$DROPLET_IP "chmod +x /tmp/setup-server.sh && /tmp/setup-server.sh"
+
   typecheck:
     runs-on: ubuntu-latest
 
