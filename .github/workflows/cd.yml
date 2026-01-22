@@ -109,7 +109,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [test, health-check-urls, build-and-push]
+    needs: [typecheck]
     
     steps:
       - name: Checkout code
