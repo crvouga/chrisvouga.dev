@@ -115,35 +115,68 @@ This guide explains how to obtain and configure the required GitHub Secrets for 
 
 ---
 
+## Optional GitHub Secrets
+
+### DO_REGION (Optional)
+**Default:** `nyc1`
+
+**Available regions:**
+- `nyc1`, `nyc3` - New York
+- `sfo3` - San Francisco
+- `ams3` - Amsterdam
+- `sgp1` - Singapore
+- `lon1` - London
+- `fra1` - Frankfurt
+- `tor1` - Toronto
+- `blr1` - Bangalore
+
+**Set in GitHub:**
+- Name: `DO_REGION`
+- Value: Your preferred region (e.g., `nyc1`)
+
+---
+
+### DO_DROPLET_SIZE (Optional)
+**Default:** `s-2vcpu-4gb`
+
+**Common sizes:**
+- `s-1vcpu-1gb` - 1 vCPU, 1GB RAM (~$6/month)
+- `s-2vcpu-2gb` - 2 vCPU, 2GB RAM (~$12/month)
+- `s-2vcpu-4gb` - 2 vCPU, 4GB RAM (~$24/month) ⭐ Recommended
+- `s-4vcpu-8gb` - 4 vCPU, 8GB RAM (~$48/month)
+
+**Set in GitHub:**
+- Name: `DO_DROPLET_SIZE`
+- Value: Your preferred size (e.g., `s-2vcpu-4gb`)
+
+---
+
+### DO_ENABLE_RESERVED_IP (Optional)
+**Default:** `true`
+
+Set to `false` if you don't want a reserved IP (saves ~$4/month but IP changes if droplet is recreated).
+
+**Set in GitHub:**
+- Name: `DO_ENABLE_RESERVED_IP`
+- Value: `true` or `false`
+
 ## Quick Setup Checklist
 
-- [ ] Generate SSH key pair (`ssh-keygen`)
-- [ ] Add public key to Digital Ocean (via Terraform, doctl, or web console)
-- [ ] Provision infrastructure with Terraform
-- [ ] Get droplet IP from Terraform output or doctl
-- [ ] Add all secrets to GitHub repository:
-  - [ ] `DO_HOST` - Droplet IP address
-  - [ ] `DO_USER` - SSH user (default: `root`)
-  - [ ] `DO_SSH_KEY` - Private SSH key
+- [ ] Add all required secrets to GitHub repository:
+  - [ ] `DO_TOKEN` - Digital Ocean API token
+  - [ ] `DOCKER_USERNAME` - Docker Hub username
+  - [ ] `DOCKER_PASSWORD` - Docker Hub password/token
   - [ ] `TMDB_API_READ_ACCESS_TOKEN` - TMDB API token
   - [ ] `TWILIO_ACCOUNT_SID` - Twilio Account SID
   - [ ] `TWILIO_AUTH_TOKEN` - Twilio Auth Token
   - [ ] `TWILIO_SERVICE_SID` - Twilio Service SID
-  - [ ] `DEPLOY_DIR` - (optional) Deployment directory
+- [ ] (Optional) Add optional secrets:
+  - [ ] `DO_REGION` - Region (default: `nyc1`)
+  - [ ] `DO_DROPLET_SIZE` - Droplet size (default: `s-2vcpu-4gb`)
+  - [ ] `DO_ENABLE_RESERVED_IP` - Reserved IP (default: `true`)
+- [ ] Push to `main` branch - GitHub Actions handles everything automatically!
 
-## Testing SSH Connection
-
-Before setting up GitHub Actions, test your SSH connection:
-
-```bash
-# Test SSH connection
-ssh -i ~/.ssh/do_deploy_key root@<DROPLET_IP>
-
-# Or if using default key
-ssh root@<DROPLET_IP>
-```
-
-If connection works, you're ready to deploy!
+**That's it!** No SSH keys to generate, no manual infrastructure setup, no local configuration needed.
 
 ## Using doctl for Quick Lookup
 
