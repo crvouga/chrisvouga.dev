@@ -275,16 +275,15 @@ jobs:
           echo "✓ Server setup completed successfully"
 
       - name: Upload Terraform State
-        working-directory: infrastructure
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: terraform-state
           path: |
-            terraform.tfstate
-            terraform.tfstate.backup
-            *.tfstate
-            *.tfstate.backup
+            infrastructure/terraform.tfstate
+            infrastructure/terraform.tfstate.backup
+            infrastructure/*.tfstate
+            infrastructure/*.tfstate.backup
           retention-days: 90
           if-no-files-found: ignore
 
