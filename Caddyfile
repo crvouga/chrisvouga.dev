@@ -33,9 +33,23 @@ pickflix.chrisvouga.dev {
     encode gzip zstd
 }
 
-# Headless Combobox
-headless-combobox.chrisvouga.dev {
-    reverse_proxy headless-combobox:80
+# Headless Combobox Docs
+headlesscombobox.chrisvouga.dev {
+    reverse_proxy headless-combobox-docs:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Headless Combobox Svelte Example
+svelte.headlesscombobox.chrisvouga.dev {
+    reverse_proxy headless-combobox-svelte-example:80
 
     header {
         X-Frame-Options "SAMEORIGIN"

@@ -47,22 +47,41 @@ services:
       retries: 3
       start_period: 40s
 
-  # # Headless Combobox
-  # # Source: https://github.com/crvouga/headless-combobox
-  # headless-combobox:
-  #   image: crvouga/headless-combobox:latest
-  #   container_name: headless-combobox
-  #   ports:
-  #     - "8005:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Headless Combobox Docs
+  # Source: https://github.com/crvouga/headless-combobox
+  headless-combobox-docs:
+    image: crvouga/headless-combobox-docs:latest
+    platform: linux/amd64
+    container_name: headless-combobox-docs
+    ports:
+      - "8005:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Headless Combobox Svelte Example
+  # Source: https://github.com/crvouga/headless-combobox
+  headless-combobox-svelte-example:
+    image: crvouga/headless-combobox-svelte-example:latest
+    platform: linux/amd64
+    container_name: headless-combobox-svelte-example
+    ports:
+      - "8006:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # # Moviefinder App
   # # Source: https://github.com/crvouga/moviefinder.app-rust
@@ -236,10 +255,11 @@ services:
     depends_on:
       - portfolio
       - pickflix
-      # - headless-combobox
+      - headless-combobox-docs
+      - headless-combobox-svelte-example
+      - image-service
       # - moviefinder-app-rust
       # - todo-app
-      # - image-service
       # - connect-four
       # - screenshot-service
       # - anime-blog
