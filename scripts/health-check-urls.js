@@ -26,8 +26,8 @@ const checkUrl = async (url) => {
     });
     const duration = Date.now() - startTime;
     
-    // LinkedIn returns 999 for bot protection, but the URL is accessible
-    const isOk = response.ok || (isLinkedIn && response.status === 999);
+    // LinkedIn returns 999 for bot protection or 405 for HEAD requests, but the URL is accessible
+    const isOk = response.ok || (isLinkedIn && (response.status === 999 || response.status === 405));
     
     const result = {
       url,
@@ -37,7 +37,11 @@ const checkUrl = async (url) => {
     };
     
     if (result.ok) {
-      const statusNote = isLinkedIn && response.status === 999 ? " (bot protection)" : "";
+      let statusNote = "";
+      if (isLinkedIn) {
+        if (response.status === 999) statusNote = " (bot protection)";
+        else if (response.status === 405) statusNote = " (HEAD not allowed, but URL accessible)";
+      }
       console.log(`  ✓ OK (${result.status})${statusNote} - ${duration}ms`);
     } else {
       console.log(`  ✗ FAILED (${result.status}) - ${duration}ms`);
