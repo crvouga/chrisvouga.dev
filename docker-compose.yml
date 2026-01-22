@@ -184,7 +184,56 @@ services:
       start_period: 10s
 
   
+
+  # Moviefinder App React
+  # Source: https://github.com/crvouga/moviefinder.app-react
+  moviefinder-app-react:
+    image: crvouga/moviefinder-app-react:latest
+    platform: linux/amd64
+    container_name: moviefinder-app-react
+    environment:
+      STAGE: local
+      PORT: 80
+      TMDB_API_READ_ACCESS_TOKEN: ${TMDB_API_READ_ACCESS_TOKEN:-noop}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-noop}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-noop}
+      TWILIO_SERVICE_SID: ${TWILIO_SERVICE_SID:-noop}
+    ports:
+      - "8015:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   
+  # Moviefinder App ClojureScript
+  # Source: https://github.com/crvouga/moviefinder.app-clojurescript
+  moviefinder-app-clojurescript:
+    image: crvouga/moviefinder-app-clojurescript:latest
+    platform: linux/amd64
+    container_name: moviefinder-app-clojurescript
+    environment:
+      PORT: 8888
+      TMDB_API_READ_ACCESS_TOKEN: ${TMDB_API_READ_ACCESS_TOKEN:-noop}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-noop}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-noop}
+      TWILIO_SERVICE_SID: ${TWILIO_SERVICE_SID:-noop}
+    ports:
+      - "8888:8888"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8888/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   
   # # Todo App
   # # Source: https://github.com/crvouga/todo-v1
