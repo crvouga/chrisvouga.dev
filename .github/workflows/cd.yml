@@ -87,6 +87,25 @@ jobs:
             echo "No existing state file - this is a fresh deployment"
           fi
 
+      - name: Check for Existing Firewall and Import
+        working-directory: infrastructure
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN }}
+        continue-on-error: true
+        run: |
+          # Check if firewall with this name already exists
+          FIREWALL_NAME="chrisvouga-dev-firewall"
+          FIREWALL_ID=$(doctl compute firewall list --format ID,Name --no-header | grep "$FIREWALL_NAME" | awk '{print $1}' | head -n1 || echo "")
+          
+          if [ -n "$FIREWALL_ID" ]; then
+            echo "Found existing firewall: $FIREWALL_ID"
+            echo "Attempting to import into Terraform state..."
+            terraform init
+            terraform import digitalocean_firewall.main "$FIREWALL_ID" || echo "Import failed, will try to create/update"
+          else
+            echo "No existing firewall found with name: $FIREWALL_NAME"
+          fi
+
       - name: Terraform Plan
         working-directory: infrastructure
         env:
