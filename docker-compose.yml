@@ -83,22 +83,55 @@ services:
       retries: 3
       start_period: 40s
 
-  # # Moviefinder App
-  # # Source: https://github.com/crvouga/moviefinder.app-rust
-  # moviefinder-app-rust:
-  #   image: crvouga/moviefinder-app-rust:latest
-  #   container_name: moviefinder-app-rust
-  #   ports:
-  #     - "8006:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Moviefinder App
+  # Source: https://github.com/crvouga/moviefinder.app-rust
+  moviefinder-app-rust:
+    image: crvouga/moviefinder-app-rust:latest
+    platform: linux/amd64
+    container_name: moviefinder-app-rust
+    environment:
+      STAGE: local
+      DATABASE_URL: postgresql://moviefinder-app-rust-postgres:moviefinder-app-rust-postgres@moviefinder-app-rust-postgres:5432/moviefinder-app-rust-postgres?sslmode=disable
+      PORT: 80
+      TMDB_API_READ_ACCESS_TOKEN: ${TMDB_API_READ_ACCESS_TOKEN:-noop}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-noop}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-noop}
+      TWILIO_SERVICE_SID: ${TWILIO_SERVICE_SID:-noop}
+    ports:
+      - "8007:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    depends_on:
+      moviefinder-app-rust-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  moviefinder-app-rust-postgres:
+    image: postgres:15-alpine
+    container_name: moviefinder-app-rust-postgres
+    environment:
+      POSTGRES_DB: moviefinder-app-rust-postgres
+      POSTGRES_USER: moviefinder-app-rust-postgres
+      POSTGRES_PASSWORD: moviefinder-app-rust-postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - moviefinder-app-rust-postgres-data:/var/lib/postgresql/data
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moviefinder-app-rust-postgres -d moviefinder-app-rust-postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # # Todo App
   # # Source: https://github.com/crvouga/todo-v1
@@ -258,7 +291,7 @@ services:
       - headless-combobox-docs
       - headless-combobox-svelte-example
       - image-service
-      # - moviefinder-app-rust
+      - moviefinder-app-rust
       # - todo-app
       # - connect-four
       # - screenshot-service
@@ -274,3 +307,4 @@ networks:
 volumes:
   caddy_data:
   caddy_config:
+  moviefinder-app-rust-postgres-data:
