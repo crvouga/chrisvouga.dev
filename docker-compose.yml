@@ -183,8 +183,6 @@ services:
       retries: 5
       start_period: 10s
 
-  
-
   # Moviefinder App React
   # Source: https://github.com/crvouga/moviefinder.app-react
   moviefinder-app-react:
@@ -209,7 +207,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
   
   # Moviefinder App ClojureScript
   # Source: https://github.com/crvouga/moviefinder.app-clojurescript
@@ -235,22 +232,22 @@ services:
       retries: 3
       start_period: 40s
   
-  # # Todo App
-  # # Source: https://github.com/crvouga/todo-v1
-  # todo-app:
-  #   image: crvouga/todo-app:latest
-  #   container_name: todo-app
-  #   ports:
-  #     - "8007:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Todo App
+  # Source: https://github.com/crvouga/todo-v1
+  todo-app:
+    image: crvouga/todo-app:latest
+    container_name: todo-app
+    ports:
+      - "8010:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Image Service
   # Source: https://github.com/crvouga/image-service
@@ -394,7 +391,10 @@ services:
       - headless-combobox-svelte-example
       - image-service
       - moviefinder-app-rust
-      # - todo-app
+      - moviefinder-app-go
+      - moviefinder-app-react
+      - moviefinder-app-clojurescript
+      - todo-app
       # - connect-four
       # - screenshot-service
       # - anime-blog
