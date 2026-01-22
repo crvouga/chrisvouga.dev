@@ -108,6 +108,13 @@ jobs:
           scp -o StrictHostKeyChecking=no -i /tmp/do_deploy_key scripts/setup-server.sh root@$DROPLET_IP:/tmp/
           ssh -o StrictHostKeyChecking=no -i /tmp/do_deploy_key root@$DROPLET_IP "chmod +x /tmp/setup-server.sh && /tmp/setup-server.sh"
 
+      - name: Upload SSH Key as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssh-key
+          path: /tmp/do_deploy_key
+          retention-days: 1
+
   typecheck:
     runs-on: ubuntu-latest
 
@@ -190,15 +197,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Download SSH Key
+        uses: actions/download-artifact@v4
         with:
-          ssh-private-key: ${{ secrets.DO_SSH_KEY }}
+          name: ssh-key
+          path: ~/.ssh/
 
-      - name: Add server to known hosts
+      - name: Setup SSH
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.DO_HOST }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/do_deploy_key
+          ssh-keyscan -H ${{ needs.infrastructure.outputs.droplet_ip }} >> ~/.ssh/known_hosts
 
       - name: Create .env file
         run: |
@@ -211,19 +219,20 @@ jobs:
 
       - name: Deploy to Digital Ocean
         env:
-          DO_HOST: ${{ secrets.DO_HOST }}
-          DO_USER: ${{ secrets.DO_USER || 'root' }}
-          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR || '/opt/chrisvouga-dev' }}
+          DO_HOST: ${{ needs.infrastructure.outputs.droplet_ip }}
+          DO_USER: root
+          DEPLOY_DIR: /opt/chrisvouga-dev
+          SSH_KEY_PATH: ~/.ssh/do_deploy_key
         run: |
           chmod +x scripts/deploy.sh
-          DO_HOST="$DO_HOST" DO_USER="$DO_USER" DEPLOY_DIR="$DEPLOY_DIR" ./scripts/deploy.sh
+          DO_HOST="$DO_HOST" DO_USER="$DO_USER" DEPLOY_DIR="$DEPLOY_DIR" DO_SSH_KEY="$SSH_KEY_PATH" ./scripts/deploy.sh
 
       - name: Verify deployment
         env:
-          DO_HOST: ${{ secrets.DO_HOST }}
-          DO_USER: ${{ secrets.DO_USER || 'root' }}
-          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR || '/opt/chrisvouga-dev' }}
+          DO_HOST: ${{ needs.infrastructure.outputs.droplet_ip }}
+          DO_USER: root
+          DEPLOY_DIR: /opt/chrisvouga-dev
         run: |
-          ssh $DO_USER@$DO_HOST "cd $DEPLOY_DIR && docker compose ps"
+          ssh -i ~/.ssh/do_deploy_key -o StrictHostKeyChecking=no $DO_USER@$DO_HOST "cd $DEPLOY_DIR && docker compose ps"
 
 

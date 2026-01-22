@@ -1,45 +1,62 @@
 # Deployment Guide
 
-This guide covers deploying the chrisvouga.dev application stack to Digital Ocean.
+This guide covers deploying the chrisvouga.dev application stack to Digital Ocean. **Everything is automated via GitHub Actions** - no local setup required!
 
 ## Prerequisites
 
 - Digital Ocean account with API token
-- Terraform installed (>= 1.5.0)
-- SSH key pair
 - GitHub repository with Actions enabled
 - Domain names configured (or use IP addresses)
 
-## Initial Infrastructure Setup
+## Initial Setup (One-Time Configuration)
 
-### 1. Configure Terraform
+### 1. Configure GitHub Secrets
+
+Go to your repository → Settings → Secrets and variables → Actions, and add the following secrets:
+
+**Required Secrets:**
+- `DO_TOKEN`: Your Digital Ocean API token (get from https://cloud.digitalocean.com/account/api/tokens)
+- `DOCKER_USERNAME`: Docker Hub username
+- `DOCKER_PASSWORD`: Docker Hub password/token
+- `TMDB_API_READ_ACCESS_TOKEN`: The Movie Database API token
+- `TWILIO_ACCOUNT_SID`: Twilio Account SID
+- `TWILIO_AUTH_TOKEN`: Twilio Auth Token
+- `TWILIO_SERVICE_SID`: Twilio Service SID
+
+**Optional Secrets (with defaults):**
+- `DO_REGION`: Digital Ocean region (default: `nyc1`)
+- `DO_DROPLET_SIZE`: Droplet size (default: `s-2vcpu-4gb`)
+- `DO_ENABLE_RESERVED_IP`: Enable reserved IP (default: `true`)
+
+See `GITHUB_SECRETS.md` for detailed instructions on obtaining these values.
+
+### 2. Push to Main Branch
+
+Simply push your code to the `main` branch:
 
 ```bash
-cd infrastructure
-cp terraform.tfvars.example terraform.tfvars
+git push origin main
 ```
 
-Edit `terraform.tfvars` with your values:
-- `do_token`: Your Digital Ocean API token
-- `ssh_public_key_path`: Path to your public SSH key
-- Adjust other settings as needed
-
-### 2. Provision Infrastructure
-
-```bash
-cd infrastructure
-terraform init
-terraform plan
-terraform apply
-```
-
-After applying, note the output values:
-- `droplet_ip`: IP address of your droplet
-- `reserved_ip`: Reserved IP (if enabled)
+GitHub Actions will automatically:
+1. ✅ Run type checking
+2. ✅ Run tests
+3. ✅ Build and push Docker image
+4. ✅ **Provision Digital Ocean infrastructure** (droplet, firewall, SSH keys)
+5. ✅ **Setup server** (install Docker, configure firewall, etc.)
+6. ✅ **Deploy application** (copy files, start services)
+7. ✅ Verify deployment
 
 ### 3. Configure DNS
 
-Point your domain names to the droplet IP:
+After the first deployment completes, get your droplet IP from the GitHub Actions workflow output:
+
+1. Go to Actions → Latest workflow run
+2. Click on the `infrastructure` job
+3. Find the "Get Terraform Outputs" step
+4. Copy the `droplet_ip` value
+
+Point your domain names to this IP:
 
 - `www.chrisvouga.dev` → Droplet IP
 - `pickflix.chrisvouga.dev` → Droplet IP
@@ -58,122 +75,81 @@ Point your domain names to the droplet IP:
 - `matchthree.chrisvouga.dev` → Droplet IP
 - `simonsays.chrisvouga.dev` → Droplet IP
 
-### 4. Initial Server Setup
+**Note:** Caddy will automatically provision SSL certificates once DNS is configured.
 
-SSH into your droplet and run the setup script:
+## Ongoing Deployments
 
-```bash
-# Get droplet IP from Terraform output
-cd infrastructure
-DROPLET_IP=$(terraform output -raw droplet_ip)
+### Automated Deployment (Default)
 
-# Copy setup script to server
-scp scripts/setup-server.sh root@$DROPLET_IP:/tmp/
-
-# SSH into server
-ssh root@$DROPLET_IP
-
-# Run setup script
-chmod +x /tmp/setup-server.sh
-/tmp/setup-server.sh
-```
-
-The setup script will:
-- Install Docker and Docker Compose
-- Configure firewall
-- Create deployment directory
-- Set up systemd service for auto-restart
-
-### 5. Configure Environment Variables
-
-Create `.env` file on the server:
+**Everything is automated!** Just push to `main`:
 
 ```bash
-# SSH into server
-ssh root@$DROPLET_IP
-
-# Create .env file
-cd /opt/chrisvouga-dev
-nano .env
+git push origin main
 ```
 
-Add your environment variables (see `env.example` for template):
-```
-TMDB_API_READ_ACCESS_TOKEN=your_token_here
-TWILIO_ACCOUNT_SID=your_sid_here
-TWILIO_AUTH_TOKEN=your_token_here
-TWILIO_SERVICE_SID=your_service_sid_here
-```
+GitHub Actions automatically handles:
+1. ✅ Type checking
+2. ✅ Testing
+3. ✅ Building Docker image
+4. ✅ Pushing to Docker Hub
+5. ✅ Infrastructure provisioning (if needed)
+6. ✅ Server setup (if needed)
+7. ✅ Deploying application
+8. ✅ Health verification
 
-### 6. First Deployment
+### Manual Deployment (If Needed)
 
-#### Manual Deployment
+If you need to deploy manually (e.g., for troubleshooting):
 
 ```bash
-# Set environment variables
-export DO_HOST=$(cd infrastructure && terraform output -raw droplet_ip)
+# Get droplet IP from GitHub Actions output or Digital Ocean console
+export DO_HOST=<your-droplet-ip>
 export DO_USER=root
+
+# Generate SSH key (must match the one in Digital Ocean)
+# Or use the one from GitHub Actions artifacts
 
 # Deploy
 ./scripts/deploy.sh
 ```
 
-#### Automated Deployment via GitHub Actions
-
-1. Configure GitHub Secrets (see `GITHUB_SECRETS.md`):
-   - `DO_HOST`: Droplet IP address
-   - `DO_USER`: SSH user (default: `root`)
-   - `DO_SSH_KEY`: Private SSH key
-   - `TMDB_API_READ_ACCESS_TOKEN`: TMDB API token
-   - `TWILIO_ACCOUNT_SID`: Twilio Account SID
-   - `TWILIO_AUTH_TOKEN`: Twilio Auth Token
-   - `TWILIO_SERVICE_SID`: Twilio Service SID
-
-2. Push to `main` branch - GitHub Actions will automatically deploy
-
-## Ongoing Deployments
-
-### Automated (Recommended)
-
-Push to `main` branch - GitHub Actions handles everything:
-1. Type checking
-2. Testing
-3. Building Docker image
-4. Pushing to Docker Hub
-5. Deploying to Digital Ocean
-
-### Manual Deployment
-
-```bash
-export DO_HOST=<your-droplet-ip>
-export DO_USER=root
-./scripts/deploy.sh
-```
-
 ## Verifying Deployment
 
-### Check Service Status
+### Via GitHub Actions
 
-```bash
-ssh root@$DROPLET_IP "cd /opt/chrisvouga-dev && docker compose ps"
-```
+The deployment workflow automatically verifies deployment. Check the workflow output:
+1. Go to Actions → Latest workflow run
+2. Check the `deploy` job
+3. Look for "Verify deployment" step output
 
-### Check Logs
-
-```bash
-# All services
-ssh root@$DROPLET_IP "cd /opt/chrisvouga-dev && docker compose logs"
-
-# Specific service
-ssh root@$DROPLET_IP "cd /opt/chrisvouga-dev && docker compose logs portfolio"
-```
-
-### Health Checks
+### Via Web Browser
 
 Visit your domains:
 - https://www.chrisvouga.dev
 - https://pickflix.chrisvouga.dev
+- https://headlesscombobox.chrisvouga.dev
 - etc.
+
+### Via SSH (If Needed)
+
+To SSH into the server, you'll need the SSH key from GitHub Actions artifacts:
+
+1. Download SSH key from the `infrastructure` job artifacts
+2. Use it to connect:
+
+```bash
+# Get droplet IP from GitHub Actions output
+DROPLET_IP=<from-github-actions-output>
+
+# SSH into server
+ssh -i ~/.ssh/do_deploy_key root@$DROPLET_IP
+
+# Check service status
+cd /opt/chrisvouga-dev && docker compose ps
+
+# Check logs
+docker compose logs
+```
 
 ## Troubleshooting
 
