@@ -25,10 +25,38 @@ declare -A SERVICES=(
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPS_DIR="${SCRIPT_DIR}/apps"
 
+# Helper function to check if app exists
+app_exists() {
+  local app_name=$1
+  flyctl apps list --json 2>/dev/null | grep -q "\"Name\":\"${app_name}\""
+}
+
+# Helper function to check if app has IPv4
+has_ipv4() {
+  local app_name=$1
+  flyctl ips list -a "${app_name}" --json 2>/dev/null | grep -q '"Type":"v4"'
+}
+
+# Helper function to check if cert exists
+cert_exists() {
+  local domain=$1
+  local app_name=$2
+  flyctl certs list -a "${app_name}" 2>/dev/null | grep -q "${domain}"
+}
+
 # Allocate shared IPv4 on first app (portfolio)
 FIRST_APP="crvouga-portfolio"
-echo "Allocating shared IPv4 address (if needed)..."
-flyctl ips allocate-v4 --shared -a "${FIRST_APP}" || true
+echo "Checking IPv4 for ${FIRST_APP}..."
+if app_exists "${FIRST_APP}"; then
+  if has_ipv4 "${FIRST_APP}"; then
+    echo "✓ IPv4 already allocated for ${FIRST_APP}"
+  else
+    echo "Allocating shared IPv4 for ${FIRST_APP}..."
+    flyctl ips allocate-v4 --shared -a "${FIRST_APP}"
+  fi
+else
+  echo "Skipping IPv4 allocation (app doesn't exist yet)"
+fi
 
 # Iterate through each app directory
 for app_dir in "${APPS_DIR}"/*; do
@@ -54,12 +82,20 @@ for app_dir in "${APPS_DIR}"/*; do
   echo "=========================================="
 
   # Create app if it doesn't exist
-  echo "Creating app (if needed)..."
-  fly apps create "${app_name}" --org personal || true
+  if app_exists "${app_name}"; then
+    echo "✓ App ${app_name} already exists"
+  else
+    echo "Creating app ${app_name}..."
+    flyctl apps create "${app_name}" --org personal
+  fi
 
   # Allocate shared IPv4 to this app
-  echo "Allocating shared IPv4..."
-  fly ips allocate-v4 --shared -a "${app_name}" || true
+  if has_ipv4 "${app_name}"; then
+    echo "✓ IPv4 already allocated for ${app_name}"
+  else
+    echo "Allocating shared IPv4 for ${app_name}..."
+    flyctl ips allocate-v4 --shared -a "${app_name}"
+  fi
 
   # Set secrets if needed
   if [ "${needs_secrets}" = "true" ]; then
@@ -96,24 +132,40 @@ for app_dir in "${APPS_DIR}"/*; do
     
     # Set secrets if we have any
     if [ ${#SECRETS[@]} -gt 0 ]; then
-      fly secrets set "${SECRETS[@]}" -a "${app_name}"
+      flyctl secrets set "${SECRETS[@]}" -a "${app_name}"
     fi
   fi
 
   # Deploy the app
   echo "Deploying app..."
-  fly deploy --config "${app_dir}/fly.toml" -a "${app_name}" --yes
+  flyctl deploy --config "${app_dir}/fly.toml" -a "${app_name}" --yes
 
   # Add custom domain certificate (configures Fly's edge routing)
-  echo "Adding custom domain certificate..."
-  fly certs add "${subdomain}.chrisvouga.dev" -a "${app_name}" || true
+  DOMAIN="${subdomain}.chrisvouga.dev"
+  if cert_exists "${DOMAIN}" "${app_name}"; then
+    echo "✓ Certificate for ${DOMAIN} already exists"
+  else
+    echo "Adding certificate for ${DOMAIN}..."
+    flyctl certs add "${DOMAIN}" -a "${app_name}"
+  fi
   
   # Also add www for portfolio
   if [ "${app_name}" == "crvouga-portfolio" ]; then
-    echo "Adding www certificate for portfolio..."
-    fly certs add "www.chrisvouga.dev" -a "${app_name}" || true
-    echo "Adding apex domain certificate for portfolio..."
-    fly certs add "chrisvouga.dev" -a "${app_name}" || true
+    WWW_DOMAIN="www.chrisvouga.dev"
+    if cert_exists "${WWW_DOMAIN}" "${app_name}"; then
+      echo "✓ Certificate for ${WWW_DOMAIN} already exists"
+    else
+      echo "Adding www certificate for portfolio..."
+      flyctl certs add "${WWW_DOMAIN}" -a "${app_name}"
+    fi
+    
+    APEX_DOMAIN="chrisvouga.dev"
+    if cert_exists "${APEX_DOMAIN}" "${app_name}"; then
+      echo "✓ Certificate for ${APEX_DOMAIN} already exists"
+    else
+      echo "Adding apex domain certificate for portfolio..."
+      flyctl certs add "${APEX_DOMAIN}" -a "${app_name}"
+    fi
   fi
 
   echo "✓ Completed: ${app_name}"
