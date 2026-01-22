@@ -21,7 +21,7 @@ www.chrisvouga.dev {
 
 # Pickflix
 pickflix.chrisvouga.dev {
-    reverse_proxy pickflix:80
+    reverse_proxy pickflix:3000
 
     header {
         X-Frame-Options "SAMEORIGIN"

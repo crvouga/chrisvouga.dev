@@ -15,7 +15,9 @@
     "generate-all": "npm run screenshot-work && npm run screenshot-projects && npm run optimize-images && npm run generate-resume && npm run screenshot-main",
     "generate-resume": "node ./src/generate-resume.js",
     "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app",
-    "docker": "docker compose up -d"
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down --volumes --rmi all",
+    "docker": "npm run docker:down && npm run docker:up"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",

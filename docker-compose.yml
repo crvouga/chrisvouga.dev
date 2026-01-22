@@ -5,6 +5,7 @@ services:
   # Source: https://github.com/crvouga/chrisvouga.dev
   portfolio:
     image: crvouga/portfolio:latest
+    platform: linux/amd64
     container_name: portfolio
     ports:
       - "8001:80"
@@ -22,10 +23,12 @@ services:
   # Source: https://github.com/crvouga/pickflix-v1
   pickflix:
     image: crvouga/pickflix:latest
+    platform: linux/amd64
     container_name: pickflix
     environment:
+      NODE_ENV: "production"
       DATABASE_URL: "noop"
-      PORT: "9000"
+      PORT: "3000"
       SECRET: "noop"
       SEND_GRID_API_KEY: "noop"
       SEND_GRID_REGISTERED_EMAIL_ADDRESS: "noop"
@@ -33,12 +36,12 @@ services:
       TMDB_API_READ_ACCESS_TOKEN: "${TMDB_API_READ_ACCESS_TOKEN:-noop}"
       YOUTUBE_API_KEY: "noop"
     ports:
-      - "8004:80"
+      - "8004:3000"
     networks:
       - projects-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3
