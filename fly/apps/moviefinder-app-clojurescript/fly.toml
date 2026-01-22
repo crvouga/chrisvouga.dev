@@ -1,0 +1,19 @@
+app = "crvouga-moviefinder-app-clojurescript"
+primary_region = "ord"
+
+[build]
+  image = "crvouga/moviefinder-app-clojurescript:latest"
+
+[env]
+  PORT = "8888"
+
+[http_service]
+  internal_port = 8888
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
