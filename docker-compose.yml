@@ -23,6 +23,15 @@ services:
   pickflix:
     image: crvouga/pickflix:latest
     container_name: pickflix
+    environment:
+      DATABASE_URL: "noop"
+      PORT: "9000"
+      SECRET: "noop"
+      SEND_GRID_API_KEY: "noop"
+      SEND_GRID_REGISTERED_EMAIL_ADDRESS: "noop"
+      SESSION_COOKIE_SECRET: "noop"
+      TMDB_API_READ_ACCESS_TOKEN: "${TMDB_API_READ_ACCESS_TOKEN:-noop}"
+      YOUTUBE_API_KEY: "noop"
     ports:
       - "8004:80"
     networks:
