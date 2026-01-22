@@ -1,5 +1,6 @@
 provider "digitalocean" {
-  token = var.do_token
+  # Token is set via TF_VAR_do_token or DIGITALOCEAN_TOKEN env vars in GitHub Actions
+  # If var.do_token is empty, provider will automatically read from DIGITALOCEAN_TOKEN env var
 }
 
 # Read SSH public key

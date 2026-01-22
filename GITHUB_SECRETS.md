@@ -6,21 +6,29 @@ This guide explains how to obtain and configure the required GitHub Secrets for 
 
 ## Required GitHub Secrets
 
-### 1. DO_TOKEN (Required)
+### 1. DO_TOKEN (Required) ⚠️ CRITICAL
 **What it is:** Digital Ocean API token for provisioning infrastructure
 
 **How to get it:**
 1. Go to https://cloud.digitalocean.com/account/api/tokens
 2. Click "Generate New Token"
 3. Give it a name (e.g., "github-actions-terraform")
-4. Select "Write" scope
-5. Copy the token (you won't see it again!)
+4. **IMPORTANT:** Select **"Write"** scope (not Read-only!)
+5. Copy the token immediately (you won't see it again!)
+6. Make sure the token is the full token string (starts with `dop_v1_` or `dop_`)
 
 **Set in GitHub:**
 - Go to your repository → Settings → Secrets and variables → Actions
 - Click "New repository secret"
-- Name: `DO_TOKEN`
-- Value: Your Digital Ocean API token
+- Name: `DO_TOKEN` (exactly this name, case-sensitive)
+- Value: Paste your full Digital Ocean API token
+
+**Troubleshooting:**
+- If you get "401 Unable to authenticate", check:
+  1. The secret name is exactly `DO_TOKEN` (not `DO_TOKEN_` or `DIGITALOCEAN_TOKEN`)
+  2. The token has "Write" scope (not Read-only)
+  3. The token hasn't been revoked or expired
+  4. You copied the entire token (no extra spaces before/after)
 
 ---
 

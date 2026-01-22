@@ -39,9 +39,22 @@ jobs:
           echo "public_key=$(cat ~/.ssh/do_deploy_key.pub)" >> $GITHUB_OUTPUT
           echo "public_key_path=$HOME/.ssh/do_deploy_key.pub" >> $GITHUB_OUTPUT
 
+      - name: Verify DO Token is Set
+        run: |
+          if [ -z "${{ secrets.DO_TOKEN }}" ]; then
+            echo "ERROR: DO_TOKEN secret is not set in GitHub Secrets"
+            echo "Please add DO_TOKEN secret in: Settings → Secrets and variables → Actions"
+            exit 1
+          else
+            echo "DO_TOKEN secret is set (length: ${#DO_TOKEN} characters)"
+          fi
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+
       - name: Terraform Init
         working-directory: infrastructure
         env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN }}
           TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
           TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
           TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key
@@ -54,6 +67,7 @@ jobs:
       - name: Terraform Plan
         working-directory: infrastructure
         env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN }}
           TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
           TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
           TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key
@@ -66,6 +80,7 @@ jobs:
       - name: Terraform Apply
         working-directory: infrastructure
         env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN }}
           TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
           TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
           TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key

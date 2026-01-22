@@ -1,7 +1,10 @@
 variable "do_token" {
-  description = "Digital Ocean API token"
+  description = "Digital Ocean API token (set via DIGITALOCEAN_TOKEN env var in GitHub Actions)"
   type        = string
   sensitive   = true
+  default     = ""
+  # Note: The provider reads from DIGITALOCEAN_TOKEN env var automatically
+  # This variable is kept for backwards compatibility but not used in provider block
 }
 
 variable "ssh_key_name" {
