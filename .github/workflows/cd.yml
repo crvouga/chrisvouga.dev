@@ -107,6 +107,52 @@ jobs:
             echo "ℹ No previous state found - this is a fresh deployment (expected on first run)"
           fi
 
+      - name: Validate Terraform State
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN }}
+          DROPLET_NAME: chrisvouga-dev
+        run: |
+          set -euo pipefail
+          cd infrastructure
+          
+          # Check if state file exists
+          if [ -f terraform.tfstate ] || [ -f terraform.tfstate.backup ]; then
+            echo "✓ Terraform state file exists - proceeding with managed infrastructure"
+            exit 0
+          fi
+          
+          echo "⚠ Terraform state file not found - checking if resources already exist..."
+          
+          # Check if droplet with this name already exists
+          EXISTING_DROPLET=$(doctl compute droplet list --format Name,ID,Status --no-header 2>/dev/null | grep -E "^${DROPLET_NAME}\s" || echo "")
+          
+          if [ -n "$EXISTING_DROPLET" ]; then
+            echo "ERROR: Terraform state is missing but droplet '${DROPLET_NAME}' already exists in DigitalOcean!"
+            echo "This would cause Terraform to create duplicate resources."
+            echo ""
+            echo "Existing droplet found:"
+            echo "$EXISTING_DROPLET"
+            echo ""
+            echo "Possible solutions:"
+            echo "1. Restore the Terraform state artifact from a previous successful run"
+            echo "2. Manually import existing resources into Terraform state"
+            echo "3. Delete the existing droplet if it's no longer needed"
+            echo ""
+            echo "The pipeline will now fail to prevent creating duplicate resources."
+            exit 1
+          fi
+          
+          # Check if reserved IP exists (if enabled)
+          if [ "${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}" = "true" ]; then
+            EXISTING_IP=$(doctl compute reserved-ip list --format IP,Region --no-header 2>/dev/null | grep -E ".*\s{{ secrets.DO_REGION || 'nyc1' }}$" || echo "")
+            if [ -n "$EXISTING_IP" ]; then
+              echo "WARNING: Reserved IP found in region, but this may be expected. Continuing..."
+            fi
+          fi
+          
+          echo "✓ No existing resources found - this appears to be a fresh deployment"
+          echo "Proceeding with infrastructure creation..."
+
       - name: Terraform Init
         working-directory: infrastructure
         env:
