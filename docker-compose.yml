@@ -91,7 +91,6 @@ services:
     container_name: moviefinder-app-rust
     environment:
       STAGE: local
-      DATABASE_URL: postgresql://moviefinder-app-rust-postgres:moviefinder-app-rust-postgres@moviefinder-app-rust-postgres:5432/moviefinder-app-rust-postgres?sslmode=disable
       PORT: 80
       TMDB_API_READ_ACCESS_TOKEN: ${TMDB_API_READ_ACCESS_TOKEN:-noop}
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-noop}
@@ -102,9 +101,6 @@ services:
     networks:
       - projects-network
     restart: unless-stopped
-    depends_on:
-      moviefinder-app-rust-postgres:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
@@ -112,25 +108,6 @@ services:
       retries: 3
       start_period: 40s
   
-  moviefinder-app-rust-postgres:
-    image: postgres:15-alpine
-    container_name: moviefinder-app-rust-postgres
-    environment:
-      POSTGRES_DB: moviefinder-app-rust-postgres
-      POSTGRES_USER: moviefinder-app-rust-postgres
-      POSTGRES_PASSWORD: moviefinder-app-rust-postgres
-    ports:
-      - "5435:5432"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U moviefinder-app-rust-postgres -d moviefinder-app-rust-postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   # Moviefinder App Go
   # Source: https://github.com/crvouga/moviefinder.app-go
   moviefinder-app-go:
@@ -139,7 +116,6 @@ services:
     container_name: moviefinder-app-go
     environment:
       STAGE: local
-      DATABASE_URL: postgresql://moviefinder-app-go-postgres:moviefinder-app-go-postgres@moviefinder-app-go-postgres:5432/moviefinder-app-go-postgres?sslmode=disable
       PORT: 80
       TMDB_API_READ_ACCESS_TOKEN: ${TMDB_API_READ_ACCESS_TOKEN:-noop}
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-noop}
@@ -150,9 +126,6 @@ services:
     networks:
       - projects-network
     restart: unless-stopped
-    depends_on:
-      moviefinder-app-go-postgres:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
@@ -160,25 +133,6 @@ services:
       retries: 3
       start_period: 40s
   
-  moviefinder-app-go-postgres:
-    image: postgres:15-alpine
-    container_name: moviefinder-app-go-postgres
-    environment:
-      POSTGRES_DB: moviefinder-app-go-postgres
-      POSTGRES_USER: moviefinder-app-go-postgres
-      POSTGRES_PASSWORD: moviefinder-app-go-postgres
-    ports:
-      - "5436:5432"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U moviefinder-app-go-postgres -d moviefinder-app-go-postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   # Moviefinder App React
   # Source: https://github.com/crvouga/moviefinder.app-react
   moviefinder-app-react:
