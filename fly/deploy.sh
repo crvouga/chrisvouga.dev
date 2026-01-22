@@ -138,7 +138,7 @@ for app_dir in "${APPS_DIR}"/*; do
 
   # Deploy the app
   echo "Deploying app..."
-  flyctl deploy --config "${app_dir}/fly.toml" -a "${app_name}" --yes
+  flyctl deploy --config "${app_dir}/fly.toml" -a "${app_name}" --ha=false --yes
 
   # Add custom domain certificate (configures Fly's edge routing)
   DOMAIN="${subdomain}.chrisvouga.dev"
