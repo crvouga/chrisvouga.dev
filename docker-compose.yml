@@ -121,8 +121,6 @@ services:
       POSTGRES_PASSWORD: moviefinder-app-rust-postgres
     ports:
       - "5435:5432"
-    volumes:
-      - moviefinder-app-rust-postgres-data:/var/lib/postgresql/data
     networks:
       - projects-network
     restart: unless-stopped
@@ -171,8 +169,6 @@ services:
       POSTGRES_PASSWORD: moviefinder-app-go-postgres
     ports:
       - "5436:5432"
-    volumes:
-      - moviefinder-app-go-postgres-data:/var/lib/postgresql/data
     networks:
       - projects-network
     restart: unless-stopped
@@ -236,6 +232,7 @@ services:
   # Source: https://github.com/crvouga/todo-v1
   todo-app:
     image: crvouga/todo-app:latest
+    platform: linux/amd64
     container_name: todo-app
     ports:
       - "8010:80"
@@ -271,9 +268,10 @@ services:
   # Source: https://github.com/crvouga/connect-four
   connect-four:
     image: crvouga/connect-four:latest
+    platform: linux/amd64
     container_name: connect-four
     ports:
-      - "8009:80"
+      - "8012:80"
     networks:
       - projects-network
     restart: unless-stopped
@@ -284,39 +282,40 @@ services:
       retries: 3
       start_period: 40s
 
-  # # Screenshot Service
-  # # Source: https://github.com/crvouga/screenshot-service
-  # screenshot-service:
-  #   image: crvouga/screenshot-service:latest
-  #   container_name: screenshot-service
-  #   ports:
-  #     - "8010:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Screenshot Service
+  # Source: https://github.com/crvouga/screenshot-service
+  screenshot-service:
+    image: crvouga/screenshot-service:latest
+    container_name: screenshot-service
+    ports:
+      - "8010:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # # Anime Blog
-  # # Source: https://github.com/crvouga/anime
-  # anime-blog:
-  #   image: crvouga/anime-blog:latest
-  #   container_name: anime-blog
-  #   ports:
-  #     - "8011:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Anime Blog
+  # Source: https://github.com/crvouga/anime
+  anime-blog:
+    image: crvouga/anime-blog:latest
+    platform: linux/amd64
+    container_name: anime-blog
+    ports:
+      - "8011:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # # Snake Game
   # # Source: https://github.com/crvouga/snake
@@ -379,8 +378,6 @@ services:
       - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
     networks:
       - projects-network
     restart: unless-stopped
@@ -395,9 +392,9 @@ services:
       - moviefinder-app-react
       - moviefinder-app-clojurescript
       - todo-app
-      # - connect-four
-      # - screenshot-service
-      # - anime-blog
+      - connect-four
+      - screenshot-service
+      - anime-blog
       # - snake-game
       # - match-three
       # - simon-says
@@ -405,9 +402,3 @@ services:
 networks:
   projects-network:
     driver: bridge
-
-volumes:
-  caddy_data:
-  caddy_config:
-  moviefinder-app-rust-postgres-data:
-  moviefinder-app-go-postgres-data:

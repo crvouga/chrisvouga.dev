@@ -434,9 +434,10 @@ const PROJECT_AIRR = {
     t: "private",
   },
   deployment: {
-    t: "public",
+    // t: "public",
     // url: "https://experience-airr.heysia.ai/",
-    url: "https://one-origin-airr-production.up.railway.app",
+    // url: "https://one-origin-airr-production.up.railway.app",
+    t: 'not-deployed-anymore',
   },
   description:
     "Interactive product demonstration for Airr, an enterprise solution that automates transcript consumption and analysis. Showcases advanced data processing capabilities and intuitive user interface design for complex workflow management.",
