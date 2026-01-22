@@ -481,8 +481,9 @@ const PROJECT_SCREENSHOT_SERVICE = {
     url: "https://github.com/crvouga/screenshot-service",
   },
   deployment: {
-    t: "public",
-    url: "https://screenshotservice.chrisvouga.dev",
+    // t: "public",
+    // url: "https://screenshotservice.chrisvouga.dev",
+    t: 'not-deployed-anymore',
   },
   description: `Software-as-a-Service platform enabling developers to programmatically generate high-quality screenshots of web pages. Provides reliable, scalable screenshot generation with customizable options. Powers the screenshot generation for this portfolio.`,
   imageAlt: IMAGE_ALT,
