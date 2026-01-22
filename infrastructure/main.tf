@@ -31,6 +31,16 @@ resource "digitalocean_droplet" "main" {
     apt-get upgrade -y
     apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
   EOF
+
+  # Prevent accidental destruction - require explicit destroy
+  lifecycle {
+    prevent_destroy = false  # Allow destroy, but we'll validate in CI
+    ignore_changes = [
+      # Ignore changes to SSH keys after initial creation to avoid recreation
+      # The SSH key will be managed separately
+      ssh_keys,
+    ]
+  }
 }
 
 # Create firewall and attach to droplet

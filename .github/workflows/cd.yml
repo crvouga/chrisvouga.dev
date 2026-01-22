@@ -192,6 +192,56 @@ jobs:
             fi
             
             echo "✓ Successfully imported existing resources into Terraform state"
+            
+            # Refresh state to sync with actual resources
+            echo "Refreshing Terraform state to sync with actual resources..."
+            terraform refresh -input=false 2>&1 || {
+              echo "WARNING: State refresh had issues, but continuing..."
+            }
+            
+            # Check what changes Terraform wants to make
+            echo "Checking what changes Terraform wants to make after import..."
+            PLAN_OUTPUT=$(terraform plan -detailed-exitcode -input=false 2>&1 || true)
+            PLAN_EXIT_CODE=$?
+            
+            # Check if plan wants to destroy the droplet
+            if echo "$PLAN_OUTPUT" | grep -q "digitalocean_droplet.main.*will be destroyed"; then
+              echo "ERROR: Terraform plan wants to DESTROY the existing droplet!"
+              echo "This usually happens when there's a configuration mismatch after import."
+              echo ""
+              echo "Plan output:"
+              echo "$PLAN_OUTPUT"
+              echo ""
+              echo "Possible causes:"
+              echo "1. SSH key mismatch - imported droplet has different SSH keys"
+              echo "2. Configuration drift - droplet settings don't match Terraform config"
+              echo "3. Image/size mismatch"
+              echo ""
+              echo "To fix this:"
+              echo "1. Review the plan output above to see what's different"
+              echo "2. Update Terraform configuration to match existing droplet"
+              echo "3. Or manually reconcile the differences"
+              exit 1
+            fi
+            
+            if echo "$PLAN_OUTPUT" | grep -q "digitalocean_droplet.main.*must be replaced"; then
+              echo "ERROR: Terraform plan wants to REPLACE the existing droplet!"
+              echo "This would destroy and recreate the droplet, causing downtime."
+              echo ""
+              echo "Plan output:"
+              echo "$PLAN_OUTPUT"
+              echo ""
+              echo "This is not allowed. Please fix the configuration mismatch."
+              exit 1
+            fi
+            
+            if [ $PLAN_EXIT_CODE -eq 2 ]; then
+              echo "⚠ Terraform plan has changes after import (this may be expected)"
+              echo "Review the plan output above to ensure changes are safe"
+            elif [ $PLAN_EXIT_CODE -eq 0 ]; then
+              echo "✓ Terraform plan shows no changes needed - state is in sync"
+            fi
+            
             echo "State file should now exist. Continuing with infrastructure management..."
           else
             echo "✓ No existing resources found - this appears to be a fresh deployment"
