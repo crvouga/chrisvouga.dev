@@ -60,6 +60,13 @@ jobs:
         env:
           DO_TOKEN: ${{ secrets.DO_TOKEN }}
 
+      - name: Download Terraform State (if exists)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: terraform-state
+          path: infrastructure/
+
       - name: Terraform Init
         working-directory: infrastructure
         env:
@@ -156,6 +163,15 @@ jobs:
           name: ssh-key
           path: /tmp/do_deploy_key
           retention-days: 1
+
+      - name: Upload Terraform State
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: terraform-state
+          path: infrastructure/*.tfstate*
+          retention-days: 7
+          if-no-files-found: ignore
 
   typecheck:
     runs-on: ubuntu-latest
