@@ -67,11 +67,13 @@ jobs:
           DO_TOKEN: ${{ secrets.DO_TOKEN }}
 
       - name: Download Terraform State (if exists)
+        id: download-state
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: terraform-state
           path: infrastructure/
+        # Note: This will fail on first run - that's expected and handled by continue-on-error
 
       - name: Terraform Init
         working-directory: infrastructure
@@ -85,6 +87,14 @@ jobs:
           TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
           TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
         run: |
+          # Check if state was downloaded
+          if [ "${{ steps.download-state.outcome }}" == "failure" ]; then
+            echo "No previous Terraform state found - this appears to be a fresh deployment"
+            echo "This is expected on the first run or if state was cleared"
+          else
+            echo "Previous Terraform state downloaded successfully"
+          fi
+          
           terraform init
           # Verify state file exists (or will be created)
           if [ -f terraform.tfstate ] || [ -f .terraform/terraform.tfstate ]; then
