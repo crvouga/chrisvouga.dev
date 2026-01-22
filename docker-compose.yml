@@ -1,4 +1,4 @@
-version: '3.8'
+name: chrisvouga.dev
 
 services:
   # Portfolio Site
@@ -35,175 +35,175 @@ services:
       retries: 3
       start_period: 40s
 
-  # Headless Combobox
-  # Source: https://github.com/crvouga/headless-combobox
-  headless-combobox:
-    image: crvouga/headless-combobox:latest
-    container_name: headless-combobox
-    ports:
-      - "8005:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Headless Combobox
+  # # Source: https://github.com/crvouga/headless-combobox
+  # headless-combobox:
+  #   image: crvouga/headless-combobox:latest
+  #   container_name: headless-combobox
+  #   ports:
+  #     - "8005:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Moviefinder App
-  # Source: https://github.com/crvouga/moviefinder.app-rust
-  moviefinder-app-rust:
-    image: crvouga/moviefinder-app-rust:latest
-    container_name: moviefinder-app-rust
-    ports:
-      - "8006:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Moviefinder App
+  # # Source: https://github.com/crvouga/moviefinder.app-rust
+  # moviefinder-app-rust:
+  #   image: crvouga/moviefinder-app-rust:latest
+  #   container_name: moviefinder-app-rust
+  #   ports:
+  #     - "8006:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Todo App
-  # Source: https://github.com/crvouga/todo-v1
-  todo-app:
-    image: crvouga/todo-app:latest
-    container_name: todo-app
-    ports:
-      - "8007:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Todo App
+  # # Source: https://github.com/crvouga/todo-v1
+  # todo-app:
+  #   image: crvouga/todo-app:latest
+  #   container_name: todo-app
+  #   ports:
+  #     - "8007:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Image Service
-  # Source: https://github.com/crvouga/imageresizerservice.com
-  image-service:
-    image: crvouga/image-service:latest
-    container_name: image-service
-    ports:
-      - "8008:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Image Service
+  # # Source: https://github.com/crvouga/imageresizerservice.com
+  # image-service:
+  #   image: crvouga/image-service:latest
+  #   container_name: image-service
+  #   ports:
+  #     - "8008:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Connect Four
-  # Source: https://github.com/crvouga/connect-four
-  connect-four:
-    image: crvouga/connect-four:latest
-    container_name: connect-four
-    ports:
-      - "8009:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Connect Four
+  # # Source: https://github.com/crvouga/connect-four
+  # connect-four:
+  #   image: crvouga/connect-four:latest
+  #   container_name: connect-four
+  #   ports:
+  #     - "8009:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Screenshot Service
-  # Source: https://github.com/crvouga/screenshot-service
-  screenshot-service:
-    image: crvouga/screenshot-service:latest
-    container_name: screenshot-service
-    ports:
-      - "8010:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Screenshot Service
+  # # Source: https://github.com/crvouga/screenshot-service
+  # screenshot-service:
+  #   image: crvouga/screenshot-service:latest
+  #   container_name: screenshot-service
+  #   ports:
+  #     - "8010:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Anime Blog
-  # Source: https://github.com/crvouga/anime
-  anime-blog:
-    image: crvouga/anime-blog:latest
-    container_name: anime-blog
-    ports:
-      - "8011:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Anime Blog
+  # # Source: https://github.com/crvouga/anime
+  # anime-blog:
+  #   image: crvouga/anime-blog:latest
+  #   container_name: anime-blog
+  #   ports:
+  #     - "8011:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Snake Game
-  # Source: https://github.com/crvouga/snake
-  snake-game:
-    image: crvouga/snake-game:latest
-    container_name: snake-game
-    ports:
-      - "8012:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Snake Game
+  # # Source: https://github.com/crvouga/snake
+  # snake-game:
+  #   image: crvouga/snake-game:latest
+  #   container_name: snake-game
+  #   ports:
+  #     - "8012:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Match Three
-  # Source: https://github.com/crvouga/match-three
-  match-three:
-    image: crvouga/match-three:latest
-    container_name: match-three
-    ports:
-      - "8013:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Match Three
+  # # Source: https://github.com/crvouga/match-three
+  # match-three:
+  #   image: crvouga/match-three:latest
+  #   container_name: match-three
+  #   ports:
+  #     - "8013:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
-  # Simon Says
-  # Source: https://github.com/crvouga/simon-says
-  simon-says:
-    image: crvouga/simon-says:latest
-    container_name: simon-says
-    ports:
-      - "8014:80"
-    networks:
-      - projects-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # # Simon Says
+  # # Source: https://github.com/crvouga/simon-says
+  # simon-says:
+  #   image: crvouga/simon-says:latest
+  #   container_name: simon-says
+  #   ports:
+  #     - "8014:80"
+  #   networks:
+  #     - projects-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
   # Caddy Reverse Proxy
   caddy:
