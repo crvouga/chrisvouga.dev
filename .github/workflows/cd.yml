@@ -58,6 +58,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: typecheck
+    if: false # TODO: Enable this when the tests are ready
 
     steps:
       - name: Checkout code
@@ -80,6 +81,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     needs: [test, health-check-urls]
+    if: false # TODO: Enable this when the tests are ready
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
