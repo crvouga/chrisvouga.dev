@@ -98,22 +98,23 @@ services:
   #     retries: 3
   #     start_period: 40s
 
-  # # Image Service
-  # # Source: https://github.com/crvouga/imageresizerservice.com
-  # image-service:
-  #   image: crvouga/image-service:latest
-  #   container_name: image-service
-  #   ports:
-  #     - "8008:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Image Service
+  # Source: https://github.com/crvouga/image-service
+  image-service:
+    image: crvouga/image-service:latest
+    platform: linux/amd64
+    container_name: image-service
+    ports:
+      - "8008:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # # Connect Four
   # # Source: https://github.com/crvouga/connect-four

@@ -6,6 +6,7 @@
     "alpinejs",
     "bloodwork",
     "Buildx",
+    "Caddyfile",
     "chrisvouga",
     "codegen",
     "combobox",
