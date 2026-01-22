@@ -1,24 +1,25 @@
 #!/bin/bash
 set -e
 
-# Service configuration mapping: app_dir -> (app_name, subdomain, needs_secrets)
+# Service configuration mapping: app_dir -> (app_name, subdomain, secrets)
+# Secrets format: comma-separated list of secret names (or "none")
 declare -A SERVICES=(
-  ["portfolio"]="crvouga-portfolio www false"
-  ["pickflix"]="crvouga-pickflix pickflix true"
-  ["headless-combobox-docs"]="crvouga-headless-combobox-docs headless-combobox-docs false"
-  ["headless-combobox-svelte-example"]="crvouga-headless-combobox-svelte-example headless-combobox-svelte false"
-  ["moviefinder-app-rust"]="crvouga-moviefinder-app-rust moviefinder-rust true"
-  ["moviefinder-app-go"]="crvouga-moviefinder-app-go moviefinder-go true"
-  ["moviefinder-app-react"]="crvouga-moviefinder-app-react moviefinder-react true"
-  ["moviefinder-app-clojurescript"]="crvouga-moviefinder-app-clojurescript moviefinder-cljs true"
-  ["todo-app"]="crvouga-todo-app todo false"
-  ["image-service"]="crvouga-image-service image-service false"
-  ["connect-four"]="crvouga-connect-four connect-four false"
-  ["screenshot-service"]="crvouga-screenshot-service screenshot-service false"
-  ["anime-blog"]="crvouga-anime-blog anime false"
-  ["snake-game"]="crvouga-snake-game snake false"
-  ["match-three"]="crvouga-match-three match-three false"
-  ["simon-says"]="crvouga-simon-says simon-says false"
+  ["portfolio"]="crvouga-portfolio www none"
+  ["pickflix"]="crvouga-pickflix pickflix TMDB_API_READ_ACCESS_TOKEN"
+  ["headless-combobox-docs"]="crvouga-headless-combobox-docs headless-combobox-docs none"
+  ["headless-combobox-svelte-example"]="crvouga-headless-combobox-svelte-example headless-combobox-svelte none"
+  ["moviefinder-app-rust"]="crvouga-moviefinder-app-rust moviefinder-rust TMDB_API_READ_ACCESS_TOKEN,TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN,TWILIO_SERVICE_SID"
+  ["moviefinder-app-go"]="crvouga-moviefinder-app-go moviefinder-go TMDB_API_READ_ACCESS_TOKEN,TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN,TWILIO_SERVICE_SID"
+  ["moviefinder-app-react"]="crvouga-moviefinder-app-react moviefinder-react TMDB_API_READ_ACCESS_TOKEN,TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN,TWILIO_SERVICE_SID"
+  ["moviefinder-app-clojurescript"]="crvouga-moviefinder-app-clojurescript moviefinder-cljs TMDB_API_READ_ACCESS_TOKEN,TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN,TWILIO_SERVICE_SID"
+  ["todo-app"]="crvouga-todo-app todo none"
+  ["image-service"]="crvouga-image-service image-service none"
+  ["connect-four"]="crvouga-connect-four connect-four none"
+  ["screenshot-service"]="crvouga-screenshot-service screenshot-service none"
+  ["anime-blog"]="crvouga-anime-blog anime none"
+  ["snake-game"]="crvouga-snake-game snake none"
+  ["match-three"]="crvouga-match-three match-three none"
+  ["simon-says"]="crvouga-simon-says simon-says none"
 )
 
 # Get the directory where the script is located
@@ -73,7 +74,7 @@ for app_dir in "${APPS_DIR}"/*; do
   fi
 
   # Parse service config
-  IFS=' ' read -r app_name subdomain needs_secrets <<< "${SERVICES[$app_folder]}"
+  IFS=' ' read -r app_name subdomain secrets_list <<< "${SERVICES[$app_folder]}"
   
   echo ""
   echo "=========================================="
@@ -100,37 +101,23 @@ for app_dir in "${APPS_DIR}"/*; do
   fi
 
   # Set secrets if needed
-  if [ "${needs_secrets}" = "true" ]; then
+  if [ "${secrets_list}" != "none" ]; then
     echo "Setting secrets..."
     
-    # Build secrets array
+    # Build secrets array from comma-separated list
     SECRETS=()
+    IFS=',' read -ra SECRET_NAMES <<< "${secrets_list}"
     
-    # All moviefinder apps need TMDB and Twilio secrets
-    if [[ "${app_name}" == *"moviefinder"* ]] || [[ "${app_name}" == "crvouga-pickflix" ]]; then
-      if [ -n "${TMDB_API_READ_ACCESS_TOKEN}" ]; then
-        SECRETS+=("TMDB_API_READ_ACCESS_TOKEN=${TMDB_API_READ_ACCESS_TOKEN}")
+    for secret_name in "${SECRET_NAMES[@]}"; do
+      # Get the value of the environment variable with this name
+      secret_value="${!secret_name}"
+      
+      if [ -n "${secret_value}" ]; then
+        SECRETS+=("${secret_name}=${secret_value}")
+      else
+        echo "Warning: Secret ${secret_name} not found in environment"
       fi
-    fi
-    
-    # Moviefinder apps also need Twilio secrets
-    if [[ "${app_name}" == *"moviefinder"* ]]; then
-      if [ -n "${TWILIO_ACCOUNT_SID}" ]; then
-        SECRETS+=("TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}")
-      fi
-      if [ -n "${TWILIO_AUTH_TOKEN}" ]; then
-        SECRETS+=("TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}")
-      fi
-      if [ -n "${TWILIO_SERVICE_SID}" ]; then
-        SECRETS+=("TWILIO_SERVICE_SID=${TWILIO_SERVICE_SID}")
-      fi
-    fi
-    
-    # Pickflix only needs TMDB
-    if [ "${app_name}" == "crvouga-pickflix" ]; then
-      # Already added TMDB above
-      :
-    fi
+    done
     
     # Set secrets if we have any (this updates existing or creates new)
     if [ ${#SECRETS[@]} -gt 0 ]; then
