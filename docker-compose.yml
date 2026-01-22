@@ -148,7 +148,7 @@ services:
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-noop}
       TWILIO_SERVICE_SID: ${TWILIO_SERVICE_SID:-noop}
     ports:
-      - "8007:80"
+      - "8009:80"
     networks:
       - projects-network
     restart: unless-stopped
@@ -170,7 +170,7 @@ services:
       POSTGRES_USER: moviefinder-app-go-postgres
       POSTGRES_PASSWORD: moviefinder-app-go-postgres
     ports:
-      - "5435:5432"
+      - "5436:5432"
     volumes:
       - moviefinder-app-go-postgres-data:/var/lib/postgresql/data
     networks:
@@ -361,3 +361,4 @@ volumes:
   caddy_data:
   caddy_config:
   moviefinder-app-rust-postgres-data:
+  moviefinder-app-go-postgres-data:
