@@ -343,7 +343,7 @@ services:
     platform: linux/amd64
     container_name: match-three
     ports:
-      - "8013:80"
+      - "8016:80"
     networks:
       - projects-network
     restart: unless-stopped
@@ -361,7 +361,7 @@ services:
     platform: linux/amd64
     container_name: simon-says
     ports:
-      - "8014:80"
+      - "8017:80"
     networks:
       - projects-network
     restart: unless-stopped
