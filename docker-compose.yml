@@ -267,22 +267,22 @@ services:
       retries: 3
       start_period: 40s
 
-  # # Connect Four
-  # # Source: https://github.com/crvouga/connect-four
-  # connect-four:
-  #   image: crvouga/connect-four:latest
-  #   container_name: connect-four
-  #   ports:
-  #     - "8009:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Connect Four
+  # Source: https://github.com/crvouga/connect-four
+  connect-four:
+    image: crvouga/connect-four:latest
+    container_name: connect-four
+    ports:
+      - "8009:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # # Screenshot Service
   # # Source: https://github.com/crvouga/screenshot-service
