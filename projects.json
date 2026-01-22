@@ -1,0 +1,174 @@
+{
+  "projects": [
+    {
+      "name": "portfolio",
+      "subdomain": "portfolio",
+      "image": "crvouga/portfolio:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "pickflix",
+      "subdomain": "pickflix",
+      "image": "crvouga/pickflix:latest",
+      "internal_port": 3000,
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": "3000",
+        "DATABASE_URL": "noop",
+        "SECRET": "noop",
+        "SEND_GRID_API_KEY": "noop",
+        "SEND_GRID_REGISTERED_EMAIL_ADDRESS": "noop",
+        "SESSION_COOKIE_SECRET": "noop",
+        "YOUTUBE_API_KEY": "noop"
+      },
+      "secrets": [
+        "TMDB_API_READ_ACCESS_TOKEN"
+      ]
+    },
+    {
+      "name": "headless-combobox-docs",
+      "subdomain": "headless-combobox-docs",
+      "image": "crvouga/headless-combobox-docs:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "headless-combobox-svelte-example",
+      "subdomain": "headless-combobox-svelte-example",
+      "image": "crvouga/headless-combobox-svelte-example:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "moviefinder-app-rust",
+      "subdomain": "moviefinder-app-rust",
+      "image": "crvouga/moviefinder-app-rust:latest",
+      "internal_port": 80,
+      "env": {
+        "STAGE": "local",
+        "PORT": "80"
+      },
+      "secrets": [
+        "TMDB_API_READ_ACCESS_TOKEN",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_SERVICE_SID"
+      ]
+    },
+    {
+      "name": "moviefinder-app-go",
+      "subdomain": "moviefinder-app-go",
+      "image": "crvouga/moviefinder-app-go:latest",
+      "internal_port": 80,
+      "env": {
+        "STAGE": "local",
+        "PORT": "80"
+      },
+      "secrets": [
+        "TMDB_API_READ_ACCESS_TOKEN",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_SERVICE_SID"
+      ]
+    },
+    {
+      "name": "moviefinder-app-react",
+      "subdomain": "moviefinder-app-react",
+      "image": "crvouga/moviefinder-app-react:latest",
+      "internal_port": 80,
+      "env": {
+        "STAGE": "local",
+        "PORT": "80"
+      },
+      "secrets": [
+        "TMDB_API_READ_ACCESS_TOKEN",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_SERVICE_SID"
+      ]
+    },
+    {
+      "name": "moviefinder-app-clojurescript",
+      "subdomain": "moviefinder-app-clojurescript",
+      "image": "crvouga/moviefinder-app-clojurescript:latest",
+      "internal_port": 8888,
+      "env": {
+        "PORT": "8888"
+      },
+      "secrets": [
+        "TMDB_API_READ_ACCESS_TOKEN",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_SERVICE_SID"
+      ]
+    },
+    {
+      "name": "todo-app",
+      "subdomain": "todo-app",
+      "image": "crvouga/todo-app:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "image-service",
+      "subdomain": "image-service",
+      "image": "crvouga/image-service:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "connect-four",
+      "subdomain": "connect-four",
+      "image": "crvouga/connect-four:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "screenshot-service",
+      "subdomain": "screenshot-service",
+      "image": "crvouga/screenshot-service:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "anime-blog",
+      "subdomain": "anime-blog",
+      "image": "crvouga/anime-blog:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "snake-game",
+      "subdomain": "snake-game",
+      "image": "crvouga/snake-game:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "match-three",
+      "subdomain": "match-three",
+      "image": "crvouga/match-three:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    },
+    {
+      "name": "simon-says",
+      "subdomain": "simon-says",
+      "image": "crvouga/simon-says:latest",
+      "internal_port": 80,
+      "env": {},
+      "secrets": []
+    }
+  ]
+}
