@@ -380,8 +380,6 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
     networks:
       - projects-network
     restart: unless-stopped
