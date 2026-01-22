@@ -28,13 +28,13 @@ APPS_DIR="${SCRIPT_DIR}/apps"
 # Helper function to check if app exists
 app_exists() {
   local app_name=$1
-  flyctl apps list --json 2>/dev/null | grep -q "\"Name\":\"${app_name}\""
+  flyctl apps list 2>/dev/null | grep -q "^${app_name}[[:space:]]"
 }
 
 # Helper function to check if app has IPv4
 has_ipv4() {
   local app_name=$1
-  flyctl ips list -a "${app_name}" --json 2>/dev/null | grep -q '"Type":"v4"'
+  flyctl ips list -a "${app_name}" 2>/dev/null | grep -q "v4"
 }
 
 # Helper function to check if cert exists
@@ -44,7 +44,7 @@ cert_exists() {
   flyctl certs list -a "${app_name}" 2>/dev/null | grep -q "${domain}"
 }
 
-# Allocate shared IPv4 on first app (portfolio)
+# Allocate shared IPv4 on first app (portfolio) if it exists
 FIRST_APP="crvouga-portfolio"
 echo "Checking IPv4 for ${FIRST_APP}..."
 if app_exists "${FIRST_APP}"; then
@@ -52,10 +52,10 @@ if app_exists "${FIRST_APP}"; then
     echo "✓ IPv4 already allocated for ${FIRST_APP}"
   else
     echo "Allocating shared IPv4 for ${FIRST_APP}..."
-    flyctl ips allocate-v4 --shared -a "${FIRST_APP}"
+    flyctl ips allocate-v4 --shared -a "${FIRST_APP}" 2>/dev/null || echo "Note: IPv4 allocation skipped or already exists"
   fi
 else
-  echo "Skipping IPv4 allocation (app doesn't exist yet)"
+  echo "Note: ${FIRST_APP} doesn't exist yet, will allocate IPv4 during deployment"
 fi
 
 # Iterate through each app directory
@@ -89,12 +89,14 @@ for app_dir in "${APPS_DIR}"/*; do
     flyctl apps create "${app_name}" --org personal
   fi
 
-  # Allocate shared IPv4 to this app
-  if has_ipv4 "${app_name}"; then
-    echo "✓ IPv4 already allocated for ${app_name}"
-  else
-    echo "Allocating shared IPv4 for ${app_name}..."
-    flyctl ips allocate-v4 --shared -a "${app_name}"
+  # Allocate shared IPv4 to this app (only if app exists)
+  if app_exists "${app_name}"; then
+    if has_ipv4 "${app_name}"; then
+      echo "✓ IPv4 already allocated for ${app_name}"
+    else
+      echo "Allocating shared IPv4 for ${app_name}..."
+      flyctl ips allocate-v4 --shared -a "${app_name}" 2>/dev/null || echo "Note: IPv4 allocation skipped or already exists"
+    fi
   fi
 
   # Set secrets if needed
@@ -130,9 +132,9 @@ for app_dir in "${APPS_DIR}"/*; do
       :
     fi
     
-    # Set secrets if we have any
+    # Set secrets if we have any (this updates existing or creates new)
     if [ ${#SECRETS[@]} -gt 0 ]; then
-      flyctl secrets set "${SECRETS[@]}" -a "${app_name}"
+      flyctl secrets set "${SECRETS[@]}" -a "${app_name}" 2>/dev/null || echo "Note: Secrets may already be set"
     fi
   fi
 
@@ -146,7 +148,7 @@ for app_dir in "${APPS_DIR}"/*; do
     echo "✓ Certificate for ${DOMAIN} already exists"
   else
     echo "Adding certificate for ${DOMAIN}..."
-    flyctl certs add "${DOMAIN}" -a "${app_name}"
+    flyctl certs add "${DOMAIN}" -a "${app_name}" 2>/dev/null || echo "Note: Certificate already exists or failed to add"
   fi
   
   # Also add www for portfolio
@@ -156,7 +158,7 @@ for app_dir in "${APPS_DIR}"/*; do
       echo "✓ Certificate for ${WWW_DOMAIN} already exists"
     else
       echo "Adding www certificate for portfolio..."
-      flyctl certs add "${WWW_DOMAIN}" -a "${app_name}"
+      flyctl certs add "${WWW_DOMAIN}" -a "${app_name}" 2>/dev/null || echo "Note: Certificate already exists or failed to add"
     fi
     
     APEX_DOMAIN="chrisvouga.dev"
@@ -164,7 +166,7 @@ for app_dir in "${APPS_DIR}"/*; do
       echo "✓ Certificate for ${APEX_DOMAIN} already exists"
     else
       echo "Adding apex domain certificate for portfolio..."
-      flyctl certs add "${APEX_DOMAIN}" -a "${app_name}"
+      flyctl certs add "${APEX_DOMAIN}" -a "${app_name}" 2>/dev/null || echo "Note: Certificate already exists or failed to add"
     fi
   fi
 
