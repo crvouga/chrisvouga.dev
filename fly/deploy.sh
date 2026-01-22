@@ -28,7 +28,7 @@ APPS_DIR="${SCRIPT_DIR}/apps"
 # Allocate shared IPv4 on first app (portfolio)
 FIRST_APP="crvouga-portfolio"
 echo "Allocating shared IPv4 address (if needed)..."
-fly ips allocate-v4 --shared -a "${FIRST_APP}" || true
+flyctl ips allocate-v4 --shared -a "${FIRST_APP}" || true
 
 # Iterate through each app directory
 for app_dir in "${APPS_DIR}"/*; do
