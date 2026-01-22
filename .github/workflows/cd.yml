@@ -27,6 +27,7 @@ jobs:
     outputs:
       droplet_ip: ${{ steps.terraform-output.outputs.droplet_ip }}
       reserved_ip: ${{ steps.terraform-output.outputs.reserved_ip }}
+      ssh_private_key: ${{ steps.ssh-key.outputs.private_key }}
     
     steps:
       - name: Checkout code
@@ -190,13 +191,6 @@ jobs:
           scp -o StrictHostKeyChecking=no -i /tmp/do_deploy_key scripts/setup-server.sh root@$DROPLET_IP:/tmp/
           ssh -o StrictHostKeyChecking=no -i /tmp/do_deploy_key root@$DROPLET_IP "chmod +x /tmp/setup-server.sh && /tmp/setup-server.sh"
 
-      - name: Upload SSH Key as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ssh-key
-          path: /tmp/do_deploy_key
-          retention-days: 1
-
       - name: Upload Terraform State
         uses: actions/upload-artifact@v4
         if: always()
@@ -288,14 +282,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download SSH Key
-        uses: actions/download-artifact@v4
-        with:
-          name: ssh-key
-          path: ~/.ssh/
-
-      - name: Setup SSH
+      - name: Setup SSH Key
         run: |
+          mkdir -p ~/.ssh
+          echo "${{ needs.infrastructure.outputs.ssh_private_key }}" > ~/.ssh/do_deploy_key
           chmod 600 ~/.ssh/do_deploy_key
           ssh-keyscan -H ${{ needs.infrastructure.outputs.droplet_ip }} >> ~/.ssh/known_hosts
 
