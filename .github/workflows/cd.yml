@@ -8,6 +8,11 @@ on:
     branches:
       - main
 
+# Prevent concurrent runs to avoid Terraform state conflicts
+concurrency:
+  group: deployment-pipeline-${{ github.ref }}
+  cancel-in-progress: false  # Don't cancel, let current run finish
+
 jobs:
   infrastructure:
     runs-on: ubuntu-latest
