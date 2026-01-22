@@ -218,14 +218,17 @@ jobs:
               echo "$PLAN_OUTPUT"
               echo ""
               echo "Possible causes:"
-              echo "1. SSH key mismatch - imported droplet has different SSH keys"
+              echo "1. SSH key mismatch - imported droplet has different SSH keys (most common)"
+              echo "   Note: SSH keys are set to ignore_changes, but if other attributes differ,"
+              echo "   Terraform may still want to recreate the droplet"
               echo "2. Configuration drift - droplet settings don't match Terraform config"
-              echo "3. Image/size mismatch"
+              echo "3. Image/size/region mismatch"
               echo ""
               echo "To fix this:"
               echo "1. Review the plan output above to see what's different"
-              echo "2. Update Terraform configuration to match existing droplet"
-              echo "3. Or manually reconcile the differences"
+              echo "2. If it's just SSH keys, the ignore_changes should prevent recreation"
+              echo "3. If other attributes differ, update Terraform config to match existing droplet"
+              echo "4. Or manually reconcile the differences in Terraform state"
               exit 1
             fi
             
