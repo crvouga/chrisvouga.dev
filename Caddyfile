@@ -61,9 +61,51 @@ svelte.headlesscombobox.chrisvouga.dev {
     encode gzip zstd
 }
 
-# Moviefinder App
+# Moviefinder App Rust
 moviefinder-app-rust.chrisvouga.dev {
     reverse_proxy moviefinder-app-rust:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Moviefinder App Go
+moviefinder-app-go.chrisvouga.dev {
+    reverse_proxy moviefinder-app-go:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Moviefinder App React
+moviefinder-app-react.chrisvouga.dev {
+    reverse_proxy moviefinder-app-react:80
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# Moviefinder App ClojureScript
+moviefinder-app-clojurescript.chrisvouga.dev {
+    reverse_proxy moviefinder-app-clojurescript:8888
 
     header {
         X-Frame-Options "SAMEORIGIN"

@@ -80,3 +80,51 @@ jobs:
           cache-from: type=registry,ref=crvouga/portfolio:latest
           cache-to: type=inline
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DO_SSH_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.DO_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          TMDB_API_READ_ACCESS_TOKEN=${{ secrets.TMDB_API_READ_ACCESS_TOKEN }}
+          TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_SERVICE_SID=${{ secrets.TWILIO_SERVICE_SID }}
+          EOF
+
+      - name: Deploy to Digital Ocean
+        env:
+          DO_HOST: ${{ secrets.DO_HOST }}
+          DO_USER: ${{ secrets.DO_USER || 'root' }}
+          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR || '/opt/chrisvouga-dev' }}
+        run: |
+          chmod +x scripts/deploy.sh
+          DO_HOST="$DO_HOST" DO_USER="$DO_USER" DEPLOY_DIR="$DEPLOY_DIR" ./scripts/deploy.sh
+
+      - name: Verify deployment
+        env:
+          DO_HOST: ${{ secrets.DO_HOST }}
+          DO_USER: ${{ secrets.DO_USER || 'root' }}
+          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR || '/opt/chrisvouga-dev' }}
+        run: |
+          ssh $DO_USER@$DO_HOST "cd $DEPLOY_DIR && docker compose ps"
+
+
