@@ -37,6 +37,11 @@ jobs:
         with:
           terraform_version: 1.6.0
 
+      - name: Install Digital Ocean CLI (doctl)
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_TOKEN }}
+
       - name: Generate SSH Key Pair
         id: ssh-key
         run: |
@@ -91,17 +96,26 @@ jobs:
         working-directory: infrastructure
         env:
           DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN }}
+          TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+          TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
+          TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key
+          TF_VAR_droplet_name: chrisvouga-dev
+          TF_VAR_droplet_region: ${{ secrets.DO_REGION || 'nyc1' }}
+          TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
+          TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
         continue-on-error: true
         run: |
+          # Initialize Terraform first
+          terraform init
+          
           # Check if firewall with this name already exists
           FIREWALL_NAME="chrisvouga-dev-firewall"
-          FIREWALL_ID=$(doctl compute firewall list --format ID,Name --no-header | grep "$FIREWALL_NAME" | awk '{print $1}' | head -n1 || echo "")
+          FIREWALL_ID=$(doctl compute firewall list --format ID,Name --no-header 2>/dev/null | grep "$FIREWALL_NAME" | awk '{print $1}' | head -n1 || echo "")
           
-          if [ -n "$FIREWALL_ID" ]; then
+          if [ -n "$FIREWALL_ID" ] && [ "$FIREWALL_ID" != "null" ]; then
             echo "Found existing firewall: $FIREWALL_ID"
             echo "Attempting to import into Terraform state..."
-            terraform init
-            terraform import digitalocean_firewall.main "$FIREWALL_ID" || echo "Import failed, will try to create/update"
+            terraform import digitalocean_firewall.main "$FIREWALL_ID" 2>&1 || echo "Import failed or already in state, continuing..."
           else
             echo "No existing firewall found with name: $FIREWALL_NAME"
           fi
