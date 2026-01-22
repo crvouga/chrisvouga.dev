@@ -143,20 +143,25 @@ jobs:
             echo "⚠ Found existing droplet '${DROPLET_NAME}' (ID: ${DROPLET_ID}, Status: ${DROPLET_STATUS})"
             echo "Attempting to import existing resources into Terraform state..."
             
-            # Check for SSH key
+            # Check for SSH key - try to find it by name first
             SSH_KEY_ID=$(doctl compute ssh-key list --format ID,Name --no-header 2>/dev/null | grep -E "\s${TF_VAR_ssh_key_name}$" | awk '{print $1}' | head -n1 || echo "")
             
+            # If not found by name, check what SSH keys are attached to the droplet
             if [ -z "$SSH_KEY_ID" ]; then
-              echo "ERROR: SSH key '${TF_VAR_ssh_key_name}' not found in DigitalOcean"
-              echo "Cannot import droplet without the SSH key. Please ensure the SSH key exists or delete the droplet."
-              exit 1
+              echo "WARNING: SSH key '${TF_VAR_ssh_key_name}' not found in DigitalOcean"
+              echo "Checking what SSH keys are attached to the droplet..."
+              DROPLET_SSH_KEYS=$(doctl compute droplet get "$DROPLET_ID" --format SSHKeys --no-header 2>/dev/null || echo "")
+              echo "Droplet currently has SSH keys: $DROPLET_SSH_KEYS"
+              echo ""
+              echo "The SSH key will be created/updated by Terraform, but the droplet may have different keys."
+              echo "This is OK - Terraform will manage the SSH key going forward."
+            else
+              # Import SSH key if found
+              echo "Importing SSH key..."
+              terraform import digitalocean_ssh_key.main "$SSH_KEY_ID" 2>&1 || {
+                echo "WARNING: Failed to import SSH key (may already be in state or will be created)"
+              }
             fi
-            
-            # Import SSH key
-            echo "Importing SSH key..."
-            terraform import digitalocean_ssh_key.main "$SSH_KEY_ID" 2>&1 || {
-              echo "WARNING: Failed to import SSH key (may already be in state or not managed by Terraform)"
-            }
             
             # Import droplet
             echo "Importing droplet..."
