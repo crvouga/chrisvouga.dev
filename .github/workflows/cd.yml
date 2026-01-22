@@ -111,6 +111,13 @@ jobs:
         env:
           DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN }}
           DROPLET_NAME: chrisvouga-dev
+          TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+          TF_VAR_ssh_public_key_path: ${{ steps.ssh-key.outputs.public_key_path }}
+          TF_VAR_ssh_key_name: github-actions-chrisvouga-dev-key
+          TF_VAR_droplet_name: chrisvouga-dev
+          TF_VAR_droplet_region: ${{ secrets.DO_REGION || 'nyc1' }}
+          TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
+          TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
         run: |
           set -euo pipefail
           cd infrastructure
@@ -123,35 +130,73 @@ jobs:
           
           echo "⚠ Terraform state file not found - checking if resources already exist..."
           
+          # Initialize Terraform first (needed for import)
+          terraform init -input=false > /dev/null 2>&1 || terraform init -input=false
+          
           # Check if droplet with this name already exists
           EXISTING_DROPLET=$(doctl compute droplet list --format Name,ID,Status --no-header 2>/dev/null | grep -E "^${DROPLET_NAME}\s" || echo "")
           
           if [ -n "$EXISTING_DROPLET" ]; then
-            echo "ERROR: Terraform state is missing but droplet '${DROPLET_NAME}' already exists in DigitalOcean!"
-            echo "This would cause Terraform to create duplicate resources."
-            echo ""
-            echo "Existing droplet found:"
-            echo "$EXISTING_DROPLET"
-            echo ""
-            echo "Possible solutions:"
-            echo "1. Restore the Terraform state artifact from a previous successful run"
-            echo "2. Manually import existing resources into Terraform state"
-            echo "3. Delete the existing droplet if it's no longer needed"
-            echo ""
-            echo "The pipeline will now fail to prevent creating duplicate resources."
-            exit 1
-          fi
-          
-          # Check if reserved IP exists (if enabled)
-          if [ "${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}" = "true" ]; then
-            EXISTING_IP=$(doctl compute reserved-ip list --format IP,Region --no-header 2>/dev/null | grep -E ".*\s{{ secrets.DO_REGION || 'nyc1' }}$" || echo "")
-            if [ -n "$EXISTING_IP" ]; then
-              echo "WARNING: Reserved IP found in region, but this may be expected. Continuing..."
+            DROPLET_ID=$(echo "$EXISTING_DROPLET" | awk '{print $2}')
+            DROPLET_STATUS=$(echo "$EXISTING_DROPLET" | awk '{print $3}')
+            
+            echo "⚠ Found existing droplet '${DROPLET_NAME}' (ID: ${DROPLET_ID}, Status: ${DROPLET_STATUS})"
+            echo "Attempting to import existing resources into Terraform state..."
+            
+            # Check for SSH key
+            SSH_KEY_ID=$(doctl compute ssh-key list --format ID,Name --no-header 2>/dev/null | grep -E "\s${TF_VAR_ssh_key_name}$" | awk '{print $1}' | head -n1 || echo "")
+            
+            if [ -z "$SSH_KEY_ID" ]; then
+              echo "ERROR: SSH key '${TF_VAR_ssh_key_name}' not found in DigitalOcean"
+              echo "Cannot import droplet without the SSH key. Please ensure the SSH key exists or delete the droplet."
+              exit 1
             fi
+            
+            # Import SSH key
+            echo "Importing SSH key..."
+            terraform import digitalocean_ssh_key.main "$SSH_KEY_ID" 2>&1 || {
+              echo "WARNING: Failed to import SSH key (may already be in state or not managed by Terraform)"
+            }
+            
+            # Import droplet
+            echo "Importing droplet..."
+            terraform import digitalocean_droplet.main "$DROPLET_ID" 2>&1 || {
+              echo "ERROR: Failed to import droplet. This may indicate a configuration mismatch."
+              echo "Please verify the droplet configuration matches your Terraform variables."
+              exit 1
+            }
+            
+            # Check for firewall
+            FIREWALL_NAME="${DROPLET_NAME}-firewall"
+            FIREWALL_ID=$(doctl compute firewall list --format ID,Name --no-header 2>/dev/null | grep "$FIREWALL_NAME" | awk '{print $1}' | head -n1 || echo "")
+            
+            if [ -n "$FIREWALL_ID" ] && [ "$FIREWALL_ID" != "null" ]; then
+              echo "Importing firewall..."
+              terraform import digitalocean_firewall.main "$FIREWALL_ID" 2>&1 || {
+                echo "WARNING: Failed to import firewall (may already be in state)"
+              }
+            fi
+            
+            # Check for reserved IP if enabled
+            if [ "$TF_VAR_enable_reserved_ip" = "true" ]; then
+              RESERVED_IP=$(doctl compute reserved-ip list --format IP,DropletID,Region --no-header 2>/dev/null | grep -E "\s${DROPLET_ID}\s" | awk '{print $1}' | head -n1 || echo "")
+              if [ -n "$RESERVED_IP" ]; then
+                echo "Importing reserved IP..."
+                terraform import 'digitalocean_reserved_ip.main[0]' "$RESERVED_IP" 2>&1 || {
+                  echo "WARNING: Failed to import reserved IP"
+                }
+                terraform import 'digitalocean_reserved_ip_assignment.main[0]' "$RESERVED_IP:$DROPLET_ID" 2>&1 || {
+                  echo "WARNING: Failed to import reserved IP assignment"
+                }
+              fi
+            fi
+            
+            echo "✓ Successfully imported existing resources into Terraform state"
+            echo "State file should now exist. Continuing with infrastructure management..."
+          else
+            echo "✓ No existing resources found - this appears to be a fresh deployment"
+            echo "Proceeding with infrastructure creation..."
           fi
-          
-          echo "✓ No existing resources found - this appears to be a fresh deployment"
-          echo "Proceeding with infrastructure creation..."
 
       - name: Terraform Init
         working-directory: infrastructure
