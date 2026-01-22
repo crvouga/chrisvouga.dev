@@ -209,6 +209,13 @@ jobs:
             PLAN_OUTPUT=$(terraform plan -detailed-exitcode -input=false 2>&1 || true)
             PLAN_EXIT_CODE=$?
             
+            # Show the full plan for debugging
+            echo ""
+            echo "=== Full Terraform Plan Output ==="
+            echo "$PLAN_OUTPUT"
+            echo "=== End Plan Output ==="
+            echo ""
+            
             # Check if plan wants to destroy the droplet
             if echo "$PLAN_OUTPUT" | grep -q "digitalocean_droplet.main.*will be destroyed"; then
               echo "ERROR: Terraform plan wants to DESTROY the existing droplet!"
