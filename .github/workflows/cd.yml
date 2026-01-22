@@ -39,7 +39,7 @@ jobs:
   health-check-urls:
     runs-on: ubuntu-latest
     needs: typecheck
-
+    if: false # TODO: Enable this when the URLs are ready
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
