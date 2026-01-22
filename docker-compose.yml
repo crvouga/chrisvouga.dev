@@ -223,16 +223,16 @@ services:
     depends_on:
       - portfolio
       - pickflix
-      - headless-combobox
-      - moviefinder-app-rust
-      - todo-app
-      - image-service
-      - connect-four
-      - screenshot-service
-      - anime-blog
-      - snake-game
-      - match-three
-      - simon-says
+      # - headless-combobox
+      # - moviefinder-app-rust
+      # - todo-app
+      # - image-service
+      # - connect-four
+      # - screenshot-service
+      # - anime-blog
+      # - snake-game
+      # - match-three
+      # - simon-says
 
 networks:
   projects-network:
