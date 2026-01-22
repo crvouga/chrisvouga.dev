@@ -286,9 +286,10 @@ services:
   # Source: https://github.com/crvouga/screenshot-service
   screenshot-service:
     image: crvouga/screenshot-service:latest
+    platform: linux/amd64
     container_name: screenshot-service
     ports:
-      - "8010:80"
+      - "8014:80"
     networks:
       - projects-network
     restart: unless-stopped
@@ -317,56 +318,59 @@ services:
       retries: 3
       start_period: 40s
 
-  # # Snake Game
-  # # Source: https://github.com/crvouga/snake
-  # snake-game:
-  #   image: crvouga/snake-game:latest
-  #   container_name: snake-game
-  #   ports:
-  #     - "8012:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Snake Game
+  # Source: https://github.com/crvouga/snake
+  snake-game:
+    image: crvouga/snake-game:latest
+    platform: linux/amd64
+    container_name: snake-game
+    ports:
+      - "8013:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # # Match Three
-  # # Source: https://github.com/crvouga/match-three
-  # match-three:
-  #   image: crvouga/match-three:latest
-  #   container_name: match-three
-  #   ports:
-  #     - "8013:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Match Three
+  # Source: https://github.com/crvouga/match-three
+  match-three:
+    image: crvouga/match-three:latest
+    platform: linux/amd64
+    container_name: match-three
+    ports:
+      - "8013:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # # Simon Says
-  # # Source: https://github.com/crvouga/simon-says
-  # simon-says:
-  #   image: crvouga/simon-says:latest
-  #   container_name: simon-says
-  #   ports:
-  #     - "8014:80"
-  #   networks:
-  #     - projects-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
+  # Simon Says
+  # Source: https://github.com/crvouga/simon-says
+  simon-says:
+    image: crvouga/simon-says:latest
+    platform: linux/amd64
+    container_name: simon-says
+    ports:
+      - "8014:80"
+    networks:
+      - projects-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Caddy Reverse Proxy
   caddy:
@@ -393,11 +397,11 @@ services:
       - moviefinder-app-clojurescript
       - todo-app
       - connect-four
-      - screenshot-service
       - anime-blog
-      # - snake-game
-      # - match-three
-      # - simon-says
+      - screenshot-service
+      - snake-game
+      - match-three
+      - simon-says
 
 networks:
   projects-network:
