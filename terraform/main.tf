@@ -1,6 +1,6 @@
 locals {
   projects = jsondecode(file("${path.module}/../projects.json"))
-  
+
   # Map of secret variable references
   secret_vars = {
     TMDB_API_READ_ACCESS_TOKEN = var.tmdb_api_read_access_token
@@ -13,7 +13,7 @@ locals {
 # Create Fly.io app for each project
 resource "fly_app" "projects" {
   for_each = { for p in local.projects.projects : p.name => p }
-  
+
   name = each.value.name
   org  = "personal"
 }
@@ -21,13 +21,13 @@ resource "fly_app" "projects" {
 # Create machine for each app
 resource "fly_machine" "project_machines" {
   for_each = { for p in local.projects.projects : p.name => p }
-  
+
   app    = fly_app.projects[each.key].name
   region = "iad"
   name   = "${each.value.name}-machine"
-  
+
   image = each.value.image
-  
+
   services = [
     {
       protocol      = "tcp"
@@ -44,7 +44,7 @@ resource "fly_machine" "project_machines" {
       ]
     }
   ]
-  
+
   env = merge(
     each.value.env,
     {
@@ -52,11 +52,11 @@ resource "fly_machine" "project_machines" {
       secret_key => local.secret_vars[secret_key]
     }
   )
-  
+
   vm_size = "shared-cpu-1x"
-  
+
   auto_destroy = false
-  
+
   guest = {
     cpu_kind  = "shared"
     cpus      = 1
@@ -67,13 +67,13 @@ resource "fly_machine" "project_machines" {
 # Configure auto-scaling
 resource "fly_app_autoscaling" "project_scaling" {
   for_each = { for p in local.projects.projects : p.name => p }
-  
+
   app_id = fly_app.projects[each.key].id
-  
-  enabled       = true
-  min_machines  = 0
-  max_machines  = 1
-  
+
+  enabled      = true
+  min_machines = 0
+  max_machines = 1
+
   metrics = [
     {
       type = "requests"

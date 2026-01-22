@@ -10,7 +10,7 @@ output "shared_ipv6" {
 
 output "dns_instructions" {
   description = "DNS configuration instructions"
-  value = <<-EOT
+  value       = <<-EOT
     Configure DNS records in your domain provider:
     
     @ A     ${fly_app.projects["portfolio"].shared_ip_address}

@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.6"
-  
+
   cloud {
     organization = "crvouga"
     workspaces {
