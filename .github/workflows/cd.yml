@@ -16,6 +16,7 @@ concurrency:
 jobs:
   infrastructure:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     # Ensure only one infrastructure job runs at a time to prevent Terraform state conflicts
     concurrency:
@@ -46,8 +47,13 @@ jobs:
       - name: Generate SSH Key Pair
         id: ssh-key
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
           ssh-keygen -t ed25519 -f ~/.ssh/do_deploy_key -N "" -C "github-actions-deploy"
+          if [ ! -f ~/.ssh/do_deploy_key ]; then
+            echo "ERROR: SSH key generation failed"
+            exit 1
+          fi
           echo "private_key<<EOF" >> $GITHUB_OUTPUT
           cat ~/.ssh/do_deploy_key >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -56,13 +62,17 @@ jobs:
 
       - name: Verify DO Token is Set
         run: |
+          set -euo pipefail
           if [ -z "${{ secrets.DO_TOKEN }}" ]; then
             echo "ERROR: DO_TOKEN secret is not set in GitHub Secrets"
             echo "Please add DO_TOKEN secret in: Settings → Secrets and variables → Actions"
             exit 1
-          else
-            echo "DO_TOKEN secret is set (length: ${#DO_TOKEN} characters)"
           fi
+          if [ ${#DO_TOKEN} -lt 20 ]; then
+            echo "ERROR: DO_TOKEN appears to be invalid (too short)"
+            exit 1
+          fi
+          echo "✓ DO_TOKEN secret is set (length: ${#DO_TOKEN} characters)"
         env:
           DO_TOKEN: ${{ secrets.DO_TOKEN }}
 
@@ -73,7 +83,29 @@ jobs:
         with:
           name: terraform-state
           path: infrastructure/
-        # Note: This will fail on first run - that's expected and handled by continue-on-error
+          pattern: '*.tfstate*'
+          merge-multiple: false
+
+      - name: Restore Terraform State
+        working-directory: infrastructure
+        continue-on-error: true
+        run: |
+          echo "Checking for downloaded Terraform state files..."
+          # Artifacts might be in infrastructure/terraform-state/ subdirectory
+          if [ -d terraform-state ]; then
+            echo "Found state files in terraform-state subdirectory, moving to current directory..."
+            mv terraform-state/*.tfstate* . 2>/dev/null || true
+            rmdir terraform-state 2>/dev/null || true
+          fi
+          
+          # Check if state files exist now
+          if [ -f terraform.tfstate ] || [ -f terraform.tfstate.backup ]; then
+            echo "✓ Terraform state files found and restored"
+            ls -la *.tfstate* 2>/dev/null || true
+            echo "State file size: $(wc -c < terraform.tfstate 2>/dev/null || echo 0) bytes"
+          else
+            echo "ℹ No previous state found - this is a fresh deployment (expected on first run)"
+          fi
 
       - name: Terraform Init
         working-directory: infrastructure
@@ -87,20 +119,21 @@ jobs:
           TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
           TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
         run: |
-          # Check if state was downloaded
-          if [ "${{ steps.download-state.outcome }}" == "failure" ]; then
-            echo "No previous Terraform state found - this appears to be a fresh deployment"
-            echo "This is expected on the first run or if state was cleared"
-          else
-            echo "Previous Terraform state downloaded successfully"
+          set -euo pipefail
+          terraform init -input=false
+          
+          # Verify init succeeded
+          if [ ! -d .terraform ]; then
+            echo "ERROR: Terraform init failed - .terraform directory not created"
+            exit 1
           fi
           
-          terraform init
-          # Verify state file exists (or will be created)
-          if [ -f terraform.tfstate ] || [ -f .terraform/terraform.tfstate ]; then
-            echo "Terraform state file found"
+          # Verify state after init
+          if [ -f terraform.tfstate ]; then
+            echo "✓ Terraform state file exists"
+            echo "State file size: $(wc -c < terraform.tfstate) bytes"
           else
-            echo "No existing state file - this is a fresh deployment"
+            echo "ℹ No state file yet - will be created on first apply"
           fi
 
       - name: Check for Existing Firewall and Import
@@ -142,17 +175,24 @@ jobs:
           TF_VAR_droplet_region: ${{ secrets.DO_REGION || 'nyc1' }}
           TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
           TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
+        timeout-minutes: 5
         run: |
-          # Use -lock=false only if absolutely necessary, but concurrency control should prevent conflicts
-          terraform plan -out=tfplan -detailed-exitcode
+          set -euo pipefail
+          terraform plan -out=tfplan -detailed-exitcode -input=false
           PLAN_EXIT_CODE=$?
           if [ $PLAN_EXIT_CODE -eq 1 ]; then
-            echo "Terraform plan failed"
+            echo "ERROR: Terraform plan failed"
             exit 1
           elif [ $PLAN_EXIT_CODE -eq 2 ]; then
-            echo "Terraform plan has changes - will apply"
+            echo "✓ Terraform plan has changes - will apply"
           else
-            echo "Terraform plan has no changes"
+            echo "✓ Terraform plan has no changes"
+          fi
+          
+          # Verify plan file was created
+          if [ ! -f tfplan ]; then
+            echo "ERROR: Terraform plan file not created"
+            exit 1
           fi
 
       - name: Terraform Apply
@@ -166,14 +206,30 @@ jobs:
           TF_VAR_droplet_region: ${{ secrets.DO_REGION || 'nyc1' }}
           TF_VAR_droplet_size: ${{ secrets.DO_DROPLET_SIZE || 's-2vcpu-4gb' }}
           TF_VAR_enable_reserved_ip: ${{ secrets.DO_ENABLE_RESERVED_IP || 'true' }}
-        run: terraform apply -auto-approve tfplan
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          terraform apply -auto-approve -input=false tfplan
+          
+          # Verify apply succeeded
+          if [ ! -f terraform.tfstate ]; then
+            echo "ERROR: Terraform state file not created after apply"
+            exit 1
+          fi
 
       - name: Get Terraform Outputs
         id: terraform-output
         working-directory: infrastructure
         run: |
-          echo "droplet_ip=$(terraform output -raw droplet_ip)" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          DROPLET_IP=$(terraform output -raw droplet_ip)
+          if [ -z "$DROPLET_IP" ]; then
+            echo "ERROR: Droplet IP not found in Terraform outputs"
+            exit 1
+          fi
+          echo "droplet_ip=$DROPLET_IP" >> $GITHUB_OUTPUT
           echo "reserved_ip=$(terraform output -raw reserved_ip 2>/dev/null || echo '')" >> $GITHUB_OUTPUT
+          echo "✓ Droplet IP: $DROPLET_IP"
 
       - name: Save SSH Private Key
         run: |
@@ -183,31 +239,53 @@ jobs:
       - name: Wait for Droplet to be Ready
         env:
           DROPLET_IP: ${{ steps.terraform-output.outputs.droplet_ip }}
+        timeout-minutes: 5
         run: |
+          set -euo pipefail
           echo "Waiting for droplet to be ready..."
-          for i in {1..30}; do
+          MAX_ATTEMPTS=30
+          for i in $(seq 1 $MAX_ATTEMPTS); do
             if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -i /tmp/do_deploy_key root@$DROPLET_IP "echo 'Droplet is ready'" 2>/dev/null; then
-              echo "Droplet is ready!"
-              break
+              echo "✓ Droplet is ready!"
+              exit 0
             fi
-            echo "Attempt $i/30: Droplet not ready yet, waiting 10 seconds..."
+            echo "Attempt $i/$MAX_ATTEMPTS: Droplet not ready yet, waiting 10 seconds..."
             sleep 10
           done
+          echo "ERROR: Droplet did not become ready after $MAX_ATTEMPTS attempts"
+          exit 1
 
       - name: Setup Server
         env:
           DROPLET_IP: ${{ steps.terraform-output.outputs.droplet_ip }}
+        timeout-minutes: 10
         run: |
+          set -euo pipefail
+          echo "Copying setup script to server..."
           scp -o StrictHostKeyChecking=no -i /tmp/do_deploy_key scripts/setup-server.sh root@$DROPLET_IP:/tmp/
+          
+          echo "Running server setup..."
           ssh -o StrictHostKeyChecking=no -i /tmp/do_deploy_key root@$DROPLET_IP "chmod +x /tmp/setup-server.sh && /tmp/setup-server.sh"
+          
+          # Verify Docker is installed
+          if ! ssh -o StrictHostKeyChecking=no -i /tmp/do_deploy_key root@$DROPLET_IP "command -v docker" > /dev/null; then
+            echo "ERROR: Docker installation failed"
+            exit 1
+          fi
+          echo "✓ Server setup completed successfully"
 
       - name: Upload Terraform State
-        uses: actions/upload-artifact@v4
+        working-directory: infrastructure
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-state
-          path: infrastructure/*.tfstate*
-          retention-days: 7
+          path: |
+            terraform.tfstate
+            terraform.tfstate.backup
+            *.tfstate
+            *.tfstate.backup
+          retention-days: 90
           if-no-files-found: ignore
 
   typecheck:
@@ -283,21 +361,46 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [infrastructure, build-and-push]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
 
     steps:
+      - name: Validate Infrastructure Outputs
+        run: |
+          set -euo pipefail
+          if [ -z "${{ needs.infrastructure.outputs.droplet_ip }}" ]; then
+            echo "ERROR: Infrastructure job did not produce droplet_ip output"
+            exit 1
+          fi
+          if [ -z "${{ needs.infrastructure.outputs.ssh_private_key }}" ]; then
+            echo "ERROR: Infrastructure job did not produce ssh_private_key output"
+            exit 1
+          fi
+          echo "✓ Infrastructure outputs validated"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup SSH Key
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
+          if [ -z "${{ needs.infrastructure.outputs.ssh_private_key }}" ]; then
+            echo "ERROR: SSH private key not found in job outputs"
+            exit 1
+          fi
           echo "${{ needs.infrastructure.outputs.ssh_private_key }}" > ~/.ssh/do_deploy_key
           chmod 600 ~/.ssh/do_deploy_key
+          
+          if [ -z "${{ needs.infrastructure.outputs.droplet_ip }}" ]; then
+            echo "ERROR: Droplet IP not found in job outputs"
+            exit 1
+          fi
           ssh-keyscan -H ${{ needs.infrastructure.outputs.droplet_ip }} >> ~/.ssh/known_hosts
+          echo "✓ SSH key configured"
 
       - name: Create .env file
         run: |
@@ -314,7 +417,13 @@ jobs:
           DO_USER: root
           DEPLOY_DIR: /opt/chrisvouga-dev
           SSH_KEY_PATH: ~/.ssh/do_deploy_key
+        timeout-minutes: 10
         run: |
+          set -euo pipefail
+          if [ ! -f scripts/deploy.sh ]; then
+            echo "ERROR: deploy.sh script not found"
+            exit 1
+          fi
           chmod +x scripts/deploy.sh
           DO_HOST="$DO_HOST" DO_USER="$DO_USER" DEPLOY_DIR="$DEPLOY_DIR" DO_SSH_KEY="$SSH_KEY_PATH" ./scripts/deploy.sh
 
@@ -323,7 +432,14 @@ jobs:
           DO_HOST: ${{ needs.infrastructure.outputs.droplet_ip }}
           DO_USER: root
           DEPLOY_DIR: /opt/chrisvouga-dev
+        timeout-minutes: 2
         run: |
-          ssh -i ~/.ssh/do_deploy_key -o StrictHostKeyChecking=no $DO_USER@$DO_HOST "cd $DEPLOY_DIR && docker compose ps"
+          set -euo pipefail
+          echo "Verifying deployment..."
+          if ! ssh -i ~/.ssh/do_deploy_key -o StrictHostKeyChecking=no $DO_USER@$DO_HOST "cd $DEPLOY_DIR && docker compose ps"; then
+            echo "ERROR: Deployment verification failed"
+            exit 1
+          fi
+          echo "✓ Deployment verified successfully"
 
 

@@ -1,5 +1,9 @@
 #!/bin/bash
 set -euo pipefail
+# Fail fast on any error
+set -o errexit
+set -o nounset
+set -o pipefail
 
 # Deployment script for Digital Ocean
 # This script copies files to the server and deploys the application

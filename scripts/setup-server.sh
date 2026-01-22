@@ -1,5 +1,9 @@
 #!/bin/bash
 set -euo pipefail
+# Fail fast on any error
+set -o errexit
+set -o nounset
+set -o pipefail
 
 # Setup script for Digital Ocean droplet
 # This script should be run once on a fresh droplet to set up Docker and Docker Compose
