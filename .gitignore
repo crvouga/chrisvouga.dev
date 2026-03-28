@@ -23,9 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-
 tsconfig.tsbuildinfo
 .vite-react-ssg-temp
 .lsp
 .clj-kondo
 .env
+
+# Cloned sibling project repos
+projects/
