@@ -1,13 +1,8 @@
-// @ts-check
+import { type View, tag, text } from "../library/html/index";
+import { HEAD } from "../ui/head";
+import { viewSectionTitle } from "./section-title";
 
-import { tag, text } from "../library/html/index.js";
-import { HEAD } from "../ui/head.js";
-import { viewSectionTitle } from "./section-title.js";
-
-/**
- * @type {(props: {title:string, subtitle?:string}) => import("../library/html/index.js").View}
- */
-export const viewSection = (props) => (attr, c) => {
+export const viewSection = (props: { title: string; subtitle?: string }): View => (attr, c) => {
   return tag(
     "section",
     {

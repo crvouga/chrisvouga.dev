@@ -1,31 +1,23 @@
-// @ts-check
+import type { View, ViewWithProps } from "../library/html/index";
+import { tag, text } from "../library/html/index";
+import { HEAD } from "./head";
+import { THEME } from "./theme";
 
-import { tag, text } from "../library/html/index.js";
-import { HEAD } from "./head.js";
-import { THEME } from "./theme.js";
+type Props = {
+  tag: string;
+  startDecorator: View | null;
+  size: "sm" | "lg" | "xl";
+  variant: "soft" | "plain" | "contained";
+  disabled: boolean;
+  text: string;
+};
 
-/**
- * @typedef {{tag:string; startDecorator: import("../library/html/index.js").View | null, size: "sm" | "lg" | "xl"; variant: "soft" | "plain" | "contained"; disabled: boolean; text: string}} Props
- */
-
-/**
- * @param {Props} input
- * @returns {string}
- */
-const toTag = (input) => {
+const toTag = (input: Props): string => {
   return input.tag;
 };
 
-/**
- *
- * @param {Props} props
- * @returns {string}
- */
-const toClassName = (props) => {
-  /**
-   * @type {string[]}
-   */
-  const classNames = [];
+const toClassName = (props: Props): string => {
+  const classNames: string[] = [];
   classNames.push("btn");
   switch (props.variant) {
     case "soft":
@@ -58,10 +50,7 @@ const toClassName = (props) => {
   return classNames.join(" ");
 };
 
-/**
- * @type {import("../library/html/index.js").ViewWithProps<Props>}
- */
-export const viewButton = (props) => (attrs, children) => {
+export const viewButton: ViewWithProps<Props> = (props) => (attrs, children) => {
   const tagName = toTag(props);
 
   return tag(
@@ -91,10 +80,7 @@ export const viewButton = (props) => (attrs, children) => {
   );
 };
 
-/**
- * @type {import("../library/html/index.js").ViewWithProps<{}>}
- */
-export const viewButtonStyles = (_props) => (_attrs, _children) => {
+export const viewButtonStyles: ViewWithProps<Record<string, never>> = (_props) => (_attrs, _children) => {
   return tag("style", {}, [
     text(`
       .btn {

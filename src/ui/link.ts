@@ -1,12 +1,8 @@
-// @ts-check
+import type { View } from "../library/html/index";
+import { ensureObject } from "../library/ensure-object";
+import { tag } from "../library/html/index";
 
-import { ensureObject } from "../library/ensure-object.js";
-import { tag } from "../library/html/index.js";
-
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewLink = (attrs, children) => {
+export const viewLink: View = (attrs, children) => {
   const href = attrs?.["href"];
 
   if (typeof href === "string" && href.trim().length > 0) {

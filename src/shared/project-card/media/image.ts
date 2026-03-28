@@ -1,15 +1,11 @@
-// @ts-check
+import { tag, text } from "../../../library/html/index";
+import { stringToJsVarSafe } from "../../../library/js-var";
+import { HEAD } from "../../../ui/head";
+import { THEME } from "../../../ui/theme";
+import { viewOpenGalleryButtonImageWrapper } from "../../../ui/image-gallery-modal/open-gallery-button-image-wrapper";
+import type { ProjectCardView } from "../props";
 
-import { tag, text } from "../../../library/html/index.js";
-import { stringToJsVarSafe } from "../../../library/js-var.js";
-import { HEAD } from "../../../ui/head.js";
-import { THEME } from "../../../ui/theme.js";
-import { viewOpenGalleryButtonImageWrapper } from "../../../ui/image-gallery-modal/open-gallery-button-image-wrapper.js";
-
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectCardMediaImage = (props) => {
+export const viewProjectCardMediaImage: ProjectCardView = (props) => {
   const src = props.project?.imageSrc?.[0];
   if (src) {
     return viewProjectCardMediaImageMain(props);
@@ -17,10 +13,7 @@ export const viewProjectCardMediaImage = (props) => {
   return viewProjectCardMediaGradient(props);
 };
 
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-const viewProjectCardMediaImageMain = (props) => (attr, _) => {
+const viewProjectCardMediaImageMain: ProjectCardView = (props) => (attr, _) => {
   const alt = props.project?.imageAlt;
   const src = props.project?.imageSrc?.[0] ?? " ";
   const jsVarSafeNamespace = stringToJsVarSafe(props.project.title);
@@ -48,10 +41,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-const viewProjectCardMediaGradient = (_) => (attr, _) => {
+const viewProjectCardMediaGradient: ProjectCardView = (_) => (attr, _c) => {
   return tag("div", { ...attr, class: "project-card-media-gradient" }, []);
 };
 

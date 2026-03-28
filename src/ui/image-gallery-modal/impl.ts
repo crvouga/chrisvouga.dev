@@ -1,29 +1,14 @@
-import * as implElement from "./impl-element.js";
-import * as implTemplate from "./impl-template.js";
+import type { OpenImageGalleryModalJsFunction, ViewImageGalleryModalFunction } from "./interface";
+import * as implElement from "./impl-element";
+import * as implTemplate from "./impl-template";
 
-/**
- * @typedef {import("./interface.js").ImageGalleryModalProps} ImageGalleryModalProps
- * @typedef {import("./interface.js").OpenImageGalleryModalJsFunction} OpenImageGalleryModalJsFunction
- * @typedef {import("./interface.js").ViewImageGalleryModalFunction} ViewImageGalleryModalFunction
- */
+type Impl = "element" | "template";
 
-/**
- * @typedef {"element" | "template"} Impl
- */
-
-/**
- *
- * @param {Impl} x
- * @returns {Impl}
- */
-const of = (x) => x;
+const of = (x: Impl): Impl => x;
 
 const IMPL = of("element");
 
-/**
- * @type {OpenImageGalleryModalJsFunction}
- */
-export const openImageGalleryModalJs = (props) => {
+export const openImageGalleryModalJs: OpenImageGalleryModalJsFunction = (props) => {
   switch (IMPL) {
     case "element":
       return implElement.openImageGalleryModalJs(props);
@@ -32,10 +17,7 @@ export const openImageGalleryModalJs = (props) => {
   }
 };
 
-/**
- * @type {ViewImageGalleryModalFunction}
- */
-export const viewImageGalleryModal = (props) => () => {
+export const viewImageGalleryModal: ViewImageGalleryModalFunction = (props) => () => {
   switch (IMPL) {
     case "element":
       return implElement.viewImageGalleryModal(props)();

@@ -49,9 +49,4 @@ export const THEME = {
   },
 };
 
-/**
- *
- * @param {number} amount
- * @returns {string}
- */
-export const unit = (amount) => `${amount * 8}px`;
+export const unit = (amount: number): string => `${amount * 8}px`;

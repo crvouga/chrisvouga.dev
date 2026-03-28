@@ -1,11 +1,8 @@
-import { tag, text } from "../../library/html/index.js";
-import { HEAD } from "../../ui/head.js";
-import { THEME } from "../../ui/theme.js";
+import { type ViewWithProps, tag, text } from "../../library/html/index";
+import { HEAD } from "../../ui/head";
+import { THEME } from "../../ui/theme";
 
-/**
- * @type {import("../../library/html/index.js").ViewWithProps<{label:string, value:string}>}
- */
-export const viewContactLinkButton = (props) => (attrs, _children) => {
+export const viewContactLinkButton: ViewWithProps<{ label: string; value: string }> = (props) => (attrs, _children) => {
   return tag(
     "button",
     {

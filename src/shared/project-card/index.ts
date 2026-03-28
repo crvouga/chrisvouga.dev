@@ -1,22 +1,15 @@
-// @ts-check
+import { projectToLinkHref } from "../../content/project";
+import { tag } from "../../library/html/index";
+import { viewCard, viewCardContent } from "../../ui/card";
+import { unit } from "../../ui/theme";
+import { viewProjectCardActions } from "./actions/index";
+import { viewProjectCardContentMain } from "./content/index";
+import { viewProjectCardMedia } from "./media/index";
+import { viewProjectCardStatus } from "./status/index";
+import type { ProjectCardProps, ProjectCardView } from "./props";
 
-import { projectToLinkHref } from "../../content/project.js";
-import { tag } from "../../library/html/index.js";
-import { viewCard, viewCardContent } from "../../ui/card.js";
-import { unit } from "../../ui/theme.js";
-import { viewProjectCardActions } from "./actions/index.js";
-import { viewProjectCardContentMain } from "./content/index.js";
-import { viewProjectCardMedia } from "./media/index.js";
-import { viewProjectCardStatus } from "./status/index.js";
-
-/**
- * @type {import("./props.js").ProjectCardView}
- */
-export const viewProjectCard = (props) => (a, _c) => {
-  /**
-   * @type {import("./props.js").ProjectCardProps}
-   */
-  const propsNew = {
+export const viewProjectCard: ProjectCardView = (props) => (a, _c) => {
+  const propsNew: ProjectCardProps = {
     ...props,
     linkHref: projectToLinkHref(props.project),
   };

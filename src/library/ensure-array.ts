@@ -1,9 +1,4 @@
-/**
- * @template T
- * @param {T} attrValue
- * @returns {T[]}
- */
-export const ensureArray = (attrValue) => {
+export const ensureArray = <T>(attrValue: T): T[] => {
   if (Array.isArray(attrValue)) {
     return attrValue;
   }

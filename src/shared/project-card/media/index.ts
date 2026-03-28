@@ -1,14 +1,10 @@
-// @ts-check
+import { tag, text } from "../../../library/html/index";
+import { HEAD } from "../../../ui/head";
+import { THEME } from "../../../ui/theme";
+import { viewProjectCardMediaImage } from "./image";
+import type { ProjectCardView } from "../props";
 
-import { tag, text } from "../../../library/html/index.js";
-import { HEAD } from "../../../ui/head.js";
-import { THEME } from "../../../ui/theme.js";
-import { viewProjectCardMediaImage } from "./image.js";
-
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectCardMedia = (props) => (attr, children) => {
+export const viewProjectCardMedia: ProjectCardView = (props) => (attr, children) => {
   return tag("div", { ...attr, class: "project-card-media" }, [
     viewProjectCardMediaImage(props)({}, []),
     ...(children ?? []),

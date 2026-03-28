@@ -1,31 +1,22 @@
-import { tag, text } from "./index.js";
-import { isRecord } from "../is-record.js";
-import { assertEquals } from "../test.js";
+import { tag, text } from "./index";
+import type { Html, Tag, Text, Fragment } from "./index";
+import { isRecord } from "../is-record";
+import { assertEquals } from "../test";
 
-/**
- *
- * @param {import("./index.js").Html} elem
- * @returns {string}
- */
-export const render = (elem) => {
+export const render = (elem: Html): string => {
   const html = renderMain(elem);
   const minified = minifyHtml(html);
   return prependDocType(minified);
 };
 
 /**
- * Minifies HTML by removing unnecessary whitespace
- * Preserves content inside script and style tags
- * @param {string} html
- * @returns {string}
+ * Minifies HTML by removing unnecessary whitespace.
+ * Preserves content inside script and style tags.
  */
-const minifyHtml = (html) => {
-  // Extract script and style content to preserve them
-  /** @type {string[]} */
-  const preserved = [];
+const minifyHtml = (html: string): string => {
+  const preserved: string[] = [];
   let preservedIndex = 0;
 
-  // Replace script and style content with placeholders
   const withPlaceholders = html.replace(
     /<(script|style)([^>]*)>([\s\S]*?)<\/\1>/gi,
     (_match, tag, attrs, content) => {
@@ -33,23 +24,16 @@ const minifyHtml = (html) => {
       preserved[preservedIndex] = `<${tag}${attrs}>${content}</${tag}>`;
       preservedIndex++;
       return placeholder;
-    }
+    },
   );
 
-  // Minify the HTML (excluding preserved content)
   let minified = withPlaceholders
-    // Remove whitespace between tags
     .replace(/>\s+</g, "><")
-    // Collapse multiple spaces to single space
     .replace(/[ \t]+/g, " ")
-    // Remove spaces before closing tags
     .replace(/\s+>/g, ">")
-    // Remove spaces after opening tags
     .replace(/<\s+/g, "<")
-    // Remove leading/trailing whitespace
     .trim();
 
-  // Restore preserved content
   preserved.forEach((content, index) => {
     minified = minified.replace(`__PRESERVED_${index}__`, content);
   });
@@ -57,21 +41,11 @@ const minifyHtml = (html) => {
   return minified;
 };
 
-/**
- *
- * @param {string} html
- * @returns {string}
- */
-const prependDocType = (html) => {
+const prependDocType = (html: string): string => {
   return `<!DOCTYPE html>${html}`;
 };
 
-/**
- *
- * @param {import("./index.js").Html} elem
- * @returns {string}
- */
-const renderMain = (elem) => {
+const renderMain = (elem: Html): string => {
   switch (elem.t) {
     case "tag":
       return renderTag(elem);
@@ -82,36 +56,22 @@ const renderMain = (elem) => {
   }
 };
 
-/**
- *
- * @param {import("./index.js").Tag} elem
- */
-const renderTag = (elem) => {
+const renderTag = (elem: Tag): string => {
   const attrsString = renderAttrs(elem.attrs);
   const childrenString = elem.children.map(renderMain).join("");
   const leadingTag = `${elem.tagName} ${attrsString}`.trim();
   return `<${leadingTag}>${childrenString}</${elem.tagName}>`;
 };
 
-/**
- * @param {import("./index.js").Text} elem
- */
-const renderText = (elem) => {
+const renderText = (elem: Text): string => {
   return elem.text;
 };
 
-/**
- * @param {import("./index.js").Fragment} elem
- */
-const renderFragment = (elem) => {
+const renderFragment = (elem: Fragment): string => {
   return elem.children.map(renderMain).join("");
 };
 
-/**
- * @param {Record<string, unknown>} attrs
- * @returns {string}
- */
-export const renderAttrs = (attrs) => {
+export const renderAttrs = (attrs: Record<string, unknown>): string => {
   return Object.keys(attrs)
     .flatMap((key) => {
       const value = attrs[key];
@@ -135,12 +95,7 @@ export const renderAttrs = (attrs) => {
     .join(" ");
 };
 
-/**
- *
- * @param {Record<string, unknown>} styles
- * @returns {string}
- */
-const renderStyles = (styles) => {
+const renderStyles = (styles: Record<string, unknown>): string => {
   return Object.entries(styles)
     .flatMap(([key, value]) => {
       if (key.trim().length === 0) {
@@ -163,7 +118,7 @@ assertEquals(renderMain(tag("div", {}, [])), "<div></div>", "Test 1");
 assertEquals(
   renderMain(tag("div", {}, [text("hello")])),
   "<div>hello</div>",
-  "Test 1"
+  "Test 1",
 );
 assertEquals(renderStyles({ padding: "16px" }), "padding: 16px", "Test 2");
 assertEquals(renderStyles({ padding: "" }), "", "Test 2");
@@ -171,5 +126,5 @@ assertEquals(renderStyles({ padding: undefined }), "", "Test 2");
 assertEquals(
   renderStyles({ padding: "16px", color: "blue" }),
   "padding: 16px; color: blue",
-  "Test 2"
+  "Test 2",
 );

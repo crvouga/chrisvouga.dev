@@ -1,22 +1,13 @@
-// @ts-check
+import type { ViewWithProps } from "../library/html/index";
+import { tag, text } from "../library/html/index";
+import { HEAD } from "./head";
+import { THEME } from "./theme";
 
-import { tag, text } from "../library/html/index.js";
-import { HEAD } from "./head.js";
-import { THEME } from "./theme.js";
+type Level = "h1" | "h2" | "h3" | "title-sm" | "body-md" | "body-xs";
 
-/**
- * @typedef {"h1" | "h2" | "h3" | "title-sm" | "body-md" | "body-xs"} Level
- */
+type Props = { level: Level; text: string };
 
-/**
- * @typedef {{level: Level; text: string}} Props
- */
-
-/**
- * @param {Props} input
- * @returns {string}
- */
-const toClassName = (input) => {
+const toClassName = (input: Props): string => {
   switch (input.level) {
     case "h1":
       return "typography-h1";
@@ -79,10 +70,7 @@ HEAD.push(
 
 const BASE_CLASS = "typography-base";
 
-/**
- * @type {import("../library/html/index.js").ViewWithProps<Props>}
- */
-export const viewTypography = (props) => (attrs, children) => {
+export const viewTypography: ViewWithProps<Props> = (props) => (attrs, children) => {
   const tagName = (() => {
     switch (props.level) {
       case "h1":

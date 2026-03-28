@@ -1,24 +1,15 @@
-// @ts-check
 import { readdirSync } from "fs";
 import { copyFile, mkdir, readdir, rm } from "fs/promises";
 import path, { join } from "path";
 
-/**
- * Deletes a directory and its contents.
- * @param {string} path - The path of the directory to delete.
- * @returns {Promise<void>}
- */
-export const deleteDirectory = async (path) => {
+export const deleteDirectory = async (path: string): Promise<void> => {
   await rm(path, { recursive: true, force: true });
 };
 
-/**
- * Copies the contents of a directory to another location.
- * @param {string} src - The source directory path.
- * @param {string} dest - The destination directory path.
- * @returns {Promise<void>}
- */
-export const copyDirectory = async (src, dest) => {
+export const copyDirectory = async (
+  src: string,
+  dest: string,
+): Promise<void> => {
   await mkdir(dest, { recursive: true });
   const entries = await readdir(src, { withFileTypes: true });
   for (const entry of entries) {
@@ -32,17 +23,8 @@ export const copyDirectory = async (src, dest) => {
   }
 };
 
-/**
- * Recursively retrieve all files from a given directory.
- *
- * @param {string} dirPath - The directory path to search.
- * @returns {string[]} An array of file paths.
- */
-export const getAllFiles = (dirPath) => {
-  /** @type {string[]} */
-  let filesList = [];
-
-  /** @type {import('fs').Dirent[]} */
+export const getAllFiles = (dirPath: string): string[] => {
+  let filesList: string[] = [];
   const entries = readdirSync(dirPath, { withFileTypes: true });
 
   for (const entry of entries) {

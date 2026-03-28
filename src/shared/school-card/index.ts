@@ -1,17 +1,14 @@
-// @ts-check
+import { tag } from "../../library/html/index";
+import type { ViewWithProps } from "../../library/html/index";
+import type { School } from "../../content/school";
+import { viewCard, viewCardContent } from "../../ui/card";
+import { appendExternalLinkIndicator } from "../../ui/external-link-indicator";
+import { viewLink } from "../../ui/link";
+import { unit } from "../../ui/theme";
+import { viewTypography } from "../../ui/typography";
+import { viewSchoolCardImage } from "./image";
 
-import { tag } from "../../library/html/index.js";
-import { viewCard, viewCardContent } from "../../ui/card.js";
-import { appendExternalLinkIndicator } from "../../ui/external-link-indicator.js";
-import { viewLink } from "../../ui/link.js";
-import { unit } from "../../ui/theme.js";
-import { viewTypography } from "../../ui/typography.js";
-import { viewSchoolCardImage } from "./image.js";
-
-/**
- * @type {import("../../library/html/index.js").ViewWithProps<{school: import("../../content/school.js").School}>}
- */
-export const viewSchoolCard =
+export const viewSchoolCard: ViewWithProps<{ school: School }> =
   ({ school }) =>
   () => {
     return viewCard({}, [

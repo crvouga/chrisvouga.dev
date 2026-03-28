@@ -1,17 +1,15 @@
-import { tag, text } from "../library/html/index.js";
-import { viewButton } from "./button.js";
-import { viewGrid, viewGridItem } from "./grid.js";
-import { HEAD } from "./head.js";
-import { unit } from "./theme.js";
+import type { Html, ViewWithProps } from "../library/html/index";
+import { tag, text } from "../library/html/index";
+import { viewButton } from "./button";
+import { viewGrid, viewGridItem } from "./grid";
+import { HEAD } from "./head";
+import { unit } from "./theme";
 
-/**
- * @type {import("../library/html/index.js").ViewWithProps<{
- *   jsVarSafeNamespace: string,
- *   children: import("../library/html/index.js").Html[],
- *   maxVisibleCardCount?: number
- * }>}
- */
-export const viewGridCollapsible = (props) => () => {
+export const viewGridCollapsible: ViewWithProps<{
+  jsVarSafeNamespace: string;
+  children: Html[];
+  maxVisibleCardCount?: number;
+}> = (props) => () => {
   const maxVisibleCardCount = props.maxVisibleCardCount ?? 3;
   const namespace = `${props.jsVarSafeNamespace}--toggle-see-more--`;
   const rootId = `${namespace}root`;

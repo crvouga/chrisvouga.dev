@@ -1,10 +1,8 @@
-/**
- * @param {string} str
- * @param {string} search
- * @param {string} replace
- * @returns {string}
- */
-export const replaceAll = (str, search, replace) => {
+export const replaceAll = (
+  str: string,
+  search: string,
+  replace: string,
+): string => {
   return str.split(search).join(replace);
 };
 
@@ -47,7 +45,7 @@ testCases.forEach(({ str, search, replace, expected }, index) => {
     throw new Error(
       `Test case ${
         index + 1
-      } failed: expected "${expected}", but got "${result}"`
+      } failed: expected "${expected}", but got "${result}"`,
     );
   }
 });

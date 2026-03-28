@@ -1,12 +1,10 @@
-import { tag, text } from "../../../library/html/index.js";
-import { HEAD } from "../../../ui/head.js";
-import { THEME } from "../../../ui/theme.js";
-import { viewTypography } from "../../../ui/typography.js";
+import { tag, text } from "../../../library/html/index";
+import type { ViewWithProps } from "../../../library/html/index";
+import { HEAD } from "../../../ui/head";
+import { THEME } from "../../../ui/theme";
+import { viewTypography } from "../../../ui/typography";
 
-/**
- * @type {import("../../../library/html/index.js").ViewWithProps<{ text: string }>}
- */
-export const viewColored =
+export const viewColored: ViewWithProps<{ text: string }> =
   ({ text }) =>
   (a, _c) => {
     return viewTypography({ level: "h2", text })({

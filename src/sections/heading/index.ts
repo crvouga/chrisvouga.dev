@@ -1,14 +1,11 @@
-// @ts-check
-import { tag, text } from "../../library/html/index.js";
-import { HEAD } from "../../ui/head.js";
-import { unit, THEME } from "../../ui/theme.js";
-import { viewHeadingContact } from "./contact.js";
-import { viewHeadingSectionText } from "./text/index.js";
+import { tag, text } from "../../library/html/index";
+import type { View } from "../../library/html/index";
+import { HEAD } from "../../ui/head";
+import { unit, THEME } from "../../ui/theme";
+import { viewHeadingContact } from "./contact";
+import { viewHeadingSectionText } from "./text/index";
 
-/**
- * @type {import("../../library/html/index.js").View}
- */
-export const viewHeadingSection = () => {
+export const viewHeadingSection: View = () => {
   return tag(
     "header",
     {

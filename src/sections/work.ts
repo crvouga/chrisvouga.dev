@@ -1,14 +1,10 @@
-// @ts-check
+import { CONTENT } from "../content/content";
+import type { View } from "../library/html/index";
+import { viewSection } from "../shared/section";
+import { viewWorkCard } from "../shared/work-card";
+import { viewGridCollapsible } from "../ui/grid-collapsible";
 
-import { CONTENT } from "../content/content.js";
-import { viewSection } from "../shared/section.js";
-import { viewWorkCard } from "../shared/work-card.js";
-import { viewGridCollapsible } from "../ui/grid-collapsible.js";
-
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewWorkSection = () => {
+export const viewWorkSection: View = () => {
   return viewSection({
     title: CONTENT.WORK_SECTION_TITLE,
   })({}, [

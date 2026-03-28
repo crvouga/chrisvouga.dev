@@ -1,9 +1,6 @@
-// @ts-check
-import { viewContactLinkButton } from "./button.js";
+import type { ViewWithProps } from "../../library/html/index";
+import { viewContactLinkButton } from "./button";
 
-/**
- * @type {import("../../library/html/index.js").ViewWithProps<{label:string, value:string}>}
- */
-export const viewContactLink = (props) => (a, c) => {
+export const viewContactLink: ViewWithProps<{ label: string; value: string }> = (props) => (a, c) => {
   return viewContactLinkButton(props)(a, c);
 };

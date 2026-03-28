@@ -1,17 +1,11 @@
-// @ts-check
+import type { ViewWithProps } from "../library/html/index";
+import { tag, text } from "../library/html/index";
+import { HEAD } from "./head";
+import { THEME, unit } from "./theme";
 
-import { tag, text } from "../library/html/index.js";
-import { HEAD } from "./head.js";
-import { THEME, unit } from "./theme.js";
+type Props = { src: string; title?: string };
 
-/**
- * @typedef {{ src: string; title?: string }} Props
- */
-
-/**
- * @type {import("../library/html/index.js").ViewWithProps<Props>}
- */
-export const viewYouTubeVideo = (props) => (attrs) => {
+export const viewYouTubeVideo: ViewWithProps<Props> = (props) => (attrs) => {
   const videoId = `youtube-video-${Math.random().toString(36).substr(2, 9)}`;
   return tag(
     "div",

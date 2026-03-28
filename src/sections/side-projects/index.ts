@@ -1,12 +1,10 @@
-import { CONTENT } from "../../content/content.js";
-import { viewProjectCard } from "../../shared/project-card/index.js";
-import { viewSection } from "../../shared/section.js";
-import { viewGridCollapsible } from "../../ui/grid-collapsible.js";
+import { CONTENT } from "../../content/content";
+import type { View } from "../../library/html/index";
+import { viewProjectCard } from "../../shared/project-card/index";
+import { viewSection } from "../../shared/section";
+import { viewGridCollapsible } from "../../ui/grid-collapsible";
 
-/**
- * @type {import("../../library/html/index.js").View}
- */
-export const viewSideProjectsSection = () => {
+export const viewSideProjectsSection: View = () => {
   return viewSection({
     title: "Side Projects",
   })({}, [

@@ -1,14 +1,12 @@
-import { ensureObject } from "../../../library/ensure-object.js";
-import { tag } from "../../../library/html/index.js";
-import { unit } from "../../../ui/theme.js";
-import { viewTypography } from "../../../ui/typography.js";
-import { viewProjectCardContentChips } from "./chips.js";
-import { viewProjectCardContentTitle } from "./title.js";
+import { ensureObject } from "../../../library/ensure-object";
+import { tag } from "../../../library/html/index";
+import { unit } from "../../../ui/theme";
+import { viewTypography } from "../../../ui/typography";
+import { viewProjectCardContentChips } from "./chips";
+import { viewProjectCardContentTitle } from "./title";
+import type { ProjectCardView } from "../props";
 
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectCardContentMain = (props) => (a, _c) => {
+export const viewProjectCardContentMain: ProjectCardView = (props) => (a, _c) => {
   return tag(
     "div",
     {

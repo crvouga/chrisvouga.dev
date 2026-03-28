@@ -1,30 +1,25 @@
-// @ts-check
-
-import { fragment, tag, text } from "../../library/html/index.js";
-import { stringToJsVarSafe } from "../../library/js-var.js";
-import { HEAD } from "../../ui/head.js";
-import { images } from "../../ui/icons.js";
+import type { ViewWithProps } from "../../library/html/index";
+import { fragment, tag, text } from "../../library/html/index";
+import { stringToJsVarSafe } from "../../library/js-var";
+import { HEAD } from "../../ui/head";
+import { images } from "../../ui/icons";
 import {
   openImageGalleryModalJs,
   viewImageGalleryModal,
-} from "../../ui/image-gallery-modal/impl.js";
-import { viewImage } from "../../ui/image.js";
+} from "../../ui/image-gallery-modal/impl";
+import { viewImage } from "../../ui/image";
 
-/**
- * @typedef {Object} OpenGalleryButtonImageWrapperProps
- * @property {string} src - The source URL of the main image
- * @property {string} [alt] - The alt text for the image
- * @property {string[]} galleryImages - Array of image URLs for the gallery
- * @property {string} [jsVarSafeNamespace] - Namespace for JS variables
- * @property {boolean} [showGalleryIndicator=true] - Whether to show the gallery indicator
- * @property {"high" | "auto"} [fetchPriority] - The fetch priority for the image
- * @property {string} [skeletonColor] - Background color for images with transparency
- */
+type OpenGalleryButtonImageWrapperProps = {
+  src: string;
+  alt?: string;
+  galleryImages: string[];
+  jsVarSafeNamespace?: string;
+  showGalleryIndicator?: boolean;
+  fetchPriority?: "high" | "auto";
+  skeletonColor?: string;
+};
 
-/**
- * @type {import("../../library/html/index.js").ViewWithProps<OpenGalleryButtonImageWrapperProps>}
- */
-export const viewOpenGalleryButtonImageWrapper = (props) => (attr, _) => {
+export const viewOpenGalleryButtonImageWrapper: ViewWithProps<OpenGalleryButtonImageWrapperProps> = (props) => (attr, _) => {
   const {
     src,
     alt = "",

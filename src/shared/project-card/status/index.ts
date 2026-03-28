@@ -1,16 +1,11 @@
-import { tag } from "../../../library/html/index.js";
-import { infoOutline } from "../../../ui/icons.js";
-import { unit, THEME } from "../../../ui/theme.js";
-import { viewTypography } from "../../../ui/typography.js";
+import { type Html, type ViewWithProps, tag } from "../../../library/html/index";
+import { infoOutline } from "../../../ui/icons";
+import { unit, THEME } from "../../../ui/theme";
+import { viewTypography } from "../../../ui/typography";
+import type { ProjectCardProps, ProjectCardView } from "../props";
 
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectCardStatus = (props) => (_a, _c) => {
-  /**
-   * @type {import("../../../library/html/index.js").Html[]}
-   */
-  const children = [];
+export const viewProjectCardStatus: ProjectCardView = (props) => (_a, _c) => {
+  const children: Html[] = [];
 
   if (props.project.deployment.t === "not-deployed-anymore") {
     children.push(
@@ -63,10 +58,7 @@ export const viewProjectCardStatus = (props) => (_a, _c) => {
   );
 };
 
-/**
- * @type {import("../../../library/html/index.js").ViewWithProps<import("../props.js").ProjectCardProps & {text:string}>}
- */
-export const viewProjectCardStatusSingle = (props) => (_a, _c) => {
+export const viewProjectCardStatusSingle: ViewWithProps<ProjectCardProps & { text: string }> = (props) => (_a, _c) => {
   const color = THEME.colors.neutralMuted;
   return tag(
     "div",

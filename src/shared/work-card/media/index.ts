@@ -1,14 +1,10 @@
-// @ts-check
+import { type ViewWithProps, tag, text } from "../../../library/html/index";
+import type { Work } from "../../../content/work";
+import { HEAD } from "../../../ui/head";
+import { THEME } from "../../../ui/theme";
+import { viewWorkCardMediaImage } from "./image";
 
-import { tag, text } from "../../../library/html/index.js";
-import { HEAD } from "../../../ui/head.js";
-import { THEME } from "../../../ui/theme.js";
-import { viewWorkCardMediaImage } from "./image.js";
-
-/**
- * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
- */
-export const viewWorkCardMedia = (props) => (attr, children) => {
+export const viewWorkCardMedia: ViewWithProps<{ work: Work; fetchPriority?: "high" | "auto" }> = (props) => (attr, children) => {
   return tag("div", { ...attr, class: "work-card-media" }, [
     viewWorkCardMediaImage(props)({}, []),
     ...(children ?? []),

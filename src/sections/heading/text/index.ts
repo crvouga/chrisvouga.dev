@@ -1,13 +1,9 @@
-// @ts-check
+import { tag } from "../../../library/html/index";
+import type { View } from "../../../library/html/index";
+import { THEME, unit } from "../../../ui/theme";
+import { viewTypography } from "../../../ui/typography";
 
-import { tag } from "../../../library/html/index.js";
-import { THEME, unit } from "../../../ui/theme.js";
-import { viewTypography } from "../../../ui/typography.js";
-
-/**
- * @type {import("../../../library/html/index.js").View}
- */
-export const viewHeadingSectionText = () => {
+export const viewHeadingSectionText: View = () => {
   return tag(
     "div",
     {

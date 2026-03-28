@@ -1,15 +1,10 @@
-// @ts-check
+import { ensureObject } from "../../../library/ensure-object";
+import { appendExternalLinkIndicator } from "../../../ui/external-link-indicator";
+import { viewLink } from "../../../ui/link";
+import { viewTypography } from "../../../ui/typography";
+import type { ProjectCardView } from "../props";
 
-import { ensureObject } from "../../../library/ensure-object.js";
-import { appendExternalLinkIndicator } from "../../../ui/external-link-indicator.js";
-import { viewLink } from "../../../ui/link.js";
-import { viewTypography } from "../../../ui/typography.js";
-
-/**
- * Creates a linked title component for a project card
- * @type {import("../props.js").ProjectCardView}
- */
-const viewProjectCardContentTitleLinked = (props) => (a, _c) => {
+const viewProjectCardContentTitleLinked: ProjectCardView = (props) => (a, _c) => {
   return viewLink(
     {
       ...a,
@@ -33,10 +28,7 @@ const viewProjectCardContentTitleLinked = (props) => (a, _c) => {
   );
 };
 
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectCardContentTitle = (props) => (a, _c) => {
+export const viewProjectCardContentTitle: ProjectCardView = (props) => (a, _c) => {
   if (props.linkHref) {
     return viewProjectCardContentTitleLinked(props)(a, _c);
   }

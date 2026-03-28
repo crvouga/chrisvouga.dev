@@ -1,12 +1,10 @@
-import { tag, text } from "../../library/html/index.js";
-import { stringToJsVarSafe } from "../../library/js-var.js";
-import { HEAD } from "../../ui/head.js";
-import { viewOpenGalleryButtonImageWrapper } from "../../ui/image-gallery-modal/open-gallery-button-image-wrapper.js";
+import { type ViewWithProps, tag, text } from "../../library/html/index";
+import type { School } from "../../content/school";
+import { stringToJsVarSafe } from "../../library/js-var";
+import { HEAD } from "../../ui/head";
+import { viewOpenGalleryButtonImageWrapper } from "../../ui/image-gallery-modal/open-gallery-button-image-wrapper";
 
-/**
- * @type {import("../../library/html/index.js").ViewWithProps<{ school: import("../../content/school.js").School }>}
- */
-export const viewSchoolCardImage = (props) => (attr, _) => {
+export const viewSchoolCardImage: ViewWithProps<{ school: School }> = (props) => (attr, _) => {
   const alt = props.school.imageAlt || props.school.institutionName;
   const src = props.school.imageSrc;
   const jsVarSafeNamespace = stringToJsVarSafe(props.school.institutionName);

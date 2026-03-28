@@ -1,26 +1,14 @@
-/**
- * @typedef {Object} ImageGalleryModalProps
- * @property {string} jsVarSafeNamespace - Unique namespace for the modal
- * @property {string[]} imageSrc - Array of image URLs to display in the gallery
- * @property {string} [imageAlt] - Alt text for the images
- * @property {string} [skeletonColor] - Background color for images with transparency
- */
+import type { ViewWithProps } from "../../library/html/index";
 
-/**
- * Interface for creating JavaScript code that opens an image gallery modal
- * @typedef {(input: {
- *   jsVarSafeNamespace: string,
- * }) => string} OpenImageGalleryModalJsFunction
- */
+export type ImageGalleryModalProps = {
+  jsVarSafeNamespace: string;
+  imageSrc: string[];
+  imageAlt?: string;
+  skeletonColor?: string;
+};
 
-/**
- * Interface for rendering an image gallery modal
- * @typedef {import("../../library/html/index.js").ViewWithProps<ImageGalleryModalProps>} ViewImageGalleryModalFunction
- */
+export type OpenImageGalleryModalJsFunction = (input: {
+  jsVarSafeNamespace: string;
+}) => string;
 
-/**
- * Interface for the Image Gallery Modal module
- * @typedef {Object} ImageGalleryModalInterface
- * @property {OpenImageGalleryModalJsFunction} openImageGalleryModalJs - Function to generate JS code for opening the modal
- * @property {ViewImageGalleryModalFunction} viewImageGalleryModal - Function to render the image gallery modal
- */
+export type ViewImageGalleryModalFunction = ViewWithProps<ImageGalleryModalProps>;

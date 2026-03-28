@@ -1,78 +1,52 @@
-import { CONTENT } from "./content/content.js";
-import { formatPhoneNumber } from "./library/phone-number.js";
-import { projectToLinkHref } from "./content/project.js";
-import { TOPIC_TO_NAME } from "./content/topic.js";
-import { THEME } from "./ui/theme.js";
+import { CONTENT } from "./content/content";
+import { formatPhoneNumber } from "./library/phone-number";
+import { projectToLinkHref } from "./content/project";
+import { TOPIC_TO_NAME } from "./content/topic";
+import { THEME } from "./ui/theme";
 import { chromium } from "playwright";
 import { mkdir } from "fs/promises";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-/**
- * Resume PDF filename
- */
 export const RESUME_FILENAME = "chris-vouga-resume.pdf";
 
-/**
- * Format date range for resume
- * @param {number} yearStart
- * @param {number | "Present"} yearEnd
- * @returns {string}
- */
-const formatDateRange = (yearStart, yearEnd) => {
+const formatDateRange = (yearStart: number, yearEnd: number | "Present"): string => {
   if (yearEnd === "Present") {
     return `${yearStart} - Present`;
   }
   return `${yearStart} - ${yearEnd}`;
 };
 
-/**
- * Clean HTML tags from text (simple approach)
- * @param {string} text
- * @returns {string}
- */
-const stripHtmlTags = (text) => {
+const stripHtmlTags = (text: string): string => {
   return text.replace(/<[^>]*>/g, "").trim();
 };
 
-/**
- * @typedef {{
- *   name: string;
- *   title: string;
- *   email: string;
- *   phone: string;
- *   website: string;
- *   summary: string;
- *   workExperience: Array<{
- *     company: string;
- *     jobTitle: string;
- *     dateRange: string;
- *     description: string;
- *     url: string | null;
- *   }>;
- *   education: Array<{
- *     degree: string;
- *     institution: string;
- *     dateRange: string;
- *   }>;
- *   projects: Array<{
- *     title: string;
- *     description: string;
- *     url: string | null;
- *     topics: string[];
- *   }>;
- * }} ResumeData
- */
+type ResumeData = {
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  website: string;
+  summary: string;
+  workExperience: Array<{
+    company: string;
+    jobTitle: string;
+    dateRange: string;
+    description: string;
+    url: string | null;
+  }>;
+  education: Array<{
+    degree: string;
+    institution: string;
+    dateRange: string;
+  }>;
+  projects: Array<{
+    title: string;
+    description: string;
+    url: string | null;
+    topics: string[];
+  }>;
+};
 
-/**
- * Generate HTML resume template
- * @param {ResumeData} data
- * @returns {string}
- */
-const generateResumeHTML = (data) => {
+const generateResumeHTML = (data: ResumeData): string => {
   const {
     name,
     title,
@@ -277,9 +251,6 @@ const generateResumeHTML = (data) => {
     <div class="section-title">Work Experience</div>
     ${workExperience
       .map(
-        /**
-         * @param {{company: string; jobTitle: string; dateRange: string; description: string; url: string | null}} work
-         */
         (work) => `
     <div class="work-item">
       <div class="item-header">
@@ -304,9 +275,6 @@ const generateResumeHTML = (data) => {
     <div class="section-title">Education</div>
     ${education
       .map(
-        /**
-         * @param {{degree: string; institution: string; dateRange: string}} edu
-         */
         (edu) => `
     <div class="education-item">
       <div class="item-header">
@@ -328,9 +296,6 @@ const generateResumeHTML = (data) => {
     <div class="section-title">Projects</div>
     ${projects
       .map(
-        /**
-         * @param {{title: string; description: string; url: string | null; topics: string[]}} project
-         */
         (project) => `
     <div class="project-item">
       <div class="item-header">
@@ -344,9 +309,7 @@ const generateResumeHTML = (data) => {
       ${
         project.topics && project.topics.length > 0
           ? `<div class="project-topics">${project.topics
-              .map(
-                /** @param {string} topic */ (topic) => `<span>${topic}</span>`
-              )
+              .map((topic) => `<span>${topic}</span>`)
               .join("")}</div>`
           : ""
       }
@@ -360,13 +323,8 @@ const generateResumeHTML = (data) => {
 </html>`;
 };
 
-/**
- * Main function to generate resume PDF
- */
 const generateResume = async () => {
   try {
-    // Transform content for resume
-    // Shorten summary for resume format (keep first 2-3 sentences)
     const fullSummary = stripHtmlTags(CONTENT.ABOUT_ME).trim();
     const summarySentences = fullSummary
       .split(/[.!?]+/)
@@ -389,7 +347,6 @@ const generateResume = async () => {
       dateRange: formatDateRange(school.yearStart, school.yearEnd),
     }));
 
-    // Include more projects, excluding specific ones and including normalizer.app
     const excludedProjects = [
       "Airr Product Demo",
       "Courier Company Website",
@@ -397,17 +354,14 @@ const generateResume = async () => {
       "ASU Earned Admissions",
     ];
 
-    // Get work projects excluding the ones we don't want
     const filteredWorkProjects = CONTENT.WORK_PROJECTS.filter(
       (project) => !excludedProjects.includes(project.title)
     );
 
-    // Get normalizer.app from side projects
     const normalizerApp = CONTENT.SIDE_PROJECTS.find(
       (project) => project.title === "normalizer.app"
     );
 
-    // Combine and take up to 6 projects
     const allProjects = normalizerApp
       ? [normalizerApp, ...filteredWorkProjects]
       : filteredWorkProjects;
@@ -421,7 +375,7 @@ const generateResume = async () => {
         .filter(Boolean),
     }));
 
-    const resumeData = {
+    const resumeData: ResumeData = {
       name: CONTENT.PAGE_TITLE,
       title: CONTENT.PAGE_SUBTITLE,
       email: CONTENT.EMAIL_ADDRESS,
@@ -433,19 +387,15 @@ const generateResume = async () => {
       projects,
     };
 
-    // Generate HTML
     const html = generateResumeHTML(resumeData);
 
-    // Launch browser and generate PDF
     const browser = await chromium.launch();
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle" });
 
-    // Ensure public directory exists
-    const publicPath = `${__dirname}/../public`;
+    const publicPath = `${import.meta.dir}/../public`;
     await mkdir(publicPath, { recursive: true });
 
-    // Generate PDF
     const pdfPath = `${publicPath}/${RESUME_FILENAME}`;
     await page.pdf({
       path: pdfPath,

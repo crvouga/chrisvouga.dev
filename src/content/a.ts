@@ -1,8 +1,3 @@
-/**
- * @param {string} href
- * @param {string} text
- * @returns {string}
- */
-export const a = (href, text) => {
+export const a = (href: string, text: string): string => {
   return `<a style="color: white;" target="_blank" rel="noreferrer noopener" href="${href}">${text}</a>`;
 };

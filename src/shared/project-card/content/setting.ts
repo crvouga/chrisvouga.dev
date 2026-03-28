@@ -1,11 +1,7 @@
-// @ts-check
+import { viewChip } from "../../../ui/chip";
+import type { ProjectCardView } from "../props";
 
-import { viewChip } from "../../../ui/chip.js";
-
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectSettingChip = (props) => (a, _c) => {
+export const viewProjectSettingChip: ProjectCardView = (props) => (a, _c) => {
   return viewChip({
     size: "sm",
     variant: "basic",

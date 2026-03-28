@@ -1,16 +1,14 @@
-import { CONTENT } from "../../content/content.js";
-import { tag, text } from "../../library/html/index.js";
-import { viewContactLink } from "../../shared/contact-link/index.js";
-import { viewGithubButton } from "../../shared/github-button.js";
-import { viewLinkedInButton } from "../../shared/linkedin-button.js";
-import { viewResumeButton } from "../../shared/resume-button.js";
-import { HEAD } from "../../ui/head.js";
-import { THEME, unit } from "../../ui/theme.js";
+import { CONTENT } from "../../content/content";
+import { tag, text } from "../../library/html/index";
+import type { ViewWithProps } from "../../library/html/index";
+import { viewContactLink } from "../../shared/contact-link/index";
+import { viewGithubButton } from "../../shared/github-button";
+import { viewLinkedInButton } from "../../shared/linkedin-button";
+import { viewResumeButton } from "../../shared/resume-button";
+import { HEAD } from "../../ui/head";
+import { THEME, unit } from "../../ui/theme";
 
-/**
- * @type {import("../../library/html/index.js").ViewWithProps<{}>}
- */
-export const viewHeadingContact = () => () => {
+export const viewHeadingContact: ViewWithProps<{}> = () => () => {
   return tag(
     "div",
     {

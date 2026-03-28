@@ -1,12 +1,9 @@
-import { CONTENT } from "../content/content.js";
-import { viewButton } from "../ui/button.js";
-import { linkedIn } from "../ui/icons.js";
+import { CONTENT } from "../content/content";
+import { viewButton } from "../ui/button";
+import { linkedIn } from "../ui/icons";
+import type { ViewWithProps } from "../library/html/index";
 
-/**
- *
- * @type {import("../library/html/index.js").ViewWithProps<{}>}
- */
-export const viewLinkedInButton = () => () => {
+export const viewLinkedInButton: ViewWithProps<{}> = () => () => {
   return viewButton({
     tag: "a",
     variant: "soft",

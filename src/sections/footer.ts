@@ -1,17 +1,15 @@
-import { CONTENT } from "../content/content.js";
-import { tag, text } from "../library/html/index.js";
-import { viewContactLink } from "../shared/contact-link/index.js";
-import { viewGithubButton } from "../shared/github-button.js";
-import { viewLinkedInButton } from "../shared/linkedin-button.js";
-import { viewResumeButton } from "../shared/resume-button.js";
-import { viewLink } from "../ui/link.js";
-import { HEAD } from "../ui/head.js";
-import { unit, THEME } from "../ui/theme.js";
+import { CONTENT } from "../content/content";
+import { tag, text } from "../library/html/index";
+import type { View } from "../library/html/index";
+import { viewContactLink } from "../shared/contact-link/index";
+import { viewGithubButton } from "../shared/github-button";
+import { viewLinkedInButton } from "../shared/linkedin-button";
+import { viewResumeButton } from "../shared/resume-button";
+import { viewLink } from "../ui/link";
+import { HEAD } from "../ui/head";
+import { unit, THEME } from "../ui/theme";
 
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewFooterSection = () => {
+export const viewFooterSection: View = () => {
   return tag(
     "footer",
     {

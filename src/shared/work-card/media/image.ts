@@ -1,15 +1,13 @@
-// @ts-check
+import { type ViewWithProps, tag, text } from "../../../library/html/index";
+import type { Work } from "../../../content/work";
+import { stringToJsVarSafe } from "../../../library/js-var";
+import { HEAD } from "../../../ui/head";
+import { THEME } from "../../../ui/theme";
+import { viewOpenGalleryButtonImageWrapper } from "../../../ui/image-gallery-modal/open-gallery-button-image-wrapper";
 
-import { tag, text } from "../../../library/html/index.js";
-import { stringToJsVarSafe } from "../../../library/js-var.js";
-import { HEAD } from "../../../ui/head.js";
-import { THEME } from "../../../ui/theme.js";
-import { viewOpenGalleryButtonImageWrapper } from "../../../ui/image-gallery-modal/open-gallery-button-image-wrapper.js";
+type WorkCardMediaProps = { work: Work; fetchPriority?: "high" | "auto" };
 
-/**
- * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
- */
-export const viewWorkCardMediaImage = (props) => {
+export const viewWorkCardMediaImage: ViewWithProps<WorkCardMediaProps> = (props) => {
   const src = props.work?.imageSrc?.[0];
   if (src) {
     return viewWorkCardMediaImageMain(props);
@@ -17,10 +15,7 @@ export const viewWorkCardMediaImage = (props) => {
   return viewWorkCardMediaGradient(props);
 };
 
-/**
- * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
- */
-const viewWorkCardMediaImageMain = (props) => (attr, _) => {
+const viewWorkCardMediaImageMain: ViewWithProps<WorkCardMediaProps> = (props) => (attr, _) => {
   const alt = props.work?.imageAlt ?? "";
   const src = props.work?.imageSrc?.[0] ?? " ";
   const jsVarSafeNamespace = stringToJsVarSafe(props.work.name);
@@ -48,10 +43,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("../../../library/html/index.js").ViewWithProps<{work: import("../../../content/work.js").Work}>}
- */
-const viewWorkCardMediaGradient = (_) => (attr, _) => {
+const viewWorkCardMediaGradient: ViewWithProps<{ work: Work }> = (_) => (attr, _c) => {
   return tag("div", { ...attr, class: "work-card-media-gradient" }, []);
 };
 

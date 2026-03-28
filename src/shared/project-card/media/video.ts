@@ -1,20 +1,14 @@
-// @ts-check
+import { tag, text } from "../../../library/html/index";
+import { toYouTubeVideoUrl } from "../../../library/youtube";
+import { HEAD } from "../../../ui/head";
+import type { ProjectCardView } from "../props";
 
-import { tag, text } from "../../../library/html/index.js";
-import { toYouTubeVideoUrl } from "../../../library/youtube.js";
-import { HEAD } from "../../../ui/head.js";
-
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectCardMediaVideo = (props) => (attr, _) => {
-  // @ts-ignore
+export const viewProjectCardMediaVideo: ProjectCardView = (props) => (attr, _) => {
   if (!props.project?.youTubeVideoId) {
     throw new Error("missing youTubeVideoId");
   }
 
   const videoUrl = toYouTubeVideoUrl({
-    // @ts-ignore
     youTubeVideoId: props.project.youTubeVideoId,
   });
 
@@ -89,15 +83,12 @@ HEAD.push(
   ])
 );
 
-// Add script to dynamically load YouTube iframe
 HEAD.push(
   tag("script", {}, [
     text(`
       function loadYouTubeVideo(container, videoUrl) {
-        // Clear the thumbnail content
         container.innerHTML = '';
 
-        // Create and append the iframe
         const iframe = document.createElement('iframe');
         iframe.src = videoUrl;
         iframe.className = 'project-card-media-video';

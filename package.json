@@ -1,26 +1,24 @@
 {
   "type": "module",
   "scripts": {
-    "start": "npx concurrently \"node --watch ./src/main.js\" \"npx serve dist\"",
-    "dev": "npm run start",
-    "local": "npm run start",
-    "build": "node ./src/main.js",
-    "test": "node test/server.test.js",
-    "tc": "npx tsc -w",
+    "start": "bun --watch ./src/main.ts & bunx serve dist",
+    "dev": "bun run start",
+    "local": "bun run start",
+    "build": "bun run ./src/main.ts",
+    "test": "bun test",
     "typecheck": "tsc",
-    "optimize-images": "node ./src/optimize-images.js",
-    "screenshot-work": "node ./src/screenshot-work-websites.js",
-    "screenshot-projects": "node ./src/screenshot-project-websites.js",
-    "screenshot-main": "node ./src/screenshot-main-site.js",
-    "generate-all": "npm run screenshot-work && npm run screenshot-projects && npm run optimize-images && npm run generate-resume && npm run screenshot-main",
-    "generate-resume": "node ./src/generate-resume.js",
+    "optimize-images": "bun run ./src/optimize-images.ts",
+    "screenshot-work": "bun run ./src/screenshot-work-websites.ts",
+    "screenshot-projects": "bun run ./src/screenshot-project-websites.ts",
+    "screenshot-main": "bun run ./src/screenshot-main-site.ts",
+    "generate-all": "bun run screenshot-work && bun run screenshot-projects && bun run optimize-images && bun run generate-resume && bun run screenshot-main",
+    "generate-resume": "bun run ./src/generate-resume.ts",
     "preview": "docker build -t portfolio-app . && docker run -p 80:80 portfolio-app",
-    "clone-projects": "npx tsx scripts/clone-projects.ts"
+    "clone-projects": "bun run scripts/clone-projects.ts"
   },
   "devDependencies": {
-    "@types/node": "^22.15.29",
+    "@types/bun": "latest",
     "playwright": "^1.48.0",
-    "tsx": "^4",
     "typescript": "^5.9.3"
   }
 }

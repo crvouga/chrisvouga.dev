@@ -1,20 +1,15 @@
-/**
- * @typedef {{
- * infoUrl?: string;
- * institutionName: string;
- * degree: string;
- * yearStart: number;
- * yearEnd: number | "Present";
- * imageSrc: string;
- * imageAlt: string;
- * galleryImageSrc: string[];
- * }} School
- */
+export type School = {
+  infoUrl?: string;
+  institutionName: string;
+  degree: string;
+  yearStart: number;
+  yearEnd: number | "Present";
+  imageSrc: string;
+  imageAlt: string;
+  galleryImageSrc: string[];
+};
 
-/**
- * @type {import("./school.js").School[]}
- */
-export const SCHOOL = [
+export const SCHOOL: School[] = [
   {
     degree: "Bachelor of Science in Mathematics & Statistics",
     institutionName: "Arizona State University",

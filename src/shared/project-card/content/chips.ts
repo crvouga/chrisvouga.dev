@@ -1,13 +1,11 @@
-import { TOPIC_TO_IMAGE_SRC, TOPIC_TO_NAME } from "../../../content/topic.js";
-import { fragment, tag, text } from "../../../library/html/index.js";
-import { viewChip } from "../../../ui/chip.js";
-import { HEAD } from "../../../ui/head.js";
-import { unit } from "../../../ui/theme.js";
+import { TOPIC_TO_IMAGE_SRC, TOPIC_TO_NAME } from "../../../content/topic";
+import { fragment, tag, text } from "../../../library/html/index";
+import { viewChip } from "../../../ui/chip";
+import { HEAD } from "../../../ui/head";
+import { unit } from "../../../ui/theme";
+import type { ProjectCardView } from "../props";
 
-/**
- * @type {import("../props.js").ProjectCardView}
- */
-export const viewProjectCardContentChips = (props) => () => {
+export const viewProjectCardContentChips: ProjectCardView = (props) => () => {
   return tag("div", {}, [
     tag("div", { class: "project-card-content-chips" }, [
       ...props.project.topics.sort().map((topic) => {

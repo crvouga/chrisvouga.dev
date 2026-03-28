@@ -1,12 +1,9 @@
-import { CONTENT } from "../content/content.js";
-import { viewButton } from "../ui/button.js";
-import { github } from "../ui/icons.js";
+import { CONTENT } from "../content/content";
+import { viewButton } from "../ui/button";
+import { github } from "../ui/icons";
+import type { ViewWithProps } from "../library/html/index";
 
-/**
- *
- * @type {import("../library/html/index.js").ViewWithProps<{}>}
- */
-export const viewGithubButton = () => () => {
+export const viewGithubButton: ViewWithProps<{}> = () => () => {
   return viewButton({
     tag: "a",
     variant: "soft",

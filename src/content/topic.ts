@@ -1,12 +1,3 @@
-//
-//
-//
-// Topics
-// source: https://svglogos.dev/
-//
-//
-//
-
 export const TOPIC_TO_IMAGE_SRC = {
   // neo4j: "/neo4j.svg",
   neo4j: null,
@@ -69,14 +60,9 @@ export const TOPIC_TO_IMAGE_SRC = {
   zod: "/zod.svg",
 };
 
-/**
- * @typedef {keyof typeof TOPIC_TO_IMAGE_SRC} Topic
- */
+export type Topic = keyof typeof TOPIC_TO_IMAGE_SRC;
 
-/**
- * @type {{ [key in Topic]: string; }}
- */
-export const TOPIC_TO_NAME = {
+export const TOPIC_TO_NAME: { [key in Topic]: string } = {
   html: "HTML",
   neo4j: "Neo4j",
   flask: "Flask",

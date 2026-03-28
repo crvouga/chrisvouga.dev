@@ -1,39 +1,30 @@
-# Use Node.js as the build environment (Debian-based for Playwright compatibility)
-FROM node:18-slim AS build
+FROM oven/bun:1 AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
+COPY package.json bun.lock* ./
 
-# Install dependencies
-RUN npm install
+RUN bun install --frozen-lockfile || bun install
 
-# Install Playwright system dependencies
-RUN npx playwright install-deps chromium
+RUN apt-get update && apt-get install -y \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+    libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 \
+    libpango-1.0-0 libcairo2 libasound2 libxshmfence1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright browsers
-RUN npx playwright install chromium
+RUN bunx playwright install chromium
 
-# Copy all files
 COPY . .
 
-# Build the app
-RUN npm run build
+RUN bun run build
 
-# Use Nginx for serving the built app
 FROM nginx:alpine
 
-# Copy custom nginx config for SPA routing
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/
 
-# Copy built files from the build stage to nginx serve directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80
 EXPOSE 80
 
-# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,18 +1,13 @@
-// @ts-check
 import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
-import { viewApp } from "./app.js";
-import { copyDirectory, deleteDirectory } from "./library/file-system.js";
-import { render } from "./library/html/render.js";
+import { viewApp } from "./app";
+import { copyDirectory, deleteDirectory } from "./library/file-system";
+import { render } from "./library/html/render";
 
 const PUBLIC_PATH = "./public";
 const DIST_PATH = "./dist";
 
-/**
- * Builds the app by generating index.html and copying public files.
- * @returns {Promise<void>}
- */
-export const main = async () => {
+export const main = async (): Promise<void> => {
   console.log("Building...");
   const start = Date.now();
   await deleteDirectory(DIST_PATH);

@@ -1,8 +1,3 @@
-/**
- *
- * @param {unknown} value
- * @returns {value is Record<string, unknown>}
- */
-export const isRecord = (value) => {
+export const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };

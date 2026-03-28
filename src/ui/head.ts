@@ -1,4 +1,3 @@
-/**
- * @type {import("../library/html/index.js").Html[]}
- */
-export const HEAD = [];
+import type { Html } from "../library/html/index";
+
+export const HEAD: Html[] = [];

@@ -1,4 +1,4 @@
-import { a } from "./a.js";
+import { a } from "./a";
 
 const BAND_HREF = "https://www.instagram.com/tripolartheband/";
 const BAND_A_TAG = a(BAND_HREF, "band");

@@ -1,4 +1,4 @@
-// @ts-check
+import { test, expect } from "bun:test";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { setTimeout } from "timers/promises";
@@ -12,12 +12,7 @@ const TEST_URL = `http://localhost:${PORT}`;
 const MAX_RETRIES = 30;
 const RETRY_DELAY_MS = 1000;
 
-/**
- * Execute a shell command and return the result
- * @param {string} command
- * @returns {Promise<{ stdout: string; stderr: string }>}
- */
-async function runCommand(command) {
+async function runCommand(command: string): Promise<{ stdout: string; stderr: string }> {
   try {
     return await execAsync(command);
   } catch (error) {
@@ -35,11 +30,7 @@ async function runCommand(command) {
   }
 }
 
-/**
- * Wait for the container to be ready by checking if it responds
- * @returns {Promise<void>}
- */
-async function waitForContainer() {
+async function waitForContainer(): Promise<void> {
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
       const response = await fetch(TEST_URL, {
@@ -49,7 +40,7 @@ async function waitForContainer() {
       if (response.ok) {
         return;
       }
-    } catch (error) {
+    } catch {
       // Container not ready yet, continue retrying
     }
     await setTimeout(RETRY_DELAY_MS);
@@ -59,11 +50,7 @@ async function waitForContainer() {
   );
 }
 
-/**
- * Print docker logs for the test container if available
- * @returns {Promise<void>}
- */
-async function printDockerLogs() {
+async function printDockerLogs(): Promise<void> {
   try {
     const { stdout } = await runCommand(
       `docker logs ${CONTAINER_NAME} 2>&1 || true`
@@ -73,20 +60,14 @@ async function printDockerLogs() {
     } else {
       console.log(`(No logs found for container ${CONTAINER_NAME})`);
     }
-  } catch (err) {
-    console.log(`⚠️  Unable to retrieve Docker logs for ${CONTAINER_NAME}`);
+  } catch {
+    console.log(`Unable to retrieve Docker logs for ${CONTAINER_NAME}`);
   }
 }
 
-/**
- * Clean up Docker resources
- * @returns {Promise<void>}
- */
-async function cleanup() {
+async function cleanup(): Promise<void> {
   try {
-    // Stop and remove container if it exists
     await runCommand(`docker rm -f ${CONTAINER_NAME} 2>/dev/null || true`);
-    // Remove image if it exists
     await runCommand(`docker rmi ${IMAGE_NAME} 2>/dev/null || true`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -94,12 +75,7 @@ async function cleanup() {
   }
 }
 
-/**
- * Main test function
- */
-async function runTest() {
-  let testPassed = false;
-
+test("Docker container serves HTML on port 80", async () => {
   try {
     console.log("Cleaning up any existing containers/images...");
     await cleanup();
@@ -118,41 +94,20 @@ async function runTest() {
     console.log("Making HTTP request to test server...");
     const response = await fetch(TEST_URL);
 
-    // Verify status code
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
+    expect(response.status).toBe(200);
 
-    // Verify content type
     const contentType = response.headers.get("content-type") || "";
-    if (!contentType.includes("html") && !contentType.includes("text/html")) {
-      throw new Error(`Expected HTML content type, got: ${contentType}`);
-    }
+    expect(contentType.includes("html") || contentType.includes("text/html")).toBe(true);
 
-    // Verify response body contains HTML
     const body = await response.text();
-    if (!body.includes("<!DOCTYPE html") && !body.includes("<html")) {
-      throw new Error("Response body does not appear to be HTML");
-    }
+    expect(body.includes("<!DOCTYPE html") || body.includes("<html")).toBe(true);
 
     console.log("✓ Test passed: Server responds with 200 HTML");
-    testPassed = true;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("✗ Test failed:", message);
     await printDockerLogs();
-    process.exitCode = 1;
+    throw error;
   } finally {
     console.log("Cleaning up...");
     await cleanup();
-    if (!testPassed) {
-      // Show final docker logs (if any) after cleanup, for clarity
-      // (the logs above are just before cleanup, but sometimes container is alive)
-      await printDockerLogs();
-    }
-    process.exit(testPassed ? 0 : 1);
   }
-}
-
-// Run the test
-runTest();
+});

@@ -1,25 +1,13 @@
-import { fragment, tag, text } from "../../library/html/index.js";
+import type { OpenImageGalleryModalJsFunction, ViewImageGalleryModalFunction } from "./interface";
+import { fragment, tag, text } from "../../library/html/index";
 
-/**
- * @typedef {import("./interface.js").ImageGalleryModalProps} ImageGalleryModalProps
- * @typedef {import("./interface.js").OpenImageGalleryModalJsFunction} OpenImageGalleryModalJsFunction
- * @typedef {import("./interface.js").ViewImageGalleryModalFunction} ViewImageGalleryModalFunction
- */
-
-/**
- * Creates a function that opens the image gallery modal
- * @type {OpenImageGalleryModalJsFunction}
- */
-export const openImageGalleryModalJs = (props) => {
+export const openImageGalleryModalJs: OpenImageGalleryModalJsFunction = (props) => {
   const elementId = `${props.jsVarSafeNamespace}ImageGalleryModal`;
 
   return `document.getElementById('${elementId}').openModal(0);`;
 };
 
-/**
- * @type {ViewImageGalleryModalFunction}
- */
-export const viewImageGalleryModal = (props) => () => {
+export const viewImageGalleryModal: ViewImageGalleryModalFunction = (props) => () => {
   const elementId = `${props.jsVarSafeNamespace}ImageGalleryModal`;
 
   return fragment([

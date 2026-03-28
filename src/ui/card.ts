@@ -1,13 +1,9 @@
-// @ts-check
+import type { View } from "../library/html/index";
+import { tag, text } from "../library/html/index";
+import { HEAD } from "./head";
+import { THEME, unit } from "./theme";
 
-import { tag, text } from "../library/html/index.js";
-import { HEAD } from "./head.js";
-import { THEME, unit } from "./theme.js";
-
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewCard = (attr, children) => {
+export const viewCard: View = (attr, children) => {
   return tag("article", { ...attr, class: "card" }, children);
 };
 
@@ -29,10 +25,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewCardContent = (attrs, children) => {
+export const viewCardContent: View = (attrs, children) => {
   return tag("div", { ...attrs, class: "card-content" }, children);
 };
 
@@ -53,10 +46,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewCardActions = (attrs, children) => {
+export const viewCardActions: View = (attrs, children) => {
   return tag("div", { ...attrs, class: "card-actions" }, children);
 };
 

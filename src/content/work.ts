@@ -1,21 +1,16 @@
-/**
- * @typedef {{
- * name: string;
- * infoUrl?: string;
- * jobTitle: string;
- * jobDescription: string;
- * yearStart: number;
- * yearEnd: number | "Present";
- * imageSrc: string[];
- * imageAlt: string;
- * galleryImageSrc: string[];
- * }} Work
- */
+export type Work = {
+  name: string;
+  infoUrl?: string;
+  jobTitle: string;
+  jobDescription: string;
+  yearStart: number;
+  yearEnd: number | "Present";
+  imageSrc: string[];
+  imageAlt: string;
+  galleryImageSrc: string[];
+};
 
-/**
- * @type {import("./work.js").Work[]}
- */
-export const WORK = [
+export const WORK: Work[] = [
   {
     name: "Geviti",
     infoUrl: "https://www.gogeviti.com/",

@@ -1,13 +1,8 @@
-// @ts-check
+import { type ViewWithProps, tag, text } from "../library/html/index";
+import { viewTypography } from "../ui/typography";
+import { HEAD } from "../ui/head";
 
-import { tag, text } from "../library/html/index.js";
-import { viewTypography } from "../ui/typography.js";
-import { HEAD } from "../ui/head.js";
-
-/**
- * @type {import("../library/html/index.js").ViewWithProps<{ title: string, subtitle?: string }>}
- */
-export const viewSectionTitle = (p) => (_a, _c) => {
+export const viewSectionTitle: ViewWithProps<{ title: string; subtitle?: string }> = (p) => (_a, _c) => {
   return tag("div", { class: "section-title" }, [
     viewTypography({ level: "h2", text: p.title })(),
     ...(p.subtitle

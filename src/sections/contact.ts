@@ -1,26 +1,21 @@
-import { CONTENT } from "../content/content.js";
-import { tag, text } from "../library/html/index.js";
-import { viewContactLink } from "../shared/contact-link/index.js";
-import { viewGithubButton } from "../shared/github-button.js";
-import { viewLinkedInButton } from "../shared/linkedin-button.js";
-import { viewResumeButton } from "../shared/resume-button.js";
-import { viewSection } from "../shared/section.js";
-import { HEAD } from "../ui/head.js";
-import { THEME, unit } from "../ui/theme.js";
+import { CONTENT } from "../content/content";
+import { tag, text } from "../library/html/index";
+import type { View } from "../library/html/index";
+import { viewContactLink } from "../shared/contact-link/index";
+import { viewGithubButton } from "../shared/github-button";
+import { viewLinkedInButton } from "../shared/linkedin-button";
+import { viewResumeButton } from "../shared/resume-button";
+import { viewSection } from "../shared/section";
+import { HEAD } from "../ui/head";
+import { THEME, unit } from "../ui/theme";
 
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewContactSection = (_a, _c) => {
+export const viewContactSection: View = (_a, _c) => {
   return viewSection({
     title: CONTENT.CONTACT_SECTION_TITLE,
   })({ class: "contact-section" }, [viewContacts()]);
 };
 
-/**
- * @type {import("../library/html/index.js").View}
- */
-const viewContacts = (_a, _c) => {
+const viewContacts: View = (_a, _c) => {
   return tag(
     "div",
     {
@@ -56,10 +51,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("../library/html/index.js").View}
- */
-const viewContactLinks = (_a, _c) => {
+const viewContactLinks: View = (_a, _c) => {
   return tag("div", { class: "contact-section-links" }, [
     viewContactLink({
       label: "Email",
@@ -80,10 +72,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("../library/html/index.js").View}
- */
-const viewContactButtons = (_a, _c) => {
+const viewContactButtons: View = (_a, _c) => {
   return tag("div", { class: "contact-section-buttons" }, [
     viewGithubButton({})(),
     viewLinkedInButton({})(),

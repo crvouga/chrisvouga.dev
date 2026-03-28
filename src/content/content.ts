@@ -6,10 +6,10 @@ import {
   ABOUT_YOUTUBE_VIDEO_TITLE,
   ABOUT_CURSOR_GIFT_TEXT,
   ABOUT_GITHUB_HEATMAP_TEXT,
-} from "./about.js";
-import { PROJECTS, SIDE_PROJECTS, WORK_PROJECTS } from "./project.js";
-import { SCHOOL } from "./school.js";
-import { WORK } from "./work.js";
+} from "./about";
+import { PROJECTS, SIDE_PROJECTS, WORK_PROJECTS } from "./project";
+import { SCHOOL } from "./school";
+import { WORK } from "./work";
 
 const PAGE_TITLE = "Chris Vouga";
 

@@ -1,11 +1,11 @@
 /**
  * Clone (or pull) all sibling project repos into the projects/ directory.
- * Run: npx tsx scripts/clone-projects.ts
+ * Run: bun run scripts/clone-projects.ts
  */
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { getUniqueCloneRepos } from "../infrastructure/projects.ts";
+import { getUniqueCloneRepos } from "../infrastructure/projects";
 
 const root = execSync("git rev-parse --show-toplevel", { encoding: "utf-8" }).trim();
 const projectsDir = join(root, "projects");

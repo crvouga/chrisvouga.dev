@@ -1,16 +1,15 @@
-// @ts-check
+import type { View, ViewWithProps } from "../library/html/index";
+import { tag, text } from "../library/html/index";
+import { HEAD } from "./head";
+import { THEME } from "./theme";
 
-import { tag, text } from "../library/html/index.js";
-import { HEAD } from "./head.js";
-import { THEME } from "./theme.js";
+type ChipProps = {
+  size: "sm";
+  startDecorator?: View;
+  variant: "outlined" | "basic";
+  text: string;
+};
 
-/**
- * @typedef {{size: "sm"; startDecorator?: import("../library/html/index.js").View; variant: "outlined" | "basic"; text: string}} ChipProps
- */
-
-/**
- * Push CSS for the Chip component to the HEAD
- */
 HEAD.push(
   tag("style", {}, [
     text(`
@@ -127,10 +126,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("../library/html/index.js").ViewWithProps<ChipProps>}
- */
-export const viewChip = (props) => (attr, _children) => {
+export const viewChip: ViewWithProps<ChipProps> = (props) => (attr, _children) => {
   const variantClass =
     props.variant === "outlined" ? "chip-outlined" : "chip-basic";
 

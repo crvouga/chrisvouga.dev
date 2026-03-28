@@ -1,20 +1,17 @@
-import { CONTENT } from "./content/content.js";
-import { tag, text } from "./library/html/index.js";
-import { replaceAll } from "./library/replace-all.js";
-import { viewAboutMeSection } from "./sections/about-me.js";
-import { viewFooterSection } from "./sections/footer.js";
-import { viewHeadingSection } from "./sections/heading/index.js";
-import { viewProjectsSection } from "./sections/projects.js";
-import { viewSchoolSection } from "./sections/school.js";
-import { viewWorkSection } from "./sections/work.js";
-import { HEAD } from "./ui/head.js";
-import { THEME } from "./ui/theme.js";
-import { viewImage } from "./ui/image.js";
+import { CONTENT } from "./content/content";
+import { tag, text, type Attrs, type Html, type View } from "./library/html/index";
+import { replaceAll } from "./library/replace-all";
+import { viewAboutMeSection } from "./sections/about-me";
+import { viewFooterSection } from "./sections/footer";
+import { viewHeadingSection } from "./sections/heading/index";
+import { viewProjectsSection } from "./sections/projects";
+import { viewSchoolSection } from "./sections/school";
+import { viewWorkSection } from "./sections/work";
+import { HEAD } from "./ui/head";
+import { THEME } from "./ui/theme";
+import { viewImage } from "./ui/image";
 
-/**
- * @returns {import("./library/html/index.js").Html}
- */
-export const viewApp = () => {
+export const viewApp = (): Html => {
   return viewDoc({}, [
     tag("main", { class: "main" }, [
       viewHeadingSection(),
@@ -44,10 +41,7 @@ HEAD.push(
   ])
 );
 
-/**
- * @type {import("./library/html/index.js").View}
- */
-export const viewDoc = (_a, c) => {
+export const viewDoc: View = (_a?: Attrs, c?: Html[]) => {
   return tag("html", { lang: "en" }, [
     tag("head", {}, [
       tag("meta", { charset: "UTF-8" }, []),

@@ -1,11 +1,9 @@
-import { tag, text } from "../library/html/index.js";
-import { HEAD } from "./head.js";
-import { viewImage } from "./image.js";
+import type { ViewWithProps } from "../library/html/index";
+import { tag, text } from "../library/html/index";
+import { HEAD } from "./head";
+import { viewImage } from "./image";
 
-/**
- * @type {import("../library/html/index.js").ViewWithProps<{src:string; alt: string}>}
- */
-export const viewAvatar = (props) => (attr, children) => {
+export const viewAvatar: ViewWithProps<{src: string; alt: string}> = (props) => (attr, children) => {
   const className = ["avatar", attr?.["class"]].filter(Boolean).join(" ");
 
   return viewImage(props)(

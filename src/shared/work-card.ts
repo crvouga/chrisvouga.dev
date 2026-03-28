@@ -1,19 +1,16 @@
-// @ts-check
+import { tag } from "../library/html/index";
+import type { ViewWithProps } from "../library/html/index";
+import type { Work } from "../content/work";
+import { viewButton } from "../ui/button";
+import { viewCard, viewCardActions, viewCardContent } from "../ui/card";
+import { appendExternalLinkIndicator } from "../ui/external-link-indicator";
+import { web } from "../ui/icons";
+import { viewLink } from "../ui/link";
+import { unit } from "../ui/theme";
+import { viewTypography } from "../ui/typography";
+import { viewWorkCardMedia } from "./work-card/media/index";
 
-import { tag } from "../library/html/index.js";
-import { viewButton } from "../ui/button.js";
-import { viewCard, viewCardActions, viewCardContent } from "../ui/card.js";
-import { appendExternalLinkIndicator } from "../ui/external-link-indicator.js";
-import { web } from "../ui/icons.js";
-import { viewLink } from "../ui/link.js";
-import { unit } from "../ui/theme.js";
-import { viewTypography } from "../ui/typography.js";
-import { viewWorkCardMedia } from "./work-card/media/index.js";
-
-/**
- * @type {import("../library/html/index.js").ViewWithProps<{work: import("../content/work.js").Work; fetchPriority?: "high" | "auto"}>}
- */
-export const viewWorkCard =
+export const viewWorkCard: ViewWithProps<{ work: Work; fetchPriority?: "high" | "auto" }> =
   ({ work, fetchPriority }) =>
   () => {
     const mediaProps = fetchPriority

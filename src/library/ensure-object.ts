@@ -1,9 +1,6 @@
-/**
- *
- * @param {null | undefined | string | number | Record<string, unknown>} attrValue
- * @returns {Record<string, unknown>}
- */
-export const ensureObject = (attrValue) => {
+export const ensureObject = (
+  attrValue: null | undefined | string | number | Record<string, unknown>,
+): Record<string, unknown> => {
   if (typeof attrValue === "object") {
     return attrValue ?? {};
   }

@@ -1,38 +1,25 @@
-// @ts-check
+export type Attrs = Record<
+  string,
+  string | number | Record<string, unknown> | undefined | null
+>;
 
-/**
- * @typedef {Record<string, string | number | Record<string, unknown> | undefined | null>} Attrs
- */
+export type Tag = { t: "tag"; tagName: string; attrs: Attrs; children: Html[] };
 
-/**
- * @typedef {{ t: "tag"; tagName: string; attrs: Attrs; children: Html[] }} Tag
- */
+export type Text = { t: "text"; text: string };
 
-/**
- * @typedef {{ t: "text"; text: string }} Text
- */
+export type Fragment = { t: "fragment"; children: Html[] };
 
-/**
- * @typedef {{ t: "fragment"; children: Html[] }} Fragment
- */
+export type Html = Tag | Text | Fragment;
 
-/**
- * @typedef {Tag | Text | Fragment} Html
- */
+export type View = (attr?: Attrs, children?: Html[]) => Html;
 
-/**
- * @typedef {(attr?: Attrs, children?: Html[]) => Html} View
- */
+export type ViewWithProps<Props> = (props: Props) => View;
 
-/**
- * @template Props
- * @typedef {(props: Props) => View} ViewWithProps
- */
-
-/**
- * @type {(tagName:string, attr?: Attrs, children?: Html[]) => Html}
- */
-export const tag = (tagName, attrs, children) => {
+export const tag = (
+  tagName: string,
+  attrs?: Attrs,
+  children?: Html[],
+): Html => {
   return {
     t: "tag",
     tagName,
@@ -41,24 +28,14 @@ export const tag = (tagName, attrs, children) => {
   };
 };
 
-/**
- *
- * @param {string} text
- * @returns {Html}
- */
-export const text = (text) => {
+export const text = (text: string): Html => {
   return {
     t: "text",
     text,
   };
 };
 
-/**
- *
- * @param {Html[]} children
- * @returns {Html}
- */
-export const fragment = (children) => {
+export const fragment = (children: Html[]): Html => {
   return {
     t: "fragment",
     children,

@@ -1,11 +1,10 @@
-// @ts-check
+import type { Project } from "../../content/project";
+import type { ViewWithProps } from "../../library/html/index";
 
-/**
- * @typedef {{project: import("../../content/project.js").Project; linkHref?: string | null; fetchPriority?: "high" | "auto"}} ProjectCardProps
- */
+export type ProjectCardProps = {
+  project: Project;
+  linkHref?: string | null;
+  fetchPriority?: "high" | "auto";
+};
 
-/**
- * @typedef {import("../../library/html/index.js").ViewWithProps<import("./props.js").ProjectCardProps>} ProjectCardView
- */
-
-export default {};
+export type ProjectCardView = ViewWithProps<ProjectCardProps>;

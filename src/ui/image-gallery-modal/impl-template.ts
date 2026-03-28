@@ -1,28 +1,16 @@
-import { fragment, tag, text } from "../../library/html/index.js";
-import { HEAD } from "../head.js";
-import { THEME, unit } from "../theme.js";
+import type { OpenImageGalleryModalJsFunction, ViewImageGalleryModalFunction } from "./interface";
+import { fragment, tag, text } from "../../library/html/index";
+import { HEAD } from "../head";
+import { THEME, unit } from "../theme";
 
-/**
- * @typedef {import("./interface.js").ImageGalleryModalProps} ImageGalleryModalProps
- * @typedef {import("./interface.js").OpenImageGalleryModalJsFunction} OpenImageGalleryModalJsFunction
- * @typedef {import("./interface.js").ViewImageGalleryModalFunction} ViewImageGalleryModalFunction
- */
-
-/**
- * Creates a function that opens the image gallery modal
- * @type {OpenImageGalleryModalJsFunction}
- */
-export const openImageGalleryModalJs = (props) => {
+export const openImageGalleryModalJs: OpenImageGalleryModalJsFunction = (props) => {
   const namespace = `${props.jsVarSafeNamespace}ImageGalleryModal`;
   const openModalFunctionName = `${namespace}openModal`;
 
   return `${openModalFunctionName}(0);`;
 };
 
-/**
- * @type {ViewImageGalleryModalFunction}
- */
-export const viewImageGalleryModal = (props) => () => {
+export const viewImageGalleryModal: ViewImageGalleryModalFunction = (props) => () => {
   const namespace = `${props.jsVarSafeNamespace}ImageGalleryModal`;
   const modalId = `${namespace}modal`;
   const imageContainerId = `${namespace}image-container`;

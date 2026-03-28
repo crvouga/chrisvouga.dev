@@ -1,16 +1,12 @@
-// @ts-check
+import { CONTENT } from "../content/content";
+import { fragment, tag } from "../library/html/index";
+import type { View } from "../library/html/index";
+import { viewSection } from "../shared/section";
+import { THEME, unit } from "../ui/theme";
+import { viewTypography } from "../ui/typography";
+import { viewYouTubeVideo } from "../ui/youtube-video";
 
-import { CONTENT } from "../content/content.js";
-import { fragment, tag } from "../library/html/index.js";
-import { viewSection } from "../shared/section.js";
-import { THEME, unit } from "../ui/theme.js";
-import { viewTypography } from "../ui/typography.js";
-import { viewYouTubeVideo } from "../ui/youtube-video.js";
-
-/**
- * @type {import("../library/html/index.js").View}
- */
-export const viewAboutMeSection = (a, _) => {
+export const viewAboutMeSection: View = (a, _) => {
   return viewSection({
     title: CONTENT.ABOUT_ME_SECTION_TITLE,
   })(

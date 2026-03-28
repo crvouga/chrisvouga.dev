@@ -1,15 +1,10 @@
-import { fragment, tag, text } from "../library/html/index.js";
-import { HEAD } from "./head.js";
-import { THEME } from "./theme.js";
+import type { ViewWithProps } from "../library/html/index";
+import { fragment, tag, text } from "../library/html/index";
+import { HEAD } from "./head";
+import { THEME } from "./theme";
 
-/**
- * @type {import("../library/html/index.js").ViewWithProps<{src: string, alt: string, fetchPriority?: "high" | "auto"}>}
- */
-export const viewImage = (props) => (attr, _) => {
-  /**
-   * @type {Record<string, any>}
-   */
-  const imgAttributes = {
+export const viewImage: ViewWithProps<{src: string; alt: string; fetchPriority?: "high" | "auto"}> = (props) => (attr, _) => {
+  const imgAttributes: Record<string, any> = {
     ...attr,
     src: props.src,
     alt: props.alt || "",

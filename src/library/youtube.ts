@@ -1,13 +1,12 @@
-/**
- * Converts a YouTube video ID into a playable embed URL
- * @param {{ youTubeVideoId: string, autoplay?: boolean, mute?: boolean }} param0
- * @returns {string}
- */
 export const toYouTubeVideoUrl = ({
   youTubeVideoId,
   autoplay = true,
   mute = true,
-}) => {
+}: {
+  youTubeVideoId: string;
+  autoplay?: boolean;
+  mute?: boolean;
+}): string => {
   const params = new URLSearchParams();
 
   if (autoplay) {
