@@ -21,6 +21,6 @@
     "allowUnusedLabels": false,
     "types": ["bun-types"]
   },
-  "include": ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts"],
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts", "projects.ts"],
   "exclude": ["node_modules", "dist", "aws", "projects", "infrastructure"]
 }
