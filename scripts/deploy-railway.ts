@@ -11,8 +11,10 @@ import {
   connectServiceImage,
   ensureProject,
   findServiceByName,
+  latestDeploymentId,
   resolveEnvironment,
   updateServiceInstance,
+  waitForLatestDeploymentSuccess,
 } from "../lib/railway-api.js";
 import { ensureRailwayToken } from "../lib/railway-token.js";
 import { waitForServiceHealthy } from "../lib/service-health.js";
@@ -37,6 +39,7 @@ type Args = {
   readonly imageTag: string;
   readonly continueOnError: boolean;
   readonly skipHealth: boolean;
+  readonly waitDeployment: boolean;
 };
 
 function parseArgs(argv: readonly string[]): Args {
@@ -45,6 +48,7 @@ function parseArgs(argv: readonly string[]): Args {
   let imageTag = config.default_image_tag;
   let continueOnError = false;
   let skipHealth = false;
+  let waitDeployment = false;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -52,9 +56,10 @@ function parseArgs(argv: readonly string[]): Args {
     else if (arg === "--image-tag") imageTag = argv[++i] ?? imageTag;
     else if (arg === "--continue-on-error") continueOnError = true;
     else if (arg === "--skip-health") skipHealth = true;
+    else if (arg === "--wait-deployment") waitDeployment = true;
     else if (arg === "--help" || arg === "-h") {
       console.log(
-        "Usage: bun run scripts/deploy-railway.ts [--id <id> ...] [--image-tag <tag>] [--continue-on-error] [--skip-health]",
+        "Usage: bun run scripts/deploy-railway.ts [--id <id> ...] [--image-tag <tag>] [--continue-on-error] [--skip-health] [--wait-deployment]",
       );
       process.exit(0);
     } else {
@@ -63,7 +68,13 @@ function parseArgs(argv: readonly string[]): Args {
     }
   }
 
-  return { ids: ids.filter(Boolean), imageTag, continueOnError, skipHealth };
+  return {
+    ids: ids.filter(Boolean),
+    imageTag,
+    continueOnError,
+    skipHealth,
+    waitDeployment,
+  };
 }
 
 async function deployOne(
@@ -71,6 +82,7 @@ async function deployOne(
   service: ServiceSpec,
   imageTag: string,
   skipHealth: boolean,
+  waitDeployment: boolean,
 ): Promise<void> {
   const projectName = railwayProjectName(config);
   const environmentName = railwayEnvironmentName(config);
@@ -101,9 +113,26 @@ async function deployOne(
     });
   }
 
+  const afterDeploymentId = waitDeployment
+    ? await latestDeploymentId({
+        projectId: project.id,
+        serviceId: railwayService.id,
+        environmentId: environment.id,
+      })
+    : undefined;
+
   await connectServiceImage(railwayService.id, image);
 
-  if (!skipHealth && service.health_check) {
+  if (waitDeployment) {
+    await waitForLatestDeploymentSuccess(
+      {
+        projectId: project.id,
+        serviceId: railwayService.id,
+        environmentId: environment.id,
+      },
+      { afterDeploymentId },
+    );
+  } else if (!skipHealth && service.health_check) {
     await waitForServiceHealthy(config, service);
   }
 
@@ -130,7 +159,7 @@ async function main(): Promise<void> {
   let failures = 0;
   for (const service of services) {
     try {
-      await deployOne(config, service, args.imageTag, args.skipHealth);
+      await deployOne(config, service, args.imageTag, args.skipHealth, args.waitDeployment);
     } catch (err) {
       failures += 1;
       console.error(`  ✗ ${service.id}: ${err instanceof Error ? err.message : err}`);

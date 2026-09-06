@@ -10,7 +10,8 @@ dist
 env
 services.yaml
 lib
-packages/9router
+packages/9router/*
+!packages/9router/package.json
 packages/vault-service
 packages/workstation
 packages/eslint-rules

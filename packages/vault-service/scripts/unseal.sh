@@ -210,8 +210,27 @@ extract_unseal_key() {
   return 1
 }
 
-if check_unsealed; then
-  echo "==> OpenBao is already unsealed."
+# A single unsealed read off the public LB can be a stale/old container during
+# a deploy swap. Require several consecutive unsealed reads before trusting it.
+confirm_unsealed() {
+  local needed="${1:-3}"
+  local seen=0
+  for _ in $(seq 1 8); do
+    if check_unsealed; then
+      seen=$((seen + 1))
+      if [ "$seen" -ge "$needed" ]; then
+        return 0
+      fi
+    else
+      seen=0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+if confirm_unsealed 3; then
+  echo "==> OpenBao is already unsealed (confirmed stable)."
   exit 0
 fi
 

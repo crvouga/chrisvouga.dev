@@ -1013,7 +1013,7 @@ export async function waitForDeployment(
     );
     const status = data.deployment?.status?.toUpperCase() ?? "";
     if (status === "SUCCESS") return;
-    if (status === "FAILED" || status === "CRASHED" || status === "REMOVED") {
+    if (status === "FAILED" || status === "CRASHED" || status === "REMOVED" || status === "CANCELLED") {
       const details = await deploymentFailureDetails(deploymentId);
       throw new RailwayApiError(
         `Deployment ${deploymentId} ended with status ${status}${details ? `\n${details}` : ""}`,
@@ -1022,6 +1022,60 @@ export async function waitForDeployment(
     await new Promise((resolve) => setTimeout(resolve, 5_000));
   }
   throw new RailwayApiError(`Deployment ${deploymentId} did not succeed within ${timeoutMs / 1000}s`);
+}
+
+export async function latestDeploymentId(input: {
+  readonly projectId: string;
+  readonly serviceId: string;
+  readonly environmentId: string;
+}): Promise<string | undefined> {
+  const deployments = await listDeployments(input);
+  const newest = deployments
+    .slice()
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
+  return newest?.id;
+}
+
+/**
+ * Wait for the newest deployment of a service to reach SUCCESS.
+ *
+ * `connectServiceImage` triggers a new deployment, but the new deployment may
+ * not appear in the list for a few seconds. Capture `afterDeploymentId` from
+ * BEFORE connecting (or pass the id you want to exclude) so we only wait for a
+ * genuinely new deployment rather than a previously-completed one.
+ */
+export async function waitForLatestDeploymentSuccess(
+  input: {
+    readonly projectId: string;
+    readonly serviceId: string;
+    readonly environmentId: string;
+  },
+  opts?: { readonly afterDeploymentId?: string; readonly timeoutMs?: number },
+): Promise<void> {
+  const timeoutMs = opts?.timeoutMs ?? 600_000;
+  const afterDeploymentId = opts?.afterDeploymentId;
+  const deadline = Date.now() + timeoutMs;
+  let deploymentId: string | undefined;
+
+  while (Date.now() < deadline) {
+    const deployments = await listDeployments(input);
+    const newest = deployments
+      .slice()
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
+    if (newest && newest.id !== afterDeploymentId) {
+      deploymentId = newest.id;
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5_000));
+  }
+
+  if (!deploymentId) {
+    throw new RailwayApiError(
+      `No new deployment appeared for service within ${timeoutMs / 1000}s`,
+    );
+  }
+
+  await waitForDeployment(deploymentId, timeoutMs);
 }
 
 async function deploymentFailureDetails(deploymentId: string): Promise<string> {
