@@ -64,6 +64,15 @@ Not on Railway. Local Node/npm only at `http://127.0.0.1:20128`. Cursor BYOK use
 
 Vault KV at `secret/personal/prd`: `9ROUTER_PASSWORD`, `9ROUTER_JWT_SECRET`, `9ROUTER_API_KEY_SECRET`, `9ROUTER_MACHINE_ID_SALT` (→ `.env` via `npm start` → Pull secrets, or `vault run -- …`).
 
+## Workstation (`workstation/`)
+
+Portable local-machine configuration; the source of truth for the global OpenCode notification plugin and its click-to-focus stack.
+
+- Managed home links: `~/.config/opencode/plugins/notifications.ts`, `~/.config/opencode/bin/{opencode-notifier,focus-opencode}` → `workstation/opencode/**`; `OpenCodeNotifier.swift` is compiled by setup into `~/.config/opencode/bin/OpenCodeNotifier.app`
+- Setup: `bun run workstation:setup` (idempotent; refuses to overwrite unmanaged files)
+- Canonical context: [`workstation/README.md`](workstation/README.md); agent directive: [`workstation/AGENTS.md`](workstation/AGENTS.md)
+- No secrets live here — they come from Vault KV at `secret/data/personal/{dev|prd}`.
+
 ## Hard rules
 
 - Never commit `VAULT_TOKEN`, `RAILWAY_TOKEN`, or deploy tokens.

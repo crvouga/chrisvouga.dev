@@ -164,6 +164,7 @@ scripts/
   destroy-railway.ts       # remove Railway services by id
 vault/                     # OpenBao (deploy-vault workflow)
 turborepo/                 # Turborepo remote cache
+workstation/               # portable local-machine config (bun run workstation:setup)
 .github/workflows/
   deploy-fleet.yml
   deploy-vault.yml

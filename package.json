@@ -21,9 +21,11 @@
     "destroy-digitalocean": "bun run scripts/destroy-digitalocean.ts",
     "rollout-publish": "bun run scripts/rollout-publish-workflows.ts",
     "print-platform-env": "bun run scripts/print-platform-env.ts",
-    "vault:login": "vault login --method=userpass username=crvouga"
+    "vault:login": "vault login --method=userpass username=crvouga",
+    "workstation:setup": "bun run workstation/setup.ts"
   },
   "devDependencies": {
+    "@opencode-ai/plugin": "1.18.29",
     "@types/bun": "latest",
     "typescript": "^5.9.3",
     "yaml": "^2.8.1"

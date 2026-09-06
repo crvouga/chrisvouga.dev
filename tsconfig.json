@@ -8,5 +8,5 @@
     "noEmit": true,
     "types": ["bun-types"]
   },
-  "include": ["scripts/**/*.ts", "lib/**/*.ts"]
+  "include": ["scripts/**/*.ts", "lib/**/*.ts", "workstation/**/*.ts"]
 }

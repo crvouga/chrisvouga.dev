@@ -1,0 +1,65 @@
+#!/bin/bash
+# OpenCode notification click handler — focus the correct VS Code window, then
+# the opencode terminal editor tab running the session that needs attention.
+#
+# Usage: focus-opencode --kind <finished|question|permission|error> \
+#                       --session <id> --dir <project-dir> [--title <session-title>]
+#
+# Best-effort by design: every step degrades gracefully, never blocks, and
+# exits 0. Keystrokes require a one-time Accessibility + Automation grant for
+# OpenCodeNotifier (System Settings → Privacy & Security); without it the
+# correct VS Code window is still focused via the `code` CLI (no permissions).
+
+set -u
+
+kind="" session="" dir="" title=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --kind) kind="${2:-}"; shift 2 ;;
+    --session) session="${2:-}"; shift 2 ;;
+    --dir) dir="${2:-}"; shift 2 ;;
+    --title) title="${2:-}"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+
+[[ -n "$dir" ]] || exit 0
+
+# Hint used to find the opencode terminal editor tab: the session title when
+# the TUI sets terminal titles, otherwise the terminal's process name.
+hint="$title"
+[[ -n "$hint" ]] || hint="opencode"
+
+# 1. Focus (or open) the VS Code window for this project. `code <folder>`
+#    focuses the existing window that has the folder open — no permissions.
+command -v code >/dev/null 2>&1 && code "$dir" 2>/dev/null
+sleep 0.4
+
+# 2. Focus the opencode terminal editor tab via the editor quick pick
+#    (ctrl+tab → type-ahead → Enter). Skipped when the terminal is already the
+#    active editor (detected from the window title), which also guarantees the
+#    typed hint never lands inside the TUI prompt input.
+FOCUS_HINT="$hint" osascript <<'APPLESCRIPT' 2>/dev/null || \
+  echo "focus-opencode: keystrokes skipped (grant Accessibility/Automation to OpenCodeNotifier)" >&2
+on run
+  set hint to system attribute "FOCUS_HINT"
+  tell application "System Events"
+    set frontApp to name of first application process whose frontmost is true
+    if frontApp is not "Code" then return "abort"
+    set winTitle to name of front window of process "Code"
+    if winTitle contains hint or winTitle contains "opencode" then
+      -- opencode terminal is already the active editor; nothing to pick
+    else
+      keystroke tab using control down
+      delay 0.45
+      keystroke hint
+      delay 0.25
+      keystroke return
+      delay 0.4
+    end if
+  end tell
+  return "ok"
+end run
+APPLESCRIPT
+
+exit 0
