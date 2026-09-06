@@ -7,7 +7,7 @@
 #       branches: [main]
 #   jobs:
 #     publish:
-#       uses: crvouga/infra/.github/workflows/publish-image.yml@main
+#       uses: crvouga/workspace/.github/workflows/publish-image.yml@main
 #       permissions:
 #         contents: read
 #         packages: write
@@ -18,7 +18,7 @@
 #         dockerfile: ./Dockerfile
 #         context: .
 #         image_prefix: chrisvouga
-#         infra_github_repo: crvouga/infra
+#         infra_github_repo: crvouga/workspace
 
 name: Publish image
 
@@ -53,7 +53,7 @@ on:
         description: "Infra repo owner/name for deploy dispatch."
         required: false
         type: string
-        default: crvouga/infra
+        default: crvouga/workspace
     secrets:
       DEPLOY_DISPATCH_TOKEN:
         description: "PAT or GITHUB_TOKEN with repo dispatch to the infra repo."

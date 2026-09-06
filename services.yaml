@@ -5,10 +5,10 @@ zone: chrisvouga.dev
 image_owner: crvouga
 image_prefix: chrisvouga
 default_image_tag: latest
-infra_github_repo: crvouga/infra
+infra_github_repo: crvouga/workspace
 skip_rollout_repos:
   - crvouga/portfolio
-  - crvouga/infra
+  - crvouga/workspace
 
 railway:
   project: infra
@@ -161,8 +161,8 @@ services:
 
   - id: turborepo
     hostname: turborepo.chrisvouga.dev
-    github_repo: crvouga/infra
-    source_code_url: https://github.com/crvouga/infra/tree/main/packages/api
+    github_repo: crvouga/workspace
+    source_code_url: https://github.com/crvouga/workspace/tree/main/packages/api
     dockerfile: packages/api/Dockerfile
     build_context: .
     port: 8080
@@ -196,8 +196,8 @@ services:
   - id: vault
     hostname: vault.chrisvouga.dev
     standalone: true
-    github_repo: crvouga/infra
-    source_code_url: https://github.com/crvouga/infra/tree/main/packages/vault-service
+    github_repo: crvouga/workspace
+    source_code_url: https://github.com/crvouga/workspace/tree/main/packages/vault-service
     dockerfile: packages/vault-service/Dockerfile
     build_context: packages/vault-service
     port: 8200

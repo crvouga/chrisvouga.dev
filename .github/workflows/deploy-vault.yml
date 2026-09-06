@@ -95,7 +95,7 @@ jobs:
           push: true
           provenance: false
           labels: |
-            org.opencontainers.image.source=https://github.com/crvouga/infra
+            org.opencontainers.image.source=https://github.com/crvouga/workspace
             org.opencontainers.image.description=Standalone OpenBao vault for chrisvouga.dev
           tags: |
             ghcr.io/crvouga/chrisvouga-vault:latest
