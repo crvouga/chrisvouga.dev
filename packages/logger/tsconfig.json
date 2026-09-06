@@ -1,10 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": [
-    "../ts-reset/src/index.ts",
-    "./src/**/*.ts",
-    "./src/**/*.tsx",
-    "./src/**/*.d.ts"
-  ],
+  "extends": "../../tsconfig.strict.json",
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./src/**/*.d.ts"],
   "exclude": ["node_modules"]
 }

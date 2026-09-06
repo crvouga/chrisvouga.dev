@@ -14,7 +14,7 @@
     "dev": "bun --env-file=.env run src/api.ts",
     "lint": "eslint src --max-warnings 0",
     "setup": "bun run scripts/setup-dev-vars.ts",
-    "tc": "tsc --noEmit -p ../../tsconfig.json",
+    "tc": "tsc --noEmit -p tsconfig.json",
     "test": "bun test"
   },
   "dependencies": {

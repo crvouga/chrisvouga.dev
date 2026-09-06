@@ -1,0 +1,12 @@
+node_modules
+dist
+*.lock
+*.tsbuildinfo
+.turbo
+.wrangler
+.github
+lib
+scripts
+packages/9router/**
+packages/vault-service/**
+packages/api/.env

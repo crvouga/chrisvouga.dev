@@ -1,4 +1,4 @@
-# 9router (local Node/npm)
+# 9router (local bun/tsx)
 
 Runs [decolua/9router](https://github.com/decolua/9router) from a local clone on **http://127.0.0.1:20128**. Not part of the Railway fleet. Tooling is an interactive TypeScript CLI (`tsx` + `@inquirer/prompts`).
 
@@ -6,7 +6,7 @@ Cursor BYOK uses the stable public hostname **https://9router.chrisvouga.dev** (
 
 ## Prerequisites
 
-- Node.js 18+ and npm
+- bun (Node.js 22+)
 - Vault access for secrets — a valid login session (`vault login`) with read on `secret/personal/prd`
 - For Cursor: `cloudflared` (`brew install cloudflared`)
 
@@ -19,12 +19,12 @@ vault login -method=userpass username=crvouga
 
 ## Interactive CLI
 
-All operations go through one entry point. There are no per-task npm scripts or CLI flags — options are prompted in the menu.
+All operations go through one entry point. There are no per-task scripts or CLI flags — options are prompted in the menu.
 
 ```bash
-cd 9router
-npm install
-npm start          # or: npm run cli / npx 9router
+cd packages/9router
+bun install
+bun start          # or: bun run cli / bunx 9router
 ```
 
 **Controls:** type to filter · ↑↓ navigate · Enter to run · Ctrl+C to quit.
@@ -56,11 +56,11 @@ Recent commands are remembered under `.pids/cli-history.json` and shown at the t
 ## One-time setup
 
 ```bash
-cd 9router
-npm install
+cd packages/9router
+bun install
 brew install cloudflared
 cloudflared tunnel login
-npm start
+bun start
 ```
 
 In the menu, run in order:
@@ -74,7 +74,7 @@ Health check: http://127.0.0.1:20128/api/health
 ## Day-to-day
 
 ```bash
-npm start
+bun start
 ```
 
 Typical picks: **Daemons: Start**, **Daemons: Status**, **Daemons: Stop**, **App: Build** (after App: Sync), **Tunnel: Foreground** (debug only).
@@ -150,7 +150,7 @@ A localhost URL (`http://127.0.0.1:20128/v1`) always fails with:
 **Cursor: Sync** writes **`https://9router.chrisvouga.dev/v1`** by default (you can pick env or a custom URL when prompted). Keep daemons up (**Daemons: Start**) so that hostname reaches local 9Router.
 
 ```bash
-npm start
+bun start
 # Daemons: Start → quit Cursor → Cursor: Sync
 ```
 
@@ -166,7 +166,7 @@ Progress is logged as `[sync-cursor] …` steps. Backup is row-level only (the k
 
 | Path | Purpose |
 | ---- | ------- |
-| `package.json` | `npm start` / `npm run cli` / bin `9router` |
+| `package.json` | `bun start` / `bun run cli` / bin `9router` |
 | `cli/` | Interactive CLI (menus, prompts, commands) |
 | `combos.yaml` | Semantic combo use-cases (roles/providers; models resolved at sync) |
 | `providers.yaml` | Provider sync methods + Vault key overrides |
@@ -201,12 +201,12 @@ vault kv patch secret/personal/prd \
   9ROUTER_MACHINE_ID_SALT="$(openssl rand -hex 32)"
 ```
 
-**Pull into `.env`:** `npm start` → **Secrets: Pull**
+**Pull into `.env`:** `bun start` → **Secrets: Pull**
 
 **Or inject at runtime** (no `.env` write; uses [`9router/.vault.yaml`](.vault.yaml)):
 
 ```bash
-vault run -- npm start
+vault run -- bun start
 ```
 
 The CLI auto-fetches from Vault when secrets are missing (`ensureAppSecrets`). Provider API keys / OAuth tokens stay in Vault KV (or local auto-import) — Providers: Sync reads them without writing into `.env`. Cloudflare tunnel cert/credentials stay machine-local (`cloudflared tunnel login` + Tunnel: Provision).

@@ -34,7 +34,7 @@ services:
     port: 3000
     health_check: true
     env:
-      PORT: "3000"
+      PORT: '3000'
     secrets: &moviefinder_secrets
       - name: DATABASE_URL
         source: vault
@@ -56,7 +56,7 @@ services:
     port: 3000
     health_check: true
     env:
-      PORT: "3000"
+      PORT: '3000'
     secrets: *moviefinder_secrets
 
   - id: moviefinder-app-clojurescript
@@ -68,7 +68,7 @@ services:
     port: 9630
     health_check: true
     env:
-      PORT: "9630"
+      PORT: '9630'
     secrets: *moviefinder_secrets
 
   - id: headless-combobox-svelte-example
@@ -98,7 +98,7 @@ services:
     port: 8080
     health_check: true
     env:
-      PORT: "8080"
+      PORT: '8080'
 
   - id: image-service
     hostname: imageservice.chrisvouga.dev
@@ -121,7 +121,7 @@ services:
     port: 8080
     health_check: true
     env:
-      PORT: "8080"
+      PORT: '8080'
 
   - id: anime-blog
     hostname: anime.chrisvouga.dev
@@ -162,17 +162,17 @@ services:
   - id: turborepo
     hostname: turborepo.chrisvouga.dev
     github_repo: crvouga/infra
-    source_code_url: https://github.com/crvouga/infra/tree/main/turborepo
-    dockerfile: turborepo/apps/api/Dockerfile
-    build_context: turborepo
+    source_code_url: https://github.com/crvouga/infra/tree/main/packages/api
+    dockerfile: packages/api/Dockerfile
+    build_context: .
     port: 8080
     health_check: true
     health_path: /health
     env:
-      PORT: "8080"
-      VAULT_ADDR: "https://vault.chrisvouga.dev"
-      VAULT_PROJECT: "personal"
-      VAULT_CONFIG: "prd"
+      PORT: '8080'
+      VAULT_ADDR: 'https://vault.chrisvouga.dev'
+      VAULT_PROJECT: 'personal'
+      VAULT_CONFIG: 'prd'
     secrets:
       - name: VAULT_TOKEN
         source: vault
@@ -188,7 +188,7 @@ services:
     # "/" 302-redirects non-bot User-Agents to /ui — health checks must hit a 200 path.
     health_path: /ui
     env:
-      PORT: "8080"
+      PORT: '8080'
     secrets:
       - name: DATABASE_URL
         source: vault
@@ -197,9 +197,9 @@ services:
     hostname: vault.chrisvouga.dev
     standalone: true
     github_repo: crvouga/infra
-    source_code_url: https://github.com/crvouga/infra/tree/main/vault
-    dockerfile: vault/Dockerfile
-    build_context: vault
+    source_code_url: https://github.com/crvouga/infra/tree/main/packages/vault-service
+    dockerfile: packages/vault-service/Dockerfile
+    build_context: packages/vault-service
     port: 8200
     health_check: true
     # External checks use OpenBao's sealedcode/uninitcode query params.
@@ -209,7 +209,7 @@ services:
       sleep: false
       health_path: /railwayhealth
     env:
-      BAO_API_ADDR: "https://vault.chrisvouga.dev"
+      BAO_API_ADDR: 'https://vault.chrisvouga.dev'
     secrets:
       - name: DB_CONNECTION_URI
         source: env

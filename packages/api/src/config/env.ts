@@ -49,7 +49,7 @@ export function readCacheServerEnv(): CacheServerEnv {
   const vaultToken = readOptionalEnv('VAULT_TOKEN');
   if (vaultToken === null) {
     throw new ConfigurationError(
-      'VAULT_TOKEN is required (non-empty string). Set it in the environment or add it to apps/api/.env; remaining config is loaded from Vault.'
+      'VAULT_TOKEN is required (non-empty string). Set it in the environment or add it to packages/api/.env; remaining config is loaded from Vault.'
     );
   }
 

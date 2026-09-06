@@ -222,7 +222,7 @@ fetch_railway_token() {
     return 0
   fi
 
-  local infra_railway_token="${REPO_ROOT}/../.railway-token"
+  local infra_railway_token="${REPO_ROOT}/../../.railway-token"
   if [ -f "$infra_railway_token" ]; then
     echo "==> Fetching RAILWAY_TOKEN from ${infra_railway_token}"
     RAILWAY_TOKEN="$(tr -d '[:space:]' < "$infra_railway_token")"

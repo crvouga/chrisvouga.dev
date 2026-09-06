@@ -4,19 +4,24 @@ FROM oven/bun:1.3.11 AS build
 WORKDIR /app
 
 COPY package.json bun.lock ./
-COPY apps/api/package.json ./apps/api/
-COPY pkgs/assert/package.json ./pkgs/assert/
-COPY pkgs/logger/package.json ./pkgs/logger/
-COPY pkgs/object-store/package.json ./pkgs/object-store/
-COPY pkgs/secret-store/package.json ./pkgs/secret-store/
-COPY pkgs/secret-string/package.json ./pkgs/secret-string/
-COPY pkgs/vault/package.json ./pkgs/vault/
+COPY packages/api/package.json ./packages/api/
+COPY packages/assert/package.json ./packages/assert/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/object-store/package.json ./packages/object-store/
+COPY packages/secret-store/package.json ./packages/secret-store/
+COPY packages/secret-string/package.json ./packages/secret-string/
+COPY packages/vault/package.json ./packages/vault/
 
 RUN bun install --frozen-lockfile
 
 COPY tsconfig.json turbo.json ./
-COPY apps/api ./apps/api
-COPY pkgs ./pkgs
+COPY packages/api ./packages/api
+COPY packages/assert ./packages/assert
+COPY packages/logger ./packages/logger
+COPY packages/object-store ./packages/object-store
+COPY packages/secret-store ./packages/secret-store
+COPY packages/secret-string ./packages/secret-string
+COPY packages/vault ./packages/vault
 COPY scripts ./scripts
 
 FROM oven/bun:1.3.11-slim AS runtime
@@ -33,4 +38,4 @@ EXPOSE 8080
 
 USER bun
 
-CMD ["bun", "apps/api/src/api.ts"]
+CMD ["bun", "packages/api/src/api.ts"]

@@ -11,8 +11,7 @@ const READINESS_ATTEMPTS = 10;
 const READINESS_DELAY_MS = 5_000;
 
 type SmokeResult =
-  | { readonly ok: true }
-  | { readonly ok: false; readonly error: string };
+  { readonly ok: true } | { readonly ok: false; readonly error: string };
 
 function fail(message: string): never {
   console.error('');

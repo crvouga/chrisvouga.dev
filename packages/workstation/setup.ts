@@ -16,8 +16,8 @@
  *   bun run workstation:setup
  *   bun run workstation/setup.ts
  */
-import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   existsSync,
   lstatSync,
@@ -26,11 +26,11 @@ import {
   readlinkSync,
   symlinkSync,
   writeFileSync,
-} from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+} from 'node:fs';
+import { homedir } from 'node:os';
+import { dirname, join } from 'node:path';
 
-const REPO_ROOT = resolve(import.meta.dir, "..");
+const WORKSTATION_ROOT = import.meta.dir;
 
 type ManagedLink = {
   /** Short human description of the managed piece. */
@@ -41,23 +41,23 @@ type ManagedLink = {
   link: string;
 };
 
-const OPENCODE_DIR = join(homedir(), ".config/opencode");
+const OPENCODE_DIR = join(homedir(), '.config/opencode');
 
 const LINKS: ManagedLink[] = [
   {
-    label: "OpenCode notification plugin",
-    target: join(REPO_ROOT, "workstation/opencode/plugins/notifications.ts"),
-    link: join(OPENCODE_DIR, "plugins/notifications.ts"),
+    label: 'OpenCode notification plugin',
+    target: join(WORKSTATION_ROOT, 'opencode/plugins/notifications.ts'),
+    link: join(OPENCODE_DIR, 'plugins/notifications.ts'),
   },
   {
-    label: "OpenCode notifier CLI",
-    target: join(REPO_ROOT, "workstation/opencode/bin/opencode-notifier"),
-    link: join(OPENCODE_DIR, "bin/opencode-notifier"),
+    label: 'OpenCode notifier CLI',
+    target: join(WORKSTATION_ROOT, 'opencode/bin/opencode-notifier'),
+    link: join(OPENCODE_DIR, 'bin/opencode-notifier'),
   },
   {
-    label: "OpenCode focus script (notification click handler)",
-    target: join(REPO_ROOT, "workstation/opencode/bin/focus-opencode"),
-    link: join(OPENCODE_DIR, "bin/focus-opencode"),
+    label: 'OpenCode focus script (notification click handler)',
+    target: join(WORKSTATION_ROOT, 'opencode/bin/focus-opencode'),
+    link: join(OPENCODE_DIR, 'bin/focus-opencode'),
   },
 ];
 
@@ -77,35 +77,38 @@ function symlinkTarget(linkPath: string) {
   }
 }
 
-function install(managed: ManagedLink): "created" | "unchanged" {
+function install(managed: ManagedLink): 'created' | 'unchanged' {
   const stat = statOrUndefined(managed.link);
   if (stat === undefined) {
     mkdirSync(dirname(managed.link), { recursive: true });
     symlinkSync(managed.target, managed.link);
-    return "created";
+    return 'created';
   }
 
   if (!stat.isSymbolicLink()) {
     throw new Error(
       `Conflict: ${managed.link} already exists and is not a symlink managed by this repository.\n` +
-        `Move or remove it, then run \`bun run workstation:setup\` again.`,
+        `Move or remove it, then run \`bun run workstation:setup\` again.`
     );
   }
 
   const current = symlinkTarget(managed.link);
-  if (current === managed.target) return "unchanged";
+  if (current === managed.target) return 'unchanged';
 
   throw new Error(
-    `Conflict: ${managed.link} is a symlink to ${current ?? "<unreadable>"}, not to ${managed.target}.\n` +
-      `Remove it, then run \`bun run workstation:setup\` again.`,
+    `Conflict: ${managed.link} is a symlink to ${current ?? '<unreadable>'}, not to ${managed.target}.\n` +
+      `Remove it, then run \`bun run workstation:setup\` again.`
   );
 }
 
 // --- OpenCodeNotifier build -------------------------------------------------
 
-const NOTIFIER_SOURCE = join(REPO_ROOT, "workstation/opencode/notifier/OpenCodeNotifier.swift");
-const NOTIFIER_APP = join(OPENCODE_DIR, "bin/OpenCodeNotifier.app");
-const NOTIFIER_HASH = join(OPENCODE_DIR, "bin/.opencode-notifier.hash");
+const NOTIFIER_SOURCE = join(
+  WORKSTATION_ROOT,
+  'opencode/notifier/OpenCodeNotifier.swift'
+);
+const NOTIFIER_APP = join(OPENCODE_DIR, 'bin/OpenCodeNotifier.app');
+const NOTIFIER_HASH = join(OPENCODE_DIR, 'bin/.opencode-notifier.hash');
 
 const INFO_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -125,7 +128,9 @@ const INFO_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
 `;
 
 function commandExists(command: string): boolean {
-  return spawnSync("/usr/bin/which", [command], { stdio: "ignore" }).status === 0;
+  return (
+    spawnSync('/usr/bin/which', [command], { stdio: 'ignore' }).status === 0
+  );
 }
 
 /**
@@ -133,57 +138,70 @@ function commandExists(command: string): boolean {
  * Rebuilds only when the source hash changes. Skips (with a warning) when
  * swiftc is unavailable — the plugin then falls back to plain notifications.
  */
-function buildNotifier(): "built" | "unchanged" | "skipped" {
-  if (!existsSync(NOTIFIER_SOURCE)) return "skipped";
-  const hash = createHash("sha256").update(readFileSync(NOTIFIER_SOURCE)).digest("hex");
+function buildNotifier(): 'built' | 'unchanged' | 'skipped' {
+  if (!existsSync(NOTIFIER_SOURCE)) return 'skipped';
+  const hash = createHash('sha256')
+    .update(readFileSync(NOTIFIER_SOURCE))
+    .digest('hex');
   if (
     existsSync(NOTIFIER_APP) &&
     existsSync(NOTIFIER_HASH) &&
-    readFileSync(NOTIFIER_HASH, "utf8").trim() === hash
+    readFileSync(NOTIFIER_HASH, 'utf8').trim() === hash
   ) {
-    return "unchanged";
+    return 'unchanged';
   }
-  if (!commandExists("swiftc")) {
+  if (!commandExists('swiftc')) {
     console.warn(
-      `  warn: swiftc not found — skipping OpenCodeNotifier build (notifications will use the osascript fallback)`,
+      `  warn: swiftc not found — skipping OpenCodeNotifier build (notifications will use the osascript fallback)`
     );
-    return "skipped";
+    return 'skipped';
   }
 
-  mkdirSync(join(NOTIFIER_APP, "Contents/MacOS"), { recursive: true });
-  writeFileSync(join(NOTIFIER_APP, "Contents/Info.plist"), INFO_PLIST);
+  mkdirSync(join(NOTIFIER_APP, 'Contents/MacOS'), { recursive: true });
+  writeFileSync(join(NOTIFIER_APP, 'Contents/Info.plist'), INFO_PLIST);
 
   const compile = spawnSync(
-    "swiftc",
-    ["-O", "-swift-version", "5", "-o", join(NOTIFIER_APP, "Contents/MacOS/OpenCodeNotifier"), NOTIFIER_SOURCE],
-    { encoding: "utf8" },
+    'swiftc',
+    [
+      '-O',
+      '-swift-version',
+      '5',
+      '-o',
+      join(NOTIFIER_APP, 'Contents/MacOS/OpenCodeNotifier'),
+      NOTIFIER_SOURCE,
+    ],
+    { encoding: 'utf8' }
   );
   if (compile.status !== 0) {
     throw new Error(
       `Failed to compile OpenCodeNotifier (swiftc):\n${compile.stderr}\n` +
-        `Fix the compile error and run \`bun run workstation:setup\` again.`,
+        `Fix the compile error and run \`bun run workstation:setup\` again.`
     );
   }
 
-  const sign = spawnSync("codesign", ["--force", "--sign", "-", NOTIFIER_APP], { encoding: "utf8" });
+  const sign = spawnSync('codesign', ['--force', '--sign', '-', NOTIFIER_APP], {
+    encoding: 'utf8',
+  });
   if (sign.status !== 0) {
-    throw new Error(`Failed to ad-hoc codesign OpenCodeNotifier:\n${sign.stderr}`);
+    throw new Error(
+      `Failed to ad-hoc codesign OpenCodeNotifier:\n${sign.stderr}`
+    );
   }
 
   writeFileSync(NOTIFIER_HASH, `${hash}\n`);
-  return "built";
+  return 'built';
 }
 
 function main(): void {
-  console.log(`Workstation setup (repo root: ${REPO_ROOT})`);
+  console.log(`Workstation setup (${WORKSTATION_ROOT})`);
   for (const managed of LINKS) {
     const status = install(managed);
     console.log(`  [${status}] ${managed.link}`);
-    if (status === "created") console.log(`      -> ${managed.target}`);
+    if (status === 'created') console.log(`      -> ${managed.target}`);
   }
   const build = buildNotifier();
-  if (build !== "skipped") console.log(`  [${build}] ${NOTIFIER_APP}`);
-  console.log("Done.");
+  if (build !== 'skipped') console.log(`  [${build}] ${NOTIFIER_APP}`);
+  console.log('Done.');
 }
 
 main();

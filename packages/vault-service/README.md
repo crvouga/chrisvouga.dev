@@ -9,12 +9,12 @@ Deploy vault bootstraps from **GitHub repo secrets** (`RAILWAY_TOKEN`, `CF_API_T
 ## Architecture
 
 ```
-infra repo (vault/** push or deploy-vault workflow)
+infra repo (packages/vault-service/** push or deploy-vault workflow)
   └── deploy-vault.yml
         ├── migrate Neon Postgres (secret_store schema)
         ├── build + push ghcr.io/crvouga/chrisvouga-vault
-        ├── vault/scripts/railway-provision.sh + railway-deploy.sh
-        ├── vault/scripts/railway-sync-dns.sh (vault.chrisvouga.dev)
+        ├── packages/vault-service/scripts/railway-provision.sh + railway-deploy.sh
+        ├── packages/vault-service/scripts/railway-sync-dns.sh (vault.chrisvouga.dev)
         └── unseal + smoke-test from crvouga.kv
 
 OpenBao (Railway) ──storage──► Neon Postgres (secret_store schema)
@@ -78,7 +78,7 @@ Runtime secrets (`DB_CONNECTION_URI`) are synced to Railway via the deploy workf
 
 ### 2. Deploy via GitHub Actions
 
-Push `vault/**` on the infra repo (or run **Deploy vault** manually). The workflow migrates the DB, builds the image, runs `vault/scripts/railway-*.sh` (GitHub secrets only — no Vault KV), reconciles DNS, unseals OpenBao, and runs smoke tests.
+Push `packages/vault-service/**` on the infra repo (or run **Deploy vault** manually). The workflow migrates the DB, builds the image, runs `packages/vault-service/scripts/railway-*.sh` (GitHub secrets only — no Vault KV), reconciles DNS, unseals OpenBao, and runs smoke tests.
 
 Every container restart leaves OpenBao **sealed**; CI unseals automatically on each deploy.
 
@@ -248,7 +248,7 @@ Returns HTTP 200 even when sealed or uninitialized, so the process stays healthy
 ## Repository Structure
 
 ```
-vault/
+packages/vault-service/
 ├── Makefile                       # make deploy | provision | destroy | sync-dns
 ├── config/openbao.hcl             # OpenBao server config
 ├── migrations/                    # SQL migrations (secret_store schema)
@@ -268,7 +268,7 @@ vault/
 └── Dockerfile
 ```
 
-CI workflow: infra repo `.github/workflows/deploy-vault.yml` (not a nested `vault/.github/workflows/deploy.yml`).
+CI workflow: infra repo `.github/workflows/deploy-vault.yml` (not a nested `packages/vault-service/.github/workflows/deploy.yml`).
 
 ## Troubleshooting
 

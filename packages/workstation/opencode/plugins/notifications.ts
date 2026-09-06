@@ -1,30 +1,30 @@
-import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
-import { basename, join } from "node:path";
-import type { Plugin, PluginInput } from "@opencode-ai/plugin";
+import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { basename, join } from 'node:path';
+import type { Plugin, PluginInput } from '@opencode-ai/plugin';
 
 /**
  * Tool id of the built-in `question` tool. The agent invokes it when it needs
  * user input; OpenCode resolves this tool before executing it (permission
  * `question`, when configured).
  */
-const QUESTION_TOOL = "question";
+const QUESTION_TOOL = 'question';
 
 /** Attention kinds and their exact notification copy. */
 const MESSAGES = {
-  finished: "Session finished",
-  question: "Agent has a question",
-  permission: "Permission required",
-  error: "Session error",
+  finished: 'Session finished',
+  question: 'Agent has a question',
+  permission: 'Permission required',
+  error: 'Session error',
 } as const;
 
 type Kind = keyof typeof MESSAGES;
 
 /** OpenCodeNotifier CLI linked into place by `bun run workstation:setup`. */
-const NOTIFIER_CLI = join(homedir(), ".config/opencode/bin/opencode-notifier");
+const NOTIFIER_CLI = join(homedir(), '.config/opencode/bin/opencode-notifier');
 
-type OpencodeClient = PluginInput["client"];
+type OpencodeClient = PluginInput['client'];
 
 /**
  * Build an AppleScript string literal for the given text.
@@ -34,15 +34,15 @@ type OpencodeClient = PluginInput["client"];
  * shell string.
  */
 function appleScriptString(value: string): string {
-  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n")}"`;
+  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n')}"`;
 }
 
 /** Fallback: plain osascript notification (no click actions). Never throws. */
 function notifyViaOsascript(title: string, message: string): void {
   try {
     const script = `display notification ${appleScriptString(message)} with title ${appleScriptString(title)}`;
-    const child = spawn("osascript", ["-e", script], { stdio: "ignore" });
-    child.on("error", () => undefined);
+    const child = spawn('osascript', ['-e', script], { stdio: 'ignore' });
+    child.on('error', () => undefined);
     child.unref();
   } catch {
     // osascript missing, notification permission denied, etc. — ignore.
@@ -55,10 +55,12 @@ function notifyViaOsascript(title: string, message: string): void {
  */
 async function fetchSessionTitle(
   client: OpencodeClient,
-  sessionID: string | undefined,
+  sessionID: string | undefined
 ): Promise<string | undefined> {
   if (!sessionID) return undefined;
-  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 500));
+  const timeout = new Promise<null>((resolve) =>
+    setTimeout(() => resolve(null), 500)
+  );
   try {
     const result = await Promise.race([
       client.session.get({ path: { id: sessionID } }),
@@ -78,32 +80,36 @@ async function fetchSessionTitle(
  * plain osascript notification when the notifier is unavailable. Never
  * throws — notification problems must never fail an OpenCode session.
  */
-function post(kind: Kind, payload: { sessionID?: string; directory: string; sessionTitle?: string }): void {
+function post(
+  kind: Kind,
+  payload: { sessionID?: string; directory: string; sessionTitle?: string }
+): void {
   const message = MESSAGES[kind];
   try {
     if (existsSync(NOTIFIER_CLI)) {
       const body = JSON.stringify({
         kind,
-        title: "OpenCode",
+        title: 'OpenCode',
         message,
-        subtitle: payload.sessionTitle ?? basename(payload.directory) ?? "opencode",
-        sessionID: payload.sessionID ?? "",
+        subtitle:
+          payload.sessionTitle ?? basename(payload.directory) ?? 'opencode',
+        sessionID: payload.sessionID ?? '',
         directory: payload.directory,
-        sessionTitle: payload.sessionTitle ?? "",
+        sessionTitle: payload.sessionTitle ?? '',
       });
-      const child = spawn(NOTIFIER_CLI, ["--post", body], { stdio: "ignore" });
+      const child = spawn(NOTIFIER_CLI, ['--post', body], { stdio: 'ignore' });
       // --post exits 0 only when the payload reached the daemon; anything
       // else (spawn failure, exit != 0) falls back to a plain notification.
-      child.on("error", () => notifyViaOsascript("OpenCode", message));
-      child.on("exit", (code) => {
-        if (code !== 0) notifyViaOsascript("OpenCode", message);
+      child.on('error', () => notifyViaOsascript('OpenCode', message));
+      child.on('exit', (code) => {
+        if (code !== 0) notifyViaOsascript('OpenCode', message);
       });
       child.unref();
       return;
     }
-    notifyViaOsascript("OpenCode", message);
+    notifyViaOsascript('OpenCode', message);
   } catch {
-    notifyViaOsascript("OpenCode", message);
+    notifyViaOsascript('OpenCode', message);
   }
 }
 
@@ -116,7 +122,7 @@ function post(kind: Kind, payload: { sessionID?: string; directory: string; sess
  * narrow local type stays accurate to the wire format without `any`.
  */
 type PermissionAskedEvent = {
-  type: "permission.asked";
+  type: 'permission.asked';
   properties: {
     id: string;
     sessionID: string;
@@ -132,31 +138,45 @@ type PermissionAskedEvent = {
 export const NotificationsPlugin: Plugin = async ({ client, directory }) => {
   return {
     async event({ event }) {
-      if (event.type === "session.idle") {
-        const sessionTitle = await fetchSessionTitle(client, event.properties.sessionID);
-        post("finished", { sessionID: event.properties.sessionID, directory, sessionTitle });
+      if (event.type === 'session.idle') {
+        const sessionTitle = await fetchSessionTitle(
+          client,
+          event.properties.sessionID
+        );
+        post('finished', {
+          sessionID: event.properties.sessionID,
+          directory,
+          sessionTitle,
+        });
         return;
       }
-      if (event.type === "session.error") {
+      if (event.type === 'session.error') {
         const sessionID = event.properties.sessionID;
         const sessionTitle = await fetchSessionTitle(client, sessionID);
-        post("error", { sessionID, directory, sessionTitle });
+        post('error', { sessionID, directory, sessionTitle });
         return;
       }
-      if ((event.type as string) !== "permission.asked") return;
+      if ((event.type as string) !== 'permission.asked') return;
 
       const asked = event as unknown as PermissionAskedEvent;
       // The `question` tool can surface as a `question` permission ask. Its
       // own notification fires from the tool.execute.before hook instead, so
       // a single question produces exactly one notification.
       if (asked.properties.permission === QUESTION_TOOL) return;
-      const sessionTitle = await fetchSessionTitle(client, asked.properties.sessionID);
-      post("permission", { sessionID: asked.properties.sessionID, directory, sessionTitle });
+      const sessionTitle = await fetchSessionTitle(
+        client,
+        asked.properties.sessionID
+      );
+      post('permission', {
+        sessionID: asked.properties.sessionID,
+        directory,
+        sessionTitle,
+      });
     },
-    async "tool.execute.before"({ tool, sessionID }) {
+    async 'tool.execute.before'({ tool, sessionID }) {
       if (tool !== QUESTION_TOOL) return;
       const sessionTitle = await fetchSessionTitle(client, sessionID);
-      post("question", { sessionID, directory, sessionTitle });
+      post('question', { sessionID, directory, sessionTitle });
     },
   };
 };

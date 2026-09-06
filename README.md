@@ -34,16 +34,16 @@ Project repos ──▶ ghcr.io (public images)
 
 ## Configuration ([`services.yaml`](services.yaml))
 
-| Field | Purpose |
-|-------|---------|
-| `zone` | Primary DNS zone (e.g. `chrisvouga.dev`) |
-| `image_owner` | GHCR org/user |
-| `infra_github_repo` | GitHub repo slug for this infra repo |
-| `railway.project` | Railway project name (e.g. `infra`) |
-| `railway.environment` | Environment name (default `production`) |
-| `railway.region` | Deployment region (default `us-east4`) |
+| Field                    | Purpose                                                                 |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `zone`                   | Primary DNS zone (e.g. `chrisvouga.dev`)                                |
+| `image_owner`            | GHCR org/user                                                           |
+| `infra_github_repo`      | GitHub repo slug for this infra repo                                    |
+| `railway.project`        | Railway project name (e.g. `infra`)                                     |
+| `railway.environment`    | Environment name (default `production`)                                 |
+| `railway.region`         | Deployment region (default `us-east4`)                                  |
 | `railway.service_prefix` | Optional service name prefix (default: none — names match service `id`) |
-| `railway.sleep` | Per service: `true` (serverless) or `false` (always on) |
+| `railway.sleep`          | Per service: `true` (serverless) or `false` (always on)                 |
 
 Derived automatically: `image_prefix` (`chrisvouga`), Vault URL (`https://vault.<zone>`).
 
@@ -62,12 +62,12 @@ Vault must exist before fleet scripts can read secrets from KV. Bootstrap does *
 Seed GitHub secrets from the vault repo:
 
 ```bash
-cd vault
+cd packages/vault-service
 export CLOUDFLARE_API_TOKEN='...'   # Zone:DNS:Edit for chrisvouga.dev
 ./scripts/seed-github-secrets.sh    # CF_API_TOKEN, DB_CONNECTION_URI, RAILWAY_TOKEN
 ```
 
-Run **Deploy vault** (push `vault/**` to `main`, or Actions → Deploy vault). The workflow uses `vault/scripts/railway-*.sh` — no Vault OIDC / KV required.
+Run **Deploy vault** (push `packages/vault-service/**` to `main`, or Actions → Deploy vault). The workflow uses `packages/vault-service/scripts/railway-*.sh` — no Vault OIDC / KV required.
 
 After first deploy: `./scripts/init.sh`, store unseal keys in `crvouga.kv`.
 
@@ -75,20 +75,20 @@ Local alternative (no CI):
 
 ```bash
 export RAILWAY_TOKEN=... CLOUDFLARE_API_TOKEN=... DB_CONNECTION_URI=...
-cd vault && make deploy
+cd packages/vault-service && make deploy
 ```
 
 ### 2. Seed Vault KV
 
 In `secret/data/personal/prd` on Vault (`https://vault.<zone>`):
 
-| Key | Purpose |
-|-----|---------|
-| `RAILWAY_TOKEN` | Railway account API token |
-| `GITHUB_TOKEN_SUPER` | PAT with `repo` + `admin:org` — triggers workflows, cross-repo dispatch |
-| `CLOUDFLARE_API_TOKEN` | DNS sync |
-| `CLOUDFLARE_ACCOUNT_ID` | DNS sync |
-| Per-app keys | See `secrets:` blocks in `services.yaml` |
+| Key                     | Purpose                                                                 |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `RAILWAY_TOKEN`         | Railway account API token                                               |
+| `GITHUB_TOKEN_SUPER`    | PAT with `repo` + `admin:org` — triggers workflows, cross-repo dispatch |
+| `CLOUDFLARE_API_TOKEN`  | DNS sync                                                                |
+| `CLOUDFLARE_ACCOUNT_ID` | DNS sync                                                                |
+| Per-app keys            | See `secrets:` blocks in `services.yaml`                                |
 
 ### 3. Provision fleet on Railway
 
@@ -112,7 +112,7 @@ vault run -- bun run sync-dns --apply --wait-for-certs
 bun run health-check --all-public
 ```
 
-Fleet DNS sync does not manage `vault.<zone>` — that record is owned by deploy-vault / `cd vault && make sync-dns`.
+Fleet DNS sync does not manage `vault.<zone>` — that record is owned by deploy-vault / `cd packages/vault-service && make sync-dns`.
 
 ### 6. Fly teardown (post-cutover)
 
@@ -152,6 +152,8 @@ bun run sync-dns --apply
 
 ## Repo layout
 
+Single flat Turborepo + Bun workspace. All packages live under `packages/`:
+
 ```
 services.yaml              # single source of truth
 lib/railway-api.ts         # Railway GraphQL client
@@ -162,9 +164,12 @@ scripts/
   sync-dns.ts              # Cloudflare ← Railway custom domain records
   destroy-fly.ts           # post-cutover Fly teardown
   destroy-railway.ts       # remove Railway services by id
-vault/                     # OpenBao (deploy-vault workflow)
-turborepo/                 # Turborepo remote cache
-workstation/               # portable local-machine config (bun run workstation:setup)
+packages/
+  api/                     # Turborepo remote cache server (@apps/api)
+  {assert,logger,object-store,secret-store,secret-string,vault}/  # @pkgs/* libs
+  9router/                 # local 9router CLI
+  vault-service/           # OpenBao (deploy-vault workflow)
+  workstation/             # portable local-machine config (bun run workstation:setup)
 .github/workflows/
   deploy-fleet.yml
   deploy-vault.yml

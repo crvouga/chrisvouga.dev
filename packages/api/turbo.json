@@ -6,7 +6,7 @@
       "outputs": []
     },
     "dev": {
-      "dependsOn": ["kill", "install:deps", "setup"],
+      "dependsOn": ["setup"],
       "persistent": true,
       "cache": false
     }

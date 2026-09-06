@@ -42,7 +42,7 @@ Fix one of:
        vault run -- npm start   # then choose the command from the menu
 
   3. Create a scoped read token (needs an admin/root session first):
-       cd ${REPO_ROOT}/vault && ./scripts/create-dev-token.sh
+       cd ${REPO_ROOT}/packages/vault-service && ./scripts/create-dev-token.sh
        vault login <printed-token>
 
   4. Or paste the four keys into ${ENV_FILE} manually (see .env.example).

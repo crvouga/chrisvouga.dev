@@ -7,8 +7,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 /** Absolute path to the 9router/ package root. */
 export const ROOT = resolve(here, "..", "..");
 
-/** Infra repo root (parent of 9router/). */
-export const REPO_ROOT = resolve(ROOT, "..");
+/** Infra repo root (two levels above 9router/). */
+export const REPO_ROOT = resolve(ROOT, "..", "..");
 
 export const APP_DIR = join(ROOT, "app");
 export const DATA_DIR_DEFAULT = join(ROOT, "data");

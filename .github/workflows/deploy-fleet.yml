@@ -21,8 +21,7 @@ on:
       - "**/*.md"
       - ".vscode/**"
       - ".cursor/**"
-      - "vault/**"
-      - "turborepo/**"
+      - "packages/**"
   repository_dispatch:
     types:
       - deploy-service

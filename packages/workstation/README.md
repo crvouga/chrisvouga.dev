@@ -2,11 +2,11 @@
 
 Portable local-machine and developer-environment configuration, managed as one subsystem of the `workspace` monorepo.
 
-This is the canonical, high-level architectural context for `workstation/`. A fresh agent (or human) can start here without prior conversation history.
+This is the canonical, high-level architectural context for `packages/workstation/`. A fresh agent (or human) can start here without prior conversation history.
 
 ## Purpose
 
-`workstation/` is the source of truth for machine configuration that is useful across machines — things like editor/agent configuration, shell and Git settings, CLI tool config, and local service setup. It holds **portable source configuration**, not machine-specific state.
+`packages/workstation/` is the source of truth for machine configuration that is useful across machines — things like editor/agent configuration, shell and Git settings, CLI tool config, and local service setup. It holds **portable source configuration**, not machine-specific state.
 
 The current practice: keep configuration in this monorepo, link it into the home directory with symlinks, and let every machine converge to the same checked-in source. Checked-in files should make it obvious which filesystem location each one maps to.
 
@@ -24,7 +24,7 @@ There is no separate dotfiles repository and no separate secret system.
 
 ## Scope
 
-`workstation/` may eventually manage:
+`packages/workstation/` may eventually manage:
 
 - OpenCode (current), and other editors (VS Code, etc.)
 - shell configuration
@@ -44,7 +44,7 @@ Only the currently-listed managed configuration below is implemented. Nothing el
 
 ## Non-goals
 
-At this stage, `workstation/` is explicitly **not**:
+At this stage, `packages/workstation/` is explicitly **not**:
 
 - full machine imaging
 - generic configuration management (no Ansible, Nix, Home Manager, chezmoi, GNU Stow, or similar)
@@ -57,7 +57,7 @@ At this stage, `workstation/` is explicitly **not**:
 ## Structure
 
 ```
-workstation/
+packages/workstation/
 ├── README.md                          # this file — canonical context
 ├── AGENTS.md                          # short agent instructions → points here
 ├── setup.ts                           # idempotent links + notifier build (bun run workstation:setup)
@@ -73,12 +73,12 @@ workstation/
 
 Checked-in → home-directory mapping (installed by setup):
 
-| Checked-in (repo) | Home directory |
-| ----------------- | -------------- |
-| `workstation/opencode/plugins/notifications.ts` | `~/.config/opencode/plugins/notifications.ts` (symlink) |
-| `workstation/opencode/bin/opencode-notifier` | `~/.config/opencode/bin/opencode-notifier` (symlink) |
-| `workstation/opencode/bin/focus-opencode` | `~/.config/opencode/bin/focus-opencode` (symlink) |
-| `workstation/opencode/notifier/OpenCodeNotifier.swift` | compiled to `~/.config/opencode/bin/OpenCodeNotifier.app` (generated artifact, never committed) |
+| Checked-in (repo)                                               | Home directory                                                                                  |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `packages/workstation/opencode/plugins/notifications.ts`        | `~/.config/opencode/plugins/notifications.ts` (symlink)                                         |
+| `packages/workstation/opencode/bin/opencode-notifier`           | `~/.config/opencode/bin/opencode-notifier` (symlink)                                            |
+| `packages/workstation/opencode/bin/focus-opencode`              | `~/.config/opencode/bin/focus-opencode` (symlink)                                               |
+| `packages/workstation/opencode/notifier/OpenCodeNotifier.swift` | compiled to `~/.config/opencode/bin/OpenCodeNotifier.app` (generated artifact, never committed) |
 
 ## Setup
 
@@ -90,7 +90,7 @@ bun install && bun run workstation:setup
 
 The command is idempotent and safe to run repeatedly (e.g. after cloning on a fresh machine, or after changing the notifier Swift source):
 
-- computes the repository root from the location of `workstation/setup.ts` (works from any current working directory)
+- derives the `packages/workstation/` root from the location of `setup.ts` (works from any current working directory)
 - creates missing parent directories under `$HOME`
 - installs managed configuration as **symlinks** pointing into the repository
 - an existing, correct symlink is treated as success (no-op)
@@ -108,15 +108,15 @@ What it changes in `$HOME` today:
 
 OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. The notification plugin (`notifications.ts`) detects attention events and posts notifications through the OpenCodeNotifier daemon; if the notifier is unavailable or fails, it falls back to a plain `osascript` notification (no click actions). Notification problems can never fail an OpenCode session — every step is best-effort and non-critical.
 
-- **Checked-in plugin path:** `workstation/opencode/plugins/notifications.ts`
+- **Checked-in plugin path:** `packages/workstation/opencode/plugins/notifications.ts`
 - **Resulting global plugin path:** `~/.config/opencode/plugins/notifications.ts` (a symlink)
 - **Events that generate notifications:**
 
-  | Event | Notification |
-  | ----- | ------------ |
-  | `session.idle` | `OpenCode` / `Session finished` |
-  | `session.error` | `OpenCode` / `Session error` |
-  | `permission.asked` | `OpenCode` / `Permission required` |
+  | Event                             | Notification                        |
+  | --------------------------------- | ----------------------------------- |
+  | `session.idle`                    | `OpenCode` / `Session finished`     |
+  | `session.error`                   | `OpenCode` / `Session error`        |
+  | `permission.asked`                | `OpenCode` / `Permission required`  |
   | agent invokes the `question` tool | `OpenCode` / `Agent has a question` |
 
 - **Question detection:** the built-in `question` tool (`tool.execute.before` hook with `tool === "question"`). A question waits for user input but is not necessarily a permission request, so it is detected from the tool invocation itself. When a `permission.asked` event follows for the `question` permission, the plugin suppresses the redundant "Permission required" notification — one question produces exactly one useful notification.
@@ -192,15 +192,15 @@ Why this shape:
   rm ~/.config/opencode/plugins/notifications.ts
   bun run workstation:setup          # succeeds again
   ```
-- **Type check:** `bun run typecheck` (also runs in the Deploy fleet CI) covers `workstation/**/*.ts`.
+- **Type check:** `bun run typecheck` (also runs in the Deploy fleet CI) covers `packages/workstation/**/*.ts`.
 
 ## Adding another workstation-managed tool
 
 Keep the convention simple — no generic provider/plugin interface:
 
-1. Create a clearly named directory under `workstation/` for the tool.
+1. Create a clearly named directory under `packages/workstation/` for the tool.
 2. Store only portable source configuration there.
-3. Extend `workstation/setup.ts` to link/install it (add a `ManagedLink`, or a build step for compiled artifacts).
+3. Extend `packages/workstation/setup.ts` to link/install it (add a `ManagedLink`, or a build step for compiled artifacts).
 4. Reuse existing workspace packages when useful.
 5. Update this README (structure, setup effects, managed config).
 6. Never commit secrets or generated state.
@@ -222,7 +222,7 @@ The current OpenCode notification plugin needs no secrets and must stay that way
 
 ## Agent/LLM context
 
-This README is the canonical high-level architectural context for `workstation/`. It is kept concise enough to load on every relevant task, and complete enough to avoid needing prior conversation history.
+This README is the canonical high-level architectural context for `packages/workstation/`. It is kept concise enough to load on every relevant task, and complete enough to avoid needing prior conversation history.
 
-- `workstation/AGENTS.md` is the short agent directive for this area.
+- `packages/workstation/AGENTS.md` is the short agent directive for this area.
 - Root-level conventions and the other subsystems are documented in the repository root `AGENTS.md` and `README.md` — read those before inventing new mechanisms.

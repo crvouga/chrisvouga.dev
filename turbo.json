@@ -17,7 +17,7 @@
     },
     "tc": {
       "dependsOn": ["^tc"],
-      "inputs": ["**/*.ts", "tsconfig.json", "../../tsconfig.json"],
+      "inputs": ["**/*.ts", "tsconfig.json", "../../tsconfig.strict.json"],
       "outputLogs": "new-only",
       "outputs": []
     },
