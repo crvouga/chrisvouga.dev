@@ -1,0 +1,16 @@
+.git
+.github
+node_modules
+dist
+.turbo
+.vscode
+.cursor
+.vault-token
+*.env
+env
+services.yaml
+lib
+packages/9router
+packages/vault-service
+packages/workstation
+packages/eslint-rules

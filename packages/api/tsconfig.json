@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.strict.json",
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.d.ts",
+    "./scripts/**/*.ts",
+    "./scripts/**/*.d.ts"
+  ]
+}

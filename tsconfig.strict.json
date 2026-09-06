@@ -3,10 +3,23 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "strict": true,
+    "lib": ["ES2022", "DOM"],
     "skipLibCheck": true,
+    "strict": true,
     "noEmit": true,
     "types": ["bun"],
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "useUnknownInCatchVariables": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "paths": {
       "@apps/api/*": ["./packages/api/src/*"],
       "@pkgs/assert": ["./packages/assert/src/index.ts"],
@@ -22,11 +35,5 @@
       "@scripts/*": ["./scripts/*"]
     }
   },
-  "include": [
-    "scripts/**/*.ts",
-    "scripts/**/*.test.ts",
-    "lib/**/*.ts",
-    "packages/workstation/**/*.ts"
-  ],
   "exclude": ["node_modules", "dist"]
 }

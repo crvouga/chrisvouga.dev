@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - vault/**
+      - packages/vault-service/**
   workflow_dispatch:
     inputs:
       unseal_only:
@@ -30,7 +30,7 @@ env:
 
 defaults:
   run:
-    working-directory: vault
+    working-directory: packages/vault-service
 
 jobs:
   deploy:
@@ -89,8 +89,8 @@ jobs:
         if: github.event_name == 'push' || inputs.unseal_only != true
         uses: docker/build-push-action@v7.2.0
         with:
-          context: vault
-          file: vault/Dockerfile
+          context: packages/vault-service
+          file: packages/vault-service/Dockerfile
           platforms: linux/amd64
           push: true
           provenance: false

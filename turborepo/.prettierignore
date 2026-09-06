@@ -1,6 +1,0 @@
-node_modules
-dist
-*.lock
-.turbo
-.wrangler
-apps/api/.env

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://v2-9-16.turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": []
+    },
+    "dev": {
+      "dependsOn": ["setup"],
+      "persistent": true,
+      "cache": false
+    }
+  }
+}
