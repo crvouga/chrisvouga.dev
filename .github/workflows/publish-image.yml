@@ -82,7 +82,7 @@ jobs:
           CALLER_TOKEN: ${{ secrets.CALLER_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if [ "${GITHUB_REPOSITORY}" = "crvouga/infra" ] && [ -n "${DISPATCH_TOKEN}" ]; then
+          if { [ "${GITHUB_REPOSITORY}" = "crvouga/infra" ] || [ "${GITHUB_REPOSITORY}" = "crvouga/workspace" ]; } && [ -n "${DISPATCH_TOKEN}" ]; then
             echo "username=${{ inputs.image_owner }}" >> "$GITHUB_OUTPUT"
             echo "password=${DISPATCH_TOKEN}" >> "$GITHUB_OUTPUT"
           elif [ -n "${CALLER_TOKEN}" ]; then
