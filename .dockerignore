@@ -12,6 +12,8 @@ packages/infra/*
 !packages/infra/package.json
 packages/9router/*
 !packages/9router/package.json
+packages/openrouter/*
+!packages/openrouter/package.json
 packages/workstation/*
 !packages/workstation/package.json
 packages/vault-service
