@@ -18,6 +18,7 @@
     "seed:turbo-client": "bun run scripts/seed-turbo-client-secrets.ts",
     "setup": "bun run scripts/setup-dev-vars.ts",
     "smoke": "bun run scripts/smoke-test-cache.ts",
+    "smoke:secrets": "bun run scripts/smoke-test-secrets.ts",
     "tc": "tsc --noEmit -p tsconfig.json",
     "test": "bun test"
   },

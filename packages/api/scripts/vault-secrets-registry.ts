@@ -1,3 +1,5 @@
+import { SecretStoreEntry, type SecretUsedBy } from './secret-store-entry';
+
 /** Public hostname for the self-hosted Turborepo remote cache server. */
 export const CACHE_PUBLIC_HOSTNAME = 'turborepo.chrisvouga.dev';
 
@@ -9,17 +11,6 @@ export const CACHE_PUBLIC_ORIGIN = `https://${CACHE_PUBLIC_HOSTNAME}`;
 
 /** GHCR repository for the cache server image (CI publishes via infra ci-turborepo workflow). */
 export const GHCR_IMAGE_REPOSITORY = 'ghcr.io/crvouga/chrisvouga-turborepo';
-
-export type SecretUsedBy = 'server' | 'client';
-
-export type SecretDefinition = {
-  readonly key: string;
-  readonly required: boolean;
-  readonly usedBy: readonly SecretUsedBy[];
-  readonly hint: string;
-  /** When set, `ensure-vault-secrets` writes this value if the key is missing. */
-  readonly defaultValue?: string;
-};
 
 /** Stable Vault secret key literals — single source of truth. */
 export const VaultSecretKey = {
@@ -37,83 +28,124 @@ export const VaultSecretKey = {
   vaultToken: 'VAULT_TOKEN',
 } as const;
 
-export const VAULT_SECRET_REGISTRY: readonly SecretDefinition[] = [
-  {
+const TURBO_CACHE_RE = /^(local|remote):(r|rw|w)?(,(local|remote):(r|rw|w)?)?$/;
+
+function validateHttpsUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') {
+      return `${VaultSecretKey.turboApi} must be an https URL, got ${value}`;
+    }
+  } catch {
+    return `${VaultSecretKey.turboApi} must be a valid URL, got ${value}`;
+  }
+  return null;
+}
+
+function validateTurboCache(value: string): string | null {
+  if (!TURBO_CACHE_RE.test(value)) {
+    return `Invalid ${VaultSecretKey.turboCache} "${value}" (expected e.g. remote:rw)`;
+  }
+  return null;
+}
+
+function validateB2AccessKeyId(value: string): string | null {
+  if (!value.startsWith('004')) {
+    return `${VaultSecretKey.b2S3AccessKeyId} must start with "004", got ${value}`;
+  }
+  return null;
+}
+
+function validateB2SecretAccessKey(value: string): string | null {
+  if (!value.startsWith('K')) {
+    return `${VaultSecretKey.b2S3SecretAccessKey} must start with "K", got ${value}`;
+  }
+  return null;
+}
+
+/** Central register of every secret expected in the secret store. */
+export const VAULT_SECRET_REGISTRY: readonly SecretStoreEntry[] = [
+  new SecretStoreEntry({
     key: VaultSecretKey.turboToken,
     required: true,
     usedBy: ['server', 'client'],
     hint: 'Bearer token Turbo clients send and the cache server validates',
-  },
-  {
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.turboApi,
     required: true,
     usedBy: ['client'],
     hint: 'Self-hosted cache URL (TURBO_API env for turbo CLI)',
-    defaultValue: CACHE_PUBLIC_ORIGIN,
-  },
-  {
+    seed: () => CACHE_PUBLIC_ORIGIN,
+    transform: (value) => value.replace(/\/+$/, ''),
+    validate: validateHttpsUrl,
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.turboTeam,
     required: true,
     usedBy: ['client'],
     hint: 'Any team slug (e.g. local) — required by turbo CLI for remote cache',
-    defaultValue: 'local',
-  },
-  {
+    seed: () => 'local',
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.b2S3Endpoint,
     required: true,
     usedBy: ['server'],
     hint: 'Backblaze B2 S3 endpoint URL (e.g. https://s3.us-west-004.backblazeb2.com)',
-  },
-  {
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.b2S3Region,
     required: true,
     usedBy: ['server'],
     hint: 'B2 region slug (e.g. us-west-004)',
-  },
-  {
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.b2S3AccessKeyId,
     required: true,
     usedBy: ['server'],
     hint: 'B2 application key ID for the S3-compatible API (starts with 004)',
-  },
-  {
+    validate: validateB2AccessKeyId,
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.b2S3SecretAccessKey,
     required: true,
     usedBy: ['server'],
     hint: 'B2 application key secret (shown once at key creation; starts with K)',
-  },
-  {
+    validate: validateB2SecretAccessKey,
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.b2Bucket,
     required: true,
     usedBy: ['server'],
     hint: 'B2 bucket name for cache artifacts',
-  },
-  {
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.vaultToken,
     required: true,
     usedBy: ['server'],
     hint: 'Long-lived Vault read token for server boot-time secret loading',
-  },
-  {
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.turboCache,
     required: false,
     usedBy: ['client'],
     hint: 'Turbo --cache flag default (e.g. remote:rw)',
-    defaultValue: 'remote:rw',
-  },
-  {
+    seed: () => 'remote:rw',
+    validate: validateTurboCache,
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.turboLogOrder,
     required: false,
     usedBy: ['client'],
     hint: 'Turbo log order (e.g. stream)',
-  },
-  {
+  }),
+  new SecretStoreEntry({
     key: VaultSecretKey.turboTelemetryDisabled,
     required: false,
     usedBy: ['client'],
     hint: 'Set to 1 to disable Turbo telemetry',
-  },
-] as const;
+  }),
+];
 
 export const VAULT_CONFIGS = ['dev', 'prd'] as const;
 
@@ -136,31 +168,12 @@ export function turboClientRegistryDefaults(): Readonly<
 > {
   const defaults: Record<string, string | undefined> = {};
   for (const def of VAULT_SECRET_REGISTRY) {
-    if (def.defaultValue !== undefined) {
-      defaults[def.key] = def.defaultValue;
+    const value = def.seed();
+    if (value !== undefined) {
+      defaults[def.key] = value;
     }
   }
   return defaults;
 }
 
-const TURBO_CACHE_RE = /^(local|remote):(r|rw|w)?(,(local|remote):(r|rw|w)?)?$/;
-
-export function validateOptionalSecretFormat(
-  key: string,
-  value: string
-): string | null {
-  if (key === VaultSecretKey.turboApi) {
-    try {
-      const url = new URL(value);
-      if (url.protocol !== 'https:') {
-        return `TURBO_API must be an https URL, got ${value}`;
-      }
-    } catch {
-      return `TURBO_API must be a valid URL, got ${value}`;
-    }
-  }
-  if (key === VaultSecretKey.turboCache && !TURBO_CACHE_RE.test(value)) {
-    return `Invalid TURBO_CACHE "${value}" (expected e.g. remote:rw)`;
-  }
-  return null;
-}
+export type { SecretUsedBy };

@@ -60,6 +60,13 @@ jobs:
           VAULT_CONFIG: dev
           VAULT_PROJECT: personal
         run: bun run --filter @pkgs/api check:vault-secrets
+      - name: Smoke test secrets (dev)
+        env:
+          CI: true
+          GITHUB_ACTIONS: true
+          VAULT_CONFIG: dev
+          VAULT_PROJECT: personal
+        run: bun run --filter @pkgs/api smoke:secrets
       - name: Turbo CI (format, tc, lint, test, build)
         run: bun run check
 

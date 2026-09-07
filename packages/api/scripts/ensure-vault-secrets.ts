@@ -29,11 +29,12 @@ function main(): void {
     console.log(`\n[ensure-vault-secrets] config=${config} project=${project}`);
 
     for (const def of VAULT_SECRET_REGISTRY) {
-      if (def.defaultValue !== undefined) {
+      const seed = def.seed();
+      if (seed !== undefined) {
         const current = cli.kvGetField(project, config, def.key);
         if (current === null || current.trim().length === 0) {
-          cli.kvUpsertField(project, config, def.key, def.defaultValue);
-          console.log(`  set default ${def.key}=${def.defaultValue}`);
+          cli.kvUpsertField(project, config, def.key, seed);
+          console.log(`  set default ${def.key}=${seed}`);
         }
       }
     }

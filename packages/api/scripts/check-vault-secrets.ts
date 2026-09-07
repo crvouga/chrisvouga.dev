@@ -7,7 +7,6 @@
 import {
   VAULT_SECRET_REGISTRY,
   VaultSecretKey,
-  validateOptionalSecretFormat,
 } from './vault-secrets-registry';
 import { verifyB2S3Credentials } from './verify-b2-s3';
 
@@ -77,8 +76,8 @@ async function main(): Promise<void> {
     if (def.required) {
       if (raw.length === 0) {
         missingRequired.push(`  • ${def.key} — ${def.hint}`);
-      } else if (def.key === VaultSecretKey.turboApi) {
-        const err = validateOptionalSecretFormat(def.key, raw);
+      } else {
+        const err = def.validate(def.transform(raw));
         if (err !== null) missingRequired.push(`  • ${err}`);
       }
       continue;
@@ -89,7 +88,7 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const err = validateOptionalSecretFormat(def.key, raw);
+    const err = def.validate(def.transform(raw));
     if (err !== null) {
       missingRequired.push(`  • ${err}`);
     }

@@ -47,14 +47,16 @@ Vault session). Reproduce the entire CI job:
 bun run check:ci
 ```
 
-This runs `bun install --frozen-lockfile`, then `check:vault-secrets`, then `bun check`. If you only want the Vault gate:
+This runs `bun install --frozen-lockfile`, then `check:vault-secrets`, then
+`check:smoke:secrets` (smoke tests every registered secret), then `bun check`.
+If you only want the Vault gate:
 
 ```bash
 bun run check:vault-secrets        # dev config (CI gate)
 bun run check:vault-secrets:prd    # prd config (deploy gate)
 ```
 
-`check:vault-secrets` needs a Vault session (e.g. `vault run --config dev -- bun run check:vault-secrets`). See `packages/api/scripts/vault-secrets-registry.ts` for the required keys and `packages/api/scripts/check-vault-secrets.ts` for what is validated.
+`check:vault-secrets` needs a Vault session (e.g. `vault run --config dev -- bun run check:vault-secrets`). See `packages/api/scripts/vault-secrets-registry.ts` for the required keys, `packages/api/scripts/check-vault-secrets.ts` for what is validated, and `packages/api/scripts/smoke-test-secrets.ts` for the per-secret smoke test.
 
 If Vault is unavailable (KV empty / service down), you can still get `bun check`
 green locally. In that case, clearly state that the Vault gate (`check:vault-secrets`)
@@ -69,6 +71,7 @@ could not be verified locally but is validated by CI OIDC.
 | `bun run tc`                  | `turbo run tc` (typecheck every package)            |
 | `bun run typecheck`           | Root `tsc --noEmit` (covers `packages/workstation`) |
 | `bun run check:vault-secrets` | Verify dev Vault config (CI gate)                   |
+| `bun run check:smoke:secrets` | Smoke test every registered secret (CI gate)        |
 
 ## Commit & push
 
