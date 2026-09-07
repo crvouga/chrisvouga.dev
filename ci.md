@@ -38,6 +38,12 @@ you must also push and confirm CI.
 Loop rule: if a fix does not change the result, run `bun run check -- --force`
 to bypass the turbo cache before debugging further.
 
+Once the loop is green and everything is good to merge, **finish by committing
+and pushing** (see [Commit & push](#commit--push)). Do not stop at a green local
+run — the change is only done when it is committed and pushed so CI confirms it.
+Running the loop is a _fix-and-check_ cycle; ending it means the code is
+committed and pushed.
+
 ## Full CI reproduction
 
 The CI check job also validates the Vault dev config (requires Vault OIDC / a
@@ -75,7 +81,9 @@ could not be verified locally but is validated by CI OIDC.
 
 ## Commit & push
 
-Once `bun check` (and `check:ci` if Vault is available) is green:
+This is the required finish to the fix-and-check loop. Once `bun check` (and
+`check:ci` if Vault is available) is green and the change is good to merge,
+commit and push:
 
 1. Inspect before committing: `git status`, `git diff`, `git log --oneline -10`.
 2. Stage only intended files — never commit secrets (`VAULT_TOKEN`, `RAILWAY_TOKEN`, deploy tokens) or generated artifacts.
@@ -87,6 +95,10 @@ Once `bun check` (and `check:ci` if Vault is available) is green:
    - Include a body only when the "why" is not obvious.
 4. Commit: `git add <files> && git commit -m "fix: ..."`
 5. Push: `git push` (CI triggers on push to `main`).
+
+There is no separate "merge" step for this repo — committing to `main` and
+pushing **is** the merge. When the loop is green and good to merge, always end
+it by committing and pushing.
 
 ## Verify CI
 
