@@ -1,30 +1,41 @@
 # Check & CI
 
-This repo uses a single canonical check pipeline so that what runs locally is the
-same as what runs in CI. If `bun check` is green, the **CI turborepo** check job
-will be green.
+This repo uses a complete local validation sequence for the workspace and its
+CI gates. Run all checks before committing; a green local run must still be
+followed by the full **CI turborepo** pipeline.
 
-## Canonical local check
+## Complete local check
+
+```bash
+bun run check:ci && bun run typecheck
+```
+
+This runs, in order:
+
+1. `bun install --frozen-lockfile` — verifies `bun.lock` is in sync with `package.json`.
+2. `check:vault-secrets` — validates the Vault dev configuration.
+3. `check:smoke:secrets` — smoke-tests every registered secret.
+4. `bun check` — runs formatting, package typecheck, lint, test, and build.
+5. `bun run typecheck` — checks the root TypeScript project, including `packages/workstation`.
+
+For the package-only checks without Vault:
 
 ```bash
 bun check
 ```
 
-`bun check` is an alias for `bun run check`, which runs, in order:
-
-1. `bun install --frozen-lockfile` — verifies `bun.lock` is in sync with `package.json` (mirrors CI's install step).
-2. `prettier --check .` — formatting (`ci:format`).
-3. `turbo run tc lint test build` — per-package typecheck, lint, test, and build across all `@pkgs/*`.
+`bun check` is an alias for `bun run check`, which runs `bun install
+--frozen-lockfile`, `prettier --check .`, and `turbo run tc lint test build`.
 
 > Turbo caches results locally (`.turbo/`). CI always runs fresh. If a change is
-> not reflected by `bun check`, run `bun run check -- --force` to bypass the
-> cache and force a real re-run.
+> not reflected by a check, append `-- --force` to the relevant Turbo command.
+> The complete sequence still requires a Vault session for the secret gates.
 
 ## Fix-and-check loop
 
-Run `bun check`. Fix failures in the order the script reports them. After each
-fix, re-run `bun check`. Repeat until green. Do not stop after the first green —
-you must also push and watch CI.
+Run the complete local check. Fix failures in the order the commands report
+them. After each fix, re-run the complete local check. Repeat until green. Do
+not stop after the first green — you must also push and watch CI.
 
 `bun check` only covers the local `check` job. It does **not** validate the CI
 `publish` job, which builds and pushes the Docker image from
@@ -43,7 +54,8 @@ CI is green — always watch the full CI run (see [Watch CI & fix failures](#wat
 | `build`           | `@pkgs/api` build is `test -f Dockerfile`; others are package builds.                                                                                    |
 
 Loop rule: if a fix does not change the result, run `bun run check -- --force`
-to bypass the turbo cache before debugging further.
+and `bun run typecheck` to bypass the Turbo cache and re-run the root check
+before debugging further.
 
 Once the loop is green and everything is good to merge, **finish by committing
 and pushing** (see [Commit & push](#commit--push)). Do not stop at a green local
@@ -54,14 +66,15 @@ committed and pushed.
 ## Full CI reproduction
 
 The CI check job also validates the Vault dev config (requires Vault OIDC / a
-Vault session). Reproduce the entire CI job:
+Vault session). Reproduce the entire CI job and the root project check:
 
 ```bash
-bun run check:ci
+bun run check:ci && bun run typecheck
 ```
 
 This runs `bun install --frozen-lockfile`, then `check:vault-secrets`, then
-`check:smoke:secrets` (smoke tests every registered secret), then `bun check`.
+`check:smoke:secrets` (smoke tests every registered secret), `bun check`, and
+the root TypeScript project check.
 If you only want the Vault gate:
 
 ```bash
@@ -88,8 +101,7 @@ could not be verified locally but is validated by CI OIDC.
 
 ## Commit & push
 
-This is the required finish to the fix-and-check loop. Once `bun check` (and
-`check:ci` if Vault is available) is green and the change is good to merge,
+This is the required finish to the fix-and-check loop. Once the complete local check is green and the change is good to merge,
 commit and push:
 
 1. Inspect before committing: `git status`, `git diff`, `git log --oneline -10`.

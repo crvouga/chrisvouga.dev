@@ -19,7 +19,7 @@
  *
  * Token resolution: VAULT_TOKEN env, else `vault print token` (the secret-store
  * wrapper). Without `--strict`, an unavailable Vault logs a warning and exits 0
- * so workstation:setup still succeeds.
+ * so workspace:setup still succeeds.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';

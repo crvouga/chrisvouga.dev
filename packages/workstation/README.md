@@ -62,7 +62,7 @@ packages/workstation/
 ├── README.md                          # this file — canonical context
 ├── AGENTS.md                          # short agent instructions → points here
 ├── package.json                       # workspace pkg (deps: secret-store, vault) + configure:opencode script
-├── setup.ts                           # idempotent links + notifier build + provider config (bun run workstation:setup)
+├── setup.ts                           # idempotent links + notifier build + provider config (bun run workspace:setup)
 └── opencode/
     ├── plugins/
     │   └── notifications.ts           # global OpenCode notification plugin (source of truth)
@@ -91,10 +91,10 @@ Checked-in → home-directory mapping (installed by setup):
 Initializes workstation-managed configuration under the user's home directory:
 
 ```bash
-bun install && bun run workstation:setup
+bun install && bun run workspace:setup
 ```
 
-`opencode:setup` is an alias at the repo root for the opencode portion of the same setup — it idempotently converges `~/.config/opencode` to the spec checked into this repo (plugin symlinks, notifier build, provider config). Both commands run the same script, so `opencode:setup` is the focused entry point if you only care about OpenCode.
+`workspace:setup` (or its short alias `ws:setup`) is the single repo-root setup command. It installs dependencies and idempotently converges `~/.config/opencode` to the spec checked into this repo (plugin symlinks, notifier build, provider config).
 
 The command is idempotent and safe to run repeatedly (e.g. after cloning on a fresh machine, or after changing the notifier Swift source):
 
@@ -124,14 +124,14 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
 - **Resulting global plugin path:** `~/.config/opencode/plugins/notifications.ts` (a symlink)
 - **Events that generate notifications:**
 
-  | Event                             | Notification                        | Sound                |
-  | --------------------------------- | ----------------------------------- | -------------------- |
-  | `session.idle`                    | `OpenCode` / `Session finished`     | `Glass` (soft chime) |
-  | `session.error`                   | `OpenCode` / `Session error`        | `Basso` (low, calm)  |
-  | `permission.asked`                | `OpenCode` / `Permission required`  | `Tink` (gentle bell) |
-  | agent invokes the `question` tool | `OpenCode` / `Agent has a question` | `Tink` (gentle bell) |
+  | Event                             | Notification                        | Sound                  |
+  | --------------------------------- | ----------------------------------- | ---------------------- |
+  | `session.idle`                    | `OpenCode` / `Session finished`     | `Purr` (soft, warm)    |
+  | `session.error`                   | `OpenCode` / `Session error`        | `Bottle` (gentle bell) |
+  | `permission.asked`                | `OpenCode` / `Permission required`  | `Ping` (soft ping)     |
+  | agent invokes the `question` tool | `OpenCode` / `Agent has a question` | `Pop` (subtle tap)     |
 
-- **Sound design:** each attention kind maps to a macOS system sound, kept deliberately calm, neutral, happy and low-key — a soft glass chime for completion, a gentle bell for questions/permission asks, and a muted low note for errors (no jarring or alarming cues). The **single source of truth** is `packages/workstation/opencode/sounds.ts` (`NOTIFIER_SOUNDS`). `bun run opencode:setup` writes that map to `~/.config/opencode/notifier-sounds.json`, which **both** the notifier daemon and the plugin fallback read at notification time — so changing a sound is a one-file edit that a running daemon picks up without a rebuild. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound.
+- **Sound design:** each attention kind maps to a macOS system sound, kept deliberately calm, neutral, happy and low-key — a warm soft purr for completion, subtle taps for questions and permission asks, and a gentle bell for errors (no jarring or alarming cues). The **single source of truth** is `packages/workstation/opencode/sounds.ts` (`NOTIFIER_SOUNDS`). `bun run workspace:setup` writes that map to `~/.config/opencode/notifier-sounds.json`, which **both** the notifier daemon and the plugin fallback read at notification time — so changing a sound is a one-file edit that a running daemon picks up without a rebuild. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound.
 
 - **Question detection:** the built-in `question` tool (`tool.execute.before` hook with `tool === "question"`). A question waits for user input but is not necessarily a permission request, so it is detected from the tool invocation itself. When a `permission.asked` event follows for the `question` permission, the plugin suppresses the redundant "Permission required" notification — one question produces exactly one useful notification.
 - **Payload:** each notification carries `{kind, title, message, subtitle, sessionID, directory, sessionTitle}` — `subtitle` is the session title (best-effort SDK lookup, 500ms timeout) so you can eyeball which session needs you; `directory` and `sessionTitle` drive click-to-focus. Notifications use the sessionID as identifier/thread, so a new event for the same session **replaces** the previous banner instead of stacking.
@@ -191,11 +191,11 @@ Every OpenCode provider whose API key exists in the secret store is wired into t
 
 ```bash
 vault login -method=userpass username=crvouga     # once (or export VAULT_TOKEN)
-bun run workstation:setup                          # runs the config step best-effort
+bun run workspace:setup                          # runs the config step best-effort
 bun run --filter @pkgs/workstation configure:opencode   # or run it directly
 ```
 
-The config step is also invoked (best-effort, never fails setup) at the end of `workstation:setup`.
+The config step is also invoked (best-effort, never fails setup) at the end of `workspace:setup`.
 
 ### Adding or debugging a provider
 
@@ -218,10 +218,10 @@ The `provider-secrets.ts` openrouter entry attaches `models: { "openrouter/auto"
 
 - **Symlink setup:**
   ```bash
-  bun run workstation:setup
+  bun run workspace:setup
   ls -la ~/.config/opencode/plugins/ ~/.config/opencode/bin/
   ```
-- **Idempotent setup:** run `bun run workstation:setup` twice — the second run reports `[unchanged]` for links and the app.
+- **Idempotent setup:** run `bun run workspace:setup` twice — the second run reports `[unchanged]` for links and the app.
 - **Notifier daemon (no OpenCode needed):**
   ```bash
   ~/.config/opencode/bin/opencode-notifier --post '{"kind":"finished","title":"OpenCode","message":"Session finished","subtitle":"infra","sessionID":"ses_test","directory":"'"$PWD"'"}'
@@ -239,9 +239,9 @@ The `provider-secrets.ts` openrouter entry attaches `models: { "openrouter/auto"
   ```bash
   mkdir -p ~/.config/opencode/plugins
   echo not-managed > ~/.config/opencode/plugins/notifications.ts
-  bun run workstation:setup          # must FAIL, must not overwrite
+  bun run workspace:setup          # must FAIL, must not overwrite
   rm ~/.config/opencode/plugins/notifications.ts
-  bun run workstation:setup          # succeeds again
+  bun run workspace:setup          # succeeds again
   ```
 - **Type check:** `bun run typecheck` (also runs in the Deploy fleet CI) covers `packages/workstation/**/*.ts`.
 - **Provider config:**

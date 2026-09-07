@@ -324,7 +324,7 @@ function baseEntry(base: EntryBase): OpenCodeProviderConfig {
     validExample: base.validExample,
     invalidHint:
       base.invalidHint ??
-      `Rotate ${base.vaultKey} at ${base.obtainUrl ?? 'the provider console'} and re-run \`bun run workstation:configure:opencode\`.`,
+      `Rotate ${base.vaultKey} at ${base.obtainUrl ?? 'the provider console'} and re-run \`bun run --filter @pkgs/workstation configure:opencode\`.`,
     transform: transformTrim,
     validate: base.validate,
   });

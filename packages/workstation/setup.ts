@@ -13,8 +13,8 @@
  *     repository root is derived from this file's location).
  *
  * Usage:
- *   bun run workstation:setup
- *   bun run workstation/setup.ts
+ *   bun run workspace:setup
+ *   bun run packages/workstation/setup.ts
  */
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -93,7 +93,7 @@ function install(managed: ManagedLink): 'created' | 'unchanged' {
   if (!stat.isSymbolicLink()) {
     throw new Error(
       `Conflict: ${managed.link} already exists and is not a symlink managed by this repository.\n` +
-        `Move or remove it, then run \`bun run workstation:setup\` again.`
+        `Move or remove it, then run \`bun run workspace:setup\` again.`
     );
   }
 
@@ -102,7 +102,7 @@ function install(managed: ManagedLink): 'created' | 'unchanged' {
 
   throw new Error(
     `Conflict: ${managed.link} is a symlink to ${current ?? '<unreadable>'}, not to ${managed.target}.\n` +
-      `Remove it, then run \`bun run workstation:setup\` again.`
+      `Remove it, then run \`bun run workspace:setup\` again.`
   );
 }
 
@@ -180,7 +180,7 @@ function buildNotifier(): 'built' | 'unchanged' | 'skipped' {
   if (compile.status !== 0) {
     throw new Error(
       `Failed to compile OpenCodeNotifier (swiftc):\n${compile.stderr}\n` +
-        `Fix the compile error and run \`bun run workstation:setup\` again.`
+        `Fix the compile error and run \`bun run workspace:setup\` again.`
     );
   }
 
@@ -216,7 +216,7 @@ function main(): void {
  * Write the runtime sound map consumed by the notifier daemon and the plugin
  * (read per notification, so sound changes take effect without a rebuild).
  * Always runs so a sound edit in `opencode/sounds.ts` is reflected on every
- * `opencode:setup`.
+ * `workspace:setup`.
  */
 function writeSoundConfig(): void {
   mkdirSync(dirname(SOUNDS_CONFIG), { recursive: true });

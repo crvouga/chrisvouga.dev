@@ -23,7 +23,7 @@ const MESSAGES: Record<Kind, string> = {
 };
 
 /**
- * Runtime sound config written by `bun run opencode:setup` from the central
+ * Runtime sound config written by `bun run workspace:setup` from the central
  * `sounds.ts`. Read per notification so sound changes take effect without
  * restarting opencode. Falls back to the central defaults when missing.
  */
@@ -40,7 +40,7 @@ function soundFor(kind: Kind): string {
   }
 }
 
-/** OpenCodeNotifier CLI linked into place by `bun run workstation:setup`. */
+/** OpenCodeNotifier CLI linked into place by `bun run workspace:setup`. */
 const NOTIFIER_CLI = join(homedir(), '.config/opencode/bin/opencode-notifier');
 
 type OpencodeClient = PluginInput['client'];
