@@ -29,6 +29,8 @@
       "@pkgs/vault": ["./packages/vault/src/index.ts"],
       "@pkgs/vault/*": ["./packages/vault/src/*"],
       "@pkgs/object-store/*": ["./packages/object-store/src/*"],
+      "@pkgs/openrouter": ["./packages/openrouter/src/index.ts"],
+      "@pkgs/openrouter/*": ["./packages/openrouter/src/*"],
       "@pkgs/secret-store": ["./packages/secret-store/src/index.ts"],
       "@pkgs/secret-store/*": ["./packages/secret-store/src/*"],
       "@pkgs/secret-string/*": ["./packages/secret-string/src/*"]

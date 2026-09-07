@@ -1,3 +1,4 @@
+import { AUTO_ROUTER_MODEL_ID, autoRouterModel } from '@pkgs/openrouter';
 import { SecretStoreEntry } from '@pkgs/secret-store';
 
 /** Vault UI base link for `personal/<config>` (target config is appended). */
@@ -176,6 +177,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     obtainUrl: 'https://openrouter.ai/settings/keys',
     docsUrl: 'https://openrouter.ai/docs',
     validExample: 'sk-or-…',
+    models: { [AUTO_ROUTER_MODEL_ID]: autoRouterModel() },
   }),
   opencodeEntry({
     provider: 'xai',
@@ -290,6 +292,8 @@ type EntryBase = {
   invalidHint?: string;
   /** Format validation applied to the stored key (also drives skip reporting). */
   validate?: ApiKeyValidator;
+  /** Provider models registered in the OpenCode config (e.g. the Auto Router). */
+  models?: Readonly<Record<string, unknown>>;
 };
 
 function opencodeEntry(base: EntryBase): OpenCodeProviderConfig {
@@ -329,6 +333,7 @@ function baseEntry(base: EntryBase): OpenCodeProviderConfig {
     name: base.name,
     vaultKey: base.vaultKey,
     entry,
+    ...(base.models !== undefined ? { models: base.models } : {}),
   };
 }
 

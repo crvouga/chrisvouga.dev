@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test';
 
+import { AUTO_ROUTER_MODEL_ID, AUTO_ROUTER_PLUGIN_ID } from '@pkgs/openrouter';
 import { OPENCODE_PROVIDER_CATALOG } from './provider-secrets';
 
 const pad = (n: number): string => 'x'.repeat(n);
@@ -64,6 +65,27 @@ test('each provider accepts a representative key and rejects a malformed one', (
     expect(p.entry.validate('x'), p.vaultKey).not.toBeNull();
     expect(p.entry.validate(''), p.vaultKey).not.toBeNull();
   }
+});
+
+test('openrouter entry registers the Auto Router model with its request body', () => {
+  const openRouter = OPENCODE_PROVIDER_CATALOG.find(
+    (p) => p.provider === 'openrouter'
+  );
+  expect(openRouter).toBeDefined();
+  const model = openRouter?.models?.[AUTO_ROUTER_MODEL_ID];
+  expect(model).toBeDefined();
+  expect(model).toEqual(
+    expect.objectContaining({
+      id: AUTO_ROUTER_MODEL_ID,
+      tool_call: true,
+      temperature: true,
+      request: expect.objectContaining({
+        body: expect.objectContaining({
+          plugins: [expect.objectContaining({ id: AUTO_ROUTER_PLUGIN_ID })],
+        }),
+      }),
+    })
+  );
 });
 
 test('prefix-based providers reject keys with the wrong prefix', () => {

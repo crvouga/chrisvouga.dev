@@ -96,6 +96,15 @@
         "typescript": "catalog:",
       },
     },
+    "packages/openrouter": {
+      "name": "@pkgs/openrouter",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "eslint-plugin-lingui": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/secret-store": {
       "name": "@pkgs/secret-store",
       "version": "0.0.0",
@@ -132,6 +141,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@opencode-ai/plugin": "1.18.29",
+        "@pkgs/openrouter": "workspace:*",
         "@pkgs/secret-store": "workspace:*",
         "@pkgs/vault": "workspace:*",
         "yaml": "catalog:",
@@ -342,6 +352,8 @@
     "@pkgs/logger": ["@pkgs/logger@workspace:packages/logger"],
 
     "@pkgs/object-store": ["@pkgs/object-store@workspace:packages/object-store"],
+
+    "@pkgs/openrouter": ["@pkgs/openrouter@workspace:packages/openrouter"],
 
     "@pkgs/secret-store": ["@pkgs/secret-store@workspace:packages/secret-store"],
 

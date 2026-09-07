@@ -201,6 +201,19 @@ The config step is also invoked (best-effort, never fails setup) at the end of `
 
 `SecretStoreEntry` carries documentation fields — `description`, `obtainUrl` (link to create/rotate a key), `docsUrl`, `vaultUiPath`, `validExample`, and `invalidHint` — that the generator prints for skipped providers, plus `transform` (normalizes the value, e.g. trimming) and `validate` (format/prefix check) for the smoke check. To add a provider, append an entry to `provider-secrets.ts` (a `SecretStoreEntry` plus optional `npm`/`baseURL`/`models`, and a `validate` if the key has a recognizable format), add the key in Vault, and re-run.
 
+### Default model: OpenRouter Auto
+
+When the `openrouter` provider has a valid key, the generated config registers the **OpenRouter Auto Router** (`openrouter/auto`) and sets it as the default `model` and `small_model`, so every OpenCode task routes through the Auto Router (`openrouter/openrouter/auto`). The Auto Router classifies each prompt into a task type and routes to the model the OpenRouter community actually spends on for that task — no model choice or OpenRouter web UI setting is ever needed.
+
+The Auto Router configuration is owned by the `@pkgs/openrouter` package (`packages/openrouter/`):
+
+- `AUTO_ROUTER_MODEL_ID` / `AUTO_ROUTER_MODEL_REFERENCE` — the model slug and the OpenCode `provider/model-id` reference.
+- `autoRouterPlugin()` / `autoRouterRequest()` — the per-request `auto-router` plugin payload (cost tier + optional allowed/excluded models).
+- `autoRouterModel()` — the OpenCode provider model entry (registered under `provider.openrouter.models["openrouter/auto"]`), whose `request.body` carries the Auto Router settings per-request so nothing is configured in the OpenRouter UI.
+- `DEFAULT_AUTO_ROUTER_COST_TIER` (`high`) — the cost band the router routes within; override via `autoRouterModel({ costTier })` / `autoRouterPlugin({ costTier })` if the account is credit-constrained.
+
+The `provider-secrets.ts` openrouter entry attaches `models: { "openrouter/auto": autoRouterModel() }`, and `configure-providers.ts` sets `model`/`small_model` to the Auto Router reference only when they are unset (an existing explicit model choice is preserved).
+
 ## Testing
 
 - **Symlink setup:**

@@ -6,7 +6,7 @@ Single flat Turborepo + Bun workspace at the repo root. Every package is scoped 
 
 - `packages/api` — Turborepo remote cache server (`@pkgs/api`), the only deployable app; its cache-support scripts (`vault-secrets-registry`, `ensure-vault-secrets`, `check-vault-secrets`, `smoke-test-cache`, `seed-turbo-client-secrets`, `vault-yaml-defaults`, `verify-b2-s3`) are colocated in `packages/api/scripts/`
 - `packages/infra` — infra/fleet management (`@pkgs/infra`): `services.yaml`, `lib/` (Railway/Cloudflare/GHCR/Fly helpers), and the ops scripts (`provision-railway`, `deploy-railway`, `sync-dns`, `sync-redirects`, `sync-aliases`, `sync-railway-secrets`, `rename-railway`, `destroy-*`, `list-deploy-service-ids`, `make-ghcr-public`, `print-platform-env`, `rollout-publish`, `seed-vault-github-secret`, `health-check`, `cleanup-railway-deployments`)
-- `packages/{assert,logger,object-store,secret-store,secret-string,vault}` — `@pkgs/*` libraries
+- `packages/{assert,logger,object-store,openrouter,secret-store,secret-string,vault}` — `@pkgs/*` libraries
 - `packages/eslint-rules` — shared ESLint rule fragments (plain dir, referenced by relative path)
 - `packages/9router` — local-only 9router CLI (`@pkgs/9router`)
 - `packages/vault-service` — standalone OpenBao service (Docker + shell; no package.json)

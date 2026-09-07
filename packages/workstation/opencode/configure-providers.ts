@@ -26,6 +26,7 @@ import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 
+import { AUTO_ROUTER_MODEL_REFERENCE } from '@pkgs/openrouter';
 import { VaultSecretStore } from '@pkgs/secret-store';
 import { VaultCli } from '@pkgs/vault';
 
@@ -130,6 +131,11 @@ function buildProviderSection(
     provider[p.id] = entry;
   }
   return provider;
+}
+
+/** Whether the connected set includes the OpenRouter provider. */
+function hasOpenRouter(connected: readonly ConnectedProvider[]): boolean {
+  return connected.some((p) => p.id === 'openrouter');
 }
 
 function loadExistingConfig(): Record<string, unknown> {
@@ -237,6 +243,14 @@ async function main(): Promise<void> {
       : {}),
     ...providerSection,
   };
+  if (hasOpenRouter(connected)) {
+    if (typeof existing.model !== 'string') {
+      existing.model = AUTO_ROUTER_MODEL_REFERENCE;
+    }
+    if (typeof existing.small_model !== 'string') {
+      existing.small_model = AUTO_ROUTER_MODEL_REFERENCE;
+    }
+  }
   if (existing['$schema'] === undefined) {
     existing['$schema'] = 'https://opencode.ai/config.json';
   }
