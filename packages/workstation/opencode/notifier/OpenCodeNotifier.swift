@@ -13,7 +13,8 @@
 //     "subtitle": "session title or project name",
 //     "sessionID": "ses_...",
 //     "directory": "/Users/you/project",
-//     "sessionTitle": "..." (optional)
+//     "sessionTitle": "..." (optional),
+//     "token": "..." (short per-session tab token, optional)
 //   }
 //
 // Notifications use the sessionID as identifier + threadIdentifier so a new
@@ -24,8 +25,8 @@
 // from one place and a running daemon picks up changes without a rebuild.
 //
 // On banner click the daemon runs ~/.config/opencode/bin/focus-opencode with
-// --kind/--session/--dir/--title so the right VS Code window, the opencode
-// terminal editor tab, and the attention session get focused.
+// --kind/--session/--dir/--title/--token so the right VS Code window, the
+// opencode terminal editor tab, and the attention session get focused.
 
 import AppKit
 import Foundation
@@ -135,7 +136,7 @@ func runFocusScript(userInfo info: [AnyHashable: Any]) {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/bin/bash")
     var arguments = [script]
-    for (flag, key) in [("--kind", "kind"), ("--session", "sessionID"), ("--dir", "directory"), ("--title", "sessionTitle")] {
+    for (flag, key) in [("--kind", "kind"), ("--session", "sessionID"), ("--dir", "directory"), ("--title", "sessionTitle"), ("--token", "token")] {
         if let value = stringField(info, key) { arguments += [flag, value] }
     }
     task.arguments = arguments

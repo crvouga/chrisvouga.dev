@@ -134,7 +134,7 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
 - **Sound design:** each attention kind maps to a macOS system sound, kept deliberately calm, neutral, happy and low-key — a warm soft purr for completion, subtle taps for questions and permission asks, and a gentle bell for errors (no jarring or alarming cues). The **single source of truth** is `packages/workstation/opencode/sounds.ts` (`NOTIFIER_SOUNDS`). `bun run workspace:setup` writes that map to `~/.config/opencode/notifier-sounds.json`, which **both** the notifier daemon and the plugin fallback read at notification time — so changing a sound is a one-file edit that a running daemon picks up without a rebuild. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound.
 
 - **Question detection:** the built-in `question` tool (`tool.execute.before` hook with `tool === "question"`). A question waits for user input but is not necessarily a permission request, so it is detected from the tool invocation itself. When a `permission.asked` event follows for the `question` permission, the plugin suppresses the redundant "Permission required" notification — one question produces exactly one useful notification.
-- **Payload:** each notification carries `{kind, title, message, subtitle, sessionID, directory, sessionTitle}` — `subtitle` is the session title (best-effort SDK lookup, 500ms timeout) so you can eyeball which session needs you; `directory` and `sessionTitle` drive click-to-focus. Notifications use the sessionID as identifier/thread, so a new event for the same session **replaces** the previous banner instead of stacking.
+- **Payload:** each notification carries `{kind, title, message, subtitle, sessionID, directory, sessionTitle, token}` — `subtitle` is the session title (best-effort SDK lookup, 500ms timeout) so you can eyeball which session it was, and `token` is the short per-session tab token (see below). Notifications use the sessionID as identifier/thread, so a new event for the same session **replaces** the previous banner instead of stacking.
 
 ### Click-to-focus architecture
 
@@ -142,23 +142,27 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
 session.idle / session.error / permission.asked / question tool
         │
         ▼
-notifications.ts ──spawn──▶ ~/.config/opencode/bin/opencode-notifier --post <json>
-        │                              │
-        │                              ▼  unix socket ~/.cache/opencode-notifier.sock
-        │                     OpenCodeNotifier.app (daemon, accessory app, UNUserNotificationCenter)
-        │                              │  posts native banner
-        ▼                              ▼
-   osascript fallback          user clicks the banner
-        (plain banner)                 │
-                                       ▼
+notifications.ts ──tags terminal title with session token (OSC, /dev/tty)
+        │
+        └──spawn──▶ ~/.config/opencode/bin/opencode-notifier --post <json>
+                               │
+                               ▼  unix socket ~/.cache/opencode-notifier.sock
+                      OpenCodeNotifier.app (daemon, accessory app, UNUserNotificationCenter)
+                               │  posts native banner
+                               ▼
+                      user clicks the banner
+                               │
+                               ▼
                      daemon runs ~/.config/opencode/bin/focus-opencode
-                        --kind K --session S --dir D --title T
+                        --kind K --session S --dir D --title T --token N
                                        │
-                     1. `code <dir>`  → focuses (or opens) the VS Code window
+                     1. `code -r <dir>` → focuses (or opens) the VS Code window
                                        │    for that project — no permissions needed
-                     2. System Events keystrokes (one-time Accessibility grant):
-                        ctrl+tab → type session title (or "opencode") → Enter
-                        → focuses the opencode terminal editor tab
+                     2. Poll (not sleep) until VS Code is frontmost
+                     3. System Events keystrokes (one-time Accessibility grant):
+                        ctrl+tab → type session token → Enter
+                        → focuses the exact opencode terminal editor tab
+                        → verified from the window title, retried once
                                        │
                      Done — the TUI shows the session that needs attention
 ```
@@ -166,9 +170,11 @@ notifications.ts ──spawn──▶ ~/.config/opencode/bin/opencode-notifier -
 Why this shape:
 
 - `terminal-notifier` is **not** used: it depends on the deprecated `NSUserNotification` API and its click actions do not work on macOS 26. OpenCodeNotifier uses `UNUserNotificationCenter` and is vendored in this repo (~200 lines Swift, built by setup) — no external binary gets notification or shell-exec permissions.
-- `code <folder>` is the official CLI behavior: it focuses the existing window that has the folder open (and opens one if none exists). This is the permission-free window-targeting step.
-- The keystroke step is guarded: it only runs when VS Code is frontmost, and it is skipped when the window title already shows the opencode terminal (meaning the terminal editor tab is already active). This guarantees the typed type-ahead text never lands inside the TUI prompt input.
-- The session inside the TUI is not externally targetable on OpenCode 1.18.29 (no session-select route on the server, no tab keybinds in this TUI version), so the click handler focuses the right terminal and lets the TUI land you on the session — deterministic when you run one terminal per session, and the notification subtitle tells you which session it was.
+- `code -r <folder>` is the official CLI behavior: it focuses the existing window that has the folder open (and opens one if none exists). This is the permission-free window-targeting step. `-r` reuses the window instead of opening a duplicate.
+- **Per-session token, not fuzzy title:** every notification first tags its controlling terminal's title with a short token derived from the session id (`opencode <token> · <session title>`, via an OSC sequence on `/dev/tty`). The opencode TUI never sets terminal titles, so the tag sticks. The click handler then matches the tab by that exact token instead of guessing from the session title — the session id is unique, so the pick can never land on the wrong tab. `token` travels in the notification payload; banners posted before tagging fall back to title matching.
+- **No fixed sleeps on the focus path:** `code` returns before the window is frontmost, so the script polls for VS Code being frontmost (up to ~4s) instead of `sleep 0.4` — typing into the picker too early (or aborting because Code wasn't front yet) was the main focus flake.
+- The keystroke step is guarded: it only runs when VS Code is frontmost, and it is skipped when the window title already contains the token (meaning the tagged terminal is already the active editor). This guarantees the typed type-ahead text never lands inside the TUI prompt input.
+- The session inside the TUI is not externally targetable on OpenCode 1.18.29 (no session-select route on the server), so the click handler focuses the exact tab and the TUI is already on that session — deterministic with one terminal per session, and the notification subtitle tells you which session it was.
 - `focus-opencode` always exits 0; a missing Accessibility grant degrades to "window focus only" with a one-line stderr hint.
 
 ### macOS permissions (one-time)
@@ -231,8 +237,10 @@ The `provider-secrets.ts` openrouter entry attaches `models: { "openrouter/auto"
   A banner should appear (after notifications are allowed); clicking it should focus the right VS Code window and terminal tab.
 - **Focus script directly:**
   ```bash
-  ~/.config/opencode/bin/focus-opencode --kind finished --session ses_test --dir /path/to/project
+  ~/.config/opencode/bin/focus-opencode --kind finished --session ses_test --dir /path/to/project --token est1234
   ```
+- **Session token unit tests:** `bun run --filter @pkgs/workstation test` covers token derivation, title sanitizing, and the OSC sequence in `opencode/session-token.test.ts`.
+- **Terminal tagging:** trigger any notification (e.g. let a session finish) and check the opencode terminal tab title reads `opencode <token> · <session title>` — the click handler matches on `<token>`.
 - **End-to-end:** start an OpenCode session in another window, let it finish → `Session finished` banner (subtitle = session title) → click → VS Code focuses on that project's window and the opencode terminal tab.
 - **Fallbacks:** with the daemon killed (`pkill -f OpenCodeNotifier.*daemon`), the plugin posts plain `osascript` notifications instead.
 - **Conflict safety:**

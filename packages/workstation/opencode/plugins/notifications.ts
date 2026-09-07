@@ -1,8 +1,19 @@
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import {
+  closeSync,
+  existsSync,
+  openSync,
+  readFileSync,
+  writeSync,
+} from 'node:fs';
 import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 import type { Plugin, PluginInput } from '@opencode-ai/plugin';
+import {
+  shortSessionToken,
+  terminalTitleFor,
+  titleSequence,
+} from '../session-token';
 import { NOTIFIER_SOUNDS } from '../sounds';
 
 /**
@@ -97,6 +108,31 @@ async function fetchSessionTitle(
 }
 
 /**
+ * Tag the controlling terminal's title with the session token so the click
+ * handler can match this exact session's VS Code tab. Best-effort: skipped
+ * when there is no controlling terminal (headless/serve) or the write fails.
+ * The opencode TUI never sets terminal titles, so the tag sticks until the
+ * next notification re-tags it. Never throws.
+ */
+function tagTerminal(
+  sessionID: string | undefined,
+  sessionTitle: string | undefined
+): void {
+  try {
+    const title = terminalTitleFor(sessionID, sessionTitle);
+    if (!title) return;
+    const fd = openSync('/dev/tty', 'w');
+    try {
+      writeSync(fd, titleSequence(title));
+    } finally {
+      closeSync(fd);
+    }
+  } catch {
+    // No controlling terminal or write failed — focus falls back to title matching.
+  }
+}
+
+/**
  * Post a click-to-focus notification (OpenCodeNotifier) carrying enough
  * context for the click handler to focus the right VS Code window, the
  * opencode terminal editor tab, and the attention session. Falls back to a
@@ -109,6 +145,8 @@ function post(
 ): void {
   const message = MESSAGES[kind];
   const sound = soundFor(kind);
+  tagTerminal(payload.sessionID, payload.sessionTitle);
+  const token = shortSessionToken(payload.sessionID);
   try {
     if (existsSync(NOTIFIER_CLI)) {
       const body = JSON.stringify({
@@ -120,6 +158,7 @@ function post(
         sessionID: payload.sessionID ?? '',
         directory: payload.directory,
         sessionTitle: payload.sessionTitle ?? '',
+        token,
       });
       const child = spawn(NOTIFIER_CLI, ['--post', body], { stdio: 'ignore' });
       // --post exits 0 only when the payload reached the daemon; anything
