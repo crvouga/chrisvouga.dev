@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 
 export type SecretSource =
@@ -216,7 +217,9 @@ export function isAlwaysOn(service: ServiceSpec): boolean {
   return !railwaySleep(service);
 }
 
-export function loadServicesConfig(path = "services.yaml"): ServicesConfig {
+export function loadServicesConfig(
+  path = join(import.meta.dirname, "..", "services.yaml"),
+): ServicesConfig {
   const raw = parseYaml(readFileSync(path, "utf8")) as ServicesConfig;
   if (!raw?.zone?.trim()) {
     throw new Error(`Invalid services config at ${path}: zone is required`);

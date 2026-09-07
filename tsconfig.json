@@ -6,27 +6,8 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["bun"],
-    "paths": {
-      "@apps/api/*": ["./packages/api/src/*"],
-      "@pkgs/assert": ["./packages/assert/src/index.ts"],
-      "@pkgs/assert/*": ["./packages/assert/src/*"],
-      "@pkgs/logger": ["./packages/logger/src/index.ts"],
-      "@pkgs/logger/*": ["./packages/logger/src/*"],
-      "@pkgs/vault": ["./packages/vault/src/index.ts"],
-      "@pkgs/vault/*": ["./packages/vault/src/*"],
-      "@pkgs/object-store/*": ["./packages/object-store/src/*"],
-      "@pkgs/secret-store": ["./packages/secret-store/src/index.ts"],
-      "@pkgs/secret-store/*": ["./packages/secret-store/src/*"],
-      "@pkgs/secret-string/*": ["./packages/secret-string/src/*"],
-      "@scripts/*": ["./scripts/*"]
-    }
+    "types": ["bun"]
   },
-  "include": [
-    "scripts/**/*.ts",
-    "scripts/**/*.test.ts",
-    "lib/**/*.ts",
-    "packages/workstation/**/*.ts"
-  ],
+  "include": ["packages/workstation/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

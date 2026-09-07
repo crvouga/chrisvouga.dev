@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   readVaultYamlDefaults,
   resolveVaultScope,
-} from '@scripts/vault-yaml-defaults';
+} from './vault-yaml-defaults';
 
 const apiRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outPath = join(apiRoot, '.env');

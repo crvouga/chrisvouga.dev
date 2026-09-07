@@ -1,5 +1,5 @@
 {
-  "name": "9router-local",
+  "name": "@pkgs/9router",
   "private": true,
   "type": "module",
   "bin": {

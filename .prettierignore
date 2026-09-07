@@ -5,8 +5,8 @@ dist
 .turbo
 .wrangler
 .github
-lib
-scripts
+packages/infra/lib
+packages/infra/scripts
 packages/9router/**
 packages/vault-service/**
 packages/api/.env

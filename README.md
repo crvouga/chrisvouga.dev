@@ -152,22 +152,14 @@ bun run sync-dns --apply
 
 ## Repo layout
 
-Single flat Turborepo + Bun workspace. All packages live under `packages/`:
+Single flat Turborepo + Bun workspace. Every package is `@pkgs/*` and lives under `packages/`:
 
 ```
-services.yaml              # single source of truth
-lib/railway-api.ts         # Railway GraphQL client
-scripts/
-  provision-railway.ts     # project/service/domain/volume provisioning
-  deploy-railway.ts        # deploy GHCR images
-  sync-railway-secrets.ts  # Vault → Railway variables
-  sync-dns.ts              # Cloudflare ← Railway custom domain records
-  destroy-fly.ts           # post-cutover Fly teardown
-  destroy-railway.ts       # remove Railway services by id
 packages/
-  api/                     # Turborepo remote cache server (@apps/api)
+  api/                     # Turborepo remote cache server (@pkgs/api) + cache-support scripts
+  infra/                   # services.yaml + lib/ + infra/fleet ops scripts (@pkgs/infra)
   {assert,logger,object-store,secret-store,secret-string,vault}/  # @pkgs/* libs
-  9router/                 # local 9router CLI
+  9router/                 # local 9router CLI (@pkgs/9router)
   vault-service/           # OpenBao (deploy-vault workflow)
   workstation/             # portable local-machine config (bun run workstation:setup)
 .github/workflows/
@@ -176,3 +168,5 @@ packages/
   ci-turborepo.yml
   publish-image.yml
 ```
+
+Ops scripts are invoked via root wrappers, e.g. `bun run sync-dns`, `bun run provision-railway --apply` (each delegates to `bun run --filter @pkgs/infra …`).

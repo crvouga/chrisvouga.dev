@@ -174,7 +174,8 @@ services:
       VAULT_PROJECT: 'personal'
       VAULT_CONFIG: 'prd'
     secrets:
-      - name: VAULT_TOKEN
+      - name: VAULT_TOKENRefactor to flat turborepo monorepo structure
+      
         source: vault
 
   - id: llm-proxy

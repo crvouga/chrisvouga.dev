@@ -71,7 +71,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run typecheck
+      - run: bun run tc
       - run: bun run provision-railway --check --fleet-only
       - id: resolve
         run: |
@@ -79,9 +79,9 @@ jobs:
           SID="${SERVICE_ID}"
           TAG="${IMAGE_TAG}"
           if [ -n "${SID}" ]; then
-            SERVICE_IDS="$(bun run scripts/list-deploy-service-ids.ts --id "${SID}")"
+            SERVICE_IDS="$(bun run list-deploy-service-ids --id "${SID}")"
           else
-            SERVICE_IDS="$(bun run scripts/list-deploy-service-ids.ts)"
+            SERVICE_IDS="$(bun run list-deploy-service-ids)"
           fi
           echo "service_id=${SID}" >> "$GITHUB_OUTPUT"
           echo "service_ids=${SERVICE_IDS}" >> "$GITHUB_OUTPUT"
@@ -134,7 +134,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run scripts/print-platform-env.ts --format github >> "$GITHUB_ENV"
+      - run: bun run print-platform-env --format github >> "$GITHUB_ENV"
       - uses: ./.github/actions/vault-secrets
         with:
           vault_addr: ${{ env.VAULT_ADDR }}
@@ -149,7 +149,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run scripts/print-platform-env.ts --format github >> "$GITHUB_ENV"
+      - run: bun run print-platform-env --format github >> "$GITHUB_ENV"
       - uses: ./.github/actions/vault-secrets
         with:
           vault_addr: ${{ env.VAULT_ADDR }}
@@ -194,7 +194,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run scripts/print-platform-env.ts --format github >> "$GITHUB_ENV"
+      - run: bun run print-platform-env --format github >> "$GITHUB_ENV"
       - uses: ./.github/actions/vault-secrets
         with:
           vault_addr: ${{ env.VAULT_ADDR }}
@@ -234,7 +234,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run scripts/print-platform-env.ts --format github >> "$GITHUB_ENV"
+      - run: bun run print-platform-env --format github >> "$GITHUB_ENV"
       - uses: ./.github/actions/vault-secrets
         with:
           vault_addr: ${{ env.VAULT_ADDR }}

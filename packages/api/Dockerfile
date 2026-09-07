@@ -23,7 +23,6 @@ COPY packages/object-store ./packages/object-store
 COPY packages/secret-store ./packages/secret-store
 COPY packages/secret-string ./packages/secret-string
 COPY packages/vault ./packages/vault
-COPY scripts ./scripts
 
 FROM oven/bun:1.3.11-slim AS runtime
 WORKDIR /app

@@ -1,4 +1,4 @@
-import { CACHE_OBJECT_STORE_NAMESPACE } from '@apps/api/config/object-store-namespace';
+import { CACHE_OBJECT_STORE_NAMESPACE } from '@pkgs/api/config/object-store-namespace';
 import { createS3ObjectStore } from '@pkgs/object-store/create-s3-object-store';
 import type { ObjectStoreS3ConnectionConfig } from '@pkgs/object-store/impl-s3';
 

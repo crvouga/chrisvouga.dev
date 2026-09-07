@@ -1,4 +1,4 @@
-import { VaultSecretKey } from '@scripts/vault-secrets-registry';
+import { VaultSecretKey } from '../../scripts/vault-secrets-registry';
 
 /** Vault secret names loaded at server boot. */
 export const CacheSecretName = {

@@ -24,7 +24,7 @@
       },
     },
     "packages/9router": {
-      "name": "9router-local",
+      "name": "@pkgs/9router",
       "bin": {
         "9router": "./cli/bin.mjs",
       },
@@ -40,7 +40,7 @@
       },
     },
     "packages/api": {
-      "name": "@apps/api",
+      "name": "@pkgs/api",
       "version": "1.0.0",
       "dependencies": {
         "@pkgs/assert": "workspace:*",
@@ -60,6 +60,17 @@
       "devDependencies": {
         "@types/bun": "catalog:",
         "eslint-plugin-lingui": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/infra": {
+      "name": "@pkgs/infra",
+      "version": "0.0.0",
+      "dependencies": {
+        "yaml": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -138,11 +149,7 @@
     "yaml": "^2.9.0",
   },
   "packages": {
-    "9router-local": ["9router-local@workspace:packages/9router"],
-
     "@ai-sdk/provider": ["@ai-sdk/provider@3.0.8", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-oGMAgGoQdBXbZqNG0Ze56CHjDZ1IDYOwGYxYjO5KLSlz5HiNQ9udIXsPZ61VWaHGZ5XW/jyjmr6t2xz2jGVwbQ=="],
-
-    "@apps/api": ["@apps/api@workspace:packages/api"],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 
@@ -314,7 +321,13 @@
 
     "@opencode-ai/sdk": ["@opencode-ai/sdk@1.18.29", "", { "dependencies": { "cross-spawn": "7.0.6" } }, "sha512-4CS+FoLPkymTlcga8jxivGDDb2AbWMIIl3b8+myoe2wtv/1ANYCErslgz1xy5hTVHymWE6CtVNKzRuPU0ED57A=="],
 
+    "@pkgs/9router": ["@pkgs/9router@workspace:packages/9router"],
+
+    "@pkgs/api": ["@pkgs/api@workspace:packages/api"],
+
     "@pkgs/assert": ["@pkgs/assert@workspace:packages/assert"],
+
+    "@pkgs/infra": ["@pkgs/infra@workspace:packages/infra"],
 
     "@pkgs/logger": ["@pkgs/logger@workspace:packages/logger"],
 

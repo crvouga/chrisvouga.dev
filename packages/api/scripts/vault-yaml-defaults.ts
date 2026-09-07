@@ -8,7 +8,7 @@ export type VaultYamlDefaults = {
   readonly config: string;
 };
 
-const VAULT_YAML = join(import.meta.dirname, '..', '.vault.yaml');
+const VAULT_YAML = join(import.meta.dirname, '..', '..', '..', '.vault.yaml');
 
 function parseYamlValue(text: string, key: string): string | undefined {
   const match = text.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));

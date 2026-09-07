@@ -1,0 +1,32 @@
+{
+  "name": "@pkgs/infra",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "cleanup-railway-deployments": "bun run scripts/cleanup-railway-deployments.ts",
+    "deploy-railway": "bun run scripts/deploy-railway.ts",
+    "destroy-digitalocean": "bun run scripts/destroy-digitalocean.ts",
+    "destroy-fly": "bun run scripts/destroy-fly.ts",
+    "destroy-railway": "bun run scripts/destroy-railway.ts",
+    "health-check": "bun run scripts/health-check-urls.ts",
+    "list-deploy-service-ids": "bun run scripts/list-deploy-service-ids.ts",
+    "make-ghcr-public": "bun run scripts/make-ghcr-public.ts",
+    "print-platform-env": "bun run scripts/print-platform-env.ts",
+    "provision-railway": "bun run scripts/provision-railway.ts",
+    "rename-railway": "bun run scripts/rename-railway.ts",
+    "rollout-publish": "bun run scripts/rollout-publish-workflows.ts",
+    "seed-vault-github-secret": "bun run scripts/seed-vault-github-secret.ts",
+    "sync-aliases": "bun run scripts/sync-aliases.ts",
+    "sync-dns": "bun run scripts/sync-dns.ts",
+    "sync-railway-secrets": "bun run scripts/sync-railway-secrets.ts",
+    "sync-redirects": "bun run scripts/sync-redirects.ts",
+    "tc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}

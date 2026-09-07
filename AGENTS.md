@@ -2,18 +2,19 @@
 
 ## Monorepo layout
 
-Single flat Turborepo + Bun workspace at the repo root. All packages live under `packages/`:
+Single flat Turborepo + Bun workspace at the repo root. Every package is scoped `@pkgs/*` and lives under `packages/`:
 
-- `packages/api` — Turborepo remote cache server (`@apps/api`), the only deployable app
+- `packages/api` — Turborepo remote cache server (`@pkgs/api`), the only deployable app; its cache-support scripts (`vault-secrets-registry`, `ensure-vault-secrets`, `check-vault-secrets`, `smoke-test-cache`, `seed-turbo-client-secrets`, `vault-yaml-defaults`, `verify-b2-s3`) are colocated in `packages/api/scripts/`
+- `packages/infra` — infra/fleet management (`@pkgs/infra`): `services.yaml`, `lib/` (Railway/Cloudflare/GHCR/Fly helpers), and the ops scripts (`provision-railway`, `deploy-railway`, `sync-dns`, `sync-redirects`, `sync-aliases`, `sync-railway-secrets`, `rename-railway`, `destroy-*`, `list-deploy-service-ids`, `make-ghcr-public`, `print-platform-env`, `rollout-publish`, `seed-vault-github-secret`, `health-check`, `cleanup-railway-deployments`)
 - `packages/{assert,logger,object-store,secret-store,secret-string,vault}` — `@pkgs/*` libraries
 - `packages/eslint-rules` — shared ESLint rule fragments (plain dir, referenced by relative path)
-- `packages/9router` — local-only 9router CLI (bun workspace member)
+- `packages/9router` — local-only 9router CLI (`@pkgs/9router`)
 - `packages/vault-service` — standalone OpenBao service (Docker + shell; no package.json)
 - `packages/workstation` — portable local-machine config (no package.json)
 
-Root holds repo tooling: `scripts/` (infra ops + cache support scripts), `lib/` (shared helpers), `services.yaml`, and CI workflows.
+Root holds only monorepo orchestration: `package.json`, `turbo.json`, `tsconfig.json`, `tsconfig.strict.json`, `bun.lock`, dotfiles, `.vault.yaml`, CI workflows, `AGENTS.md`, `README.md`.
 
-`bun install` at the root installs all workspaces. `bun run check` runs prettier + `turbo run tc lint test build` across packages. The root `tsconfig.json` typechecks infra tooling (`scripts/`, `lib/`, `packages/workstation`); `tsconfig.strict.json` is the strict base the packages extend.
+`bun install` at the root installs all workspaces. `bun run check` runs prettier + `turbo run tc lint test build` across packages; `bun run tc` typechecks all packages. The root `tsconfig.json` typechecks `packages/workstation`; `tsconfig.strict.json` is the strict base `packages/api` + the `@pkgs/*` libs extend (`packages/infra` uses the loose root config).
 
 ## Global resource naming
 
@@ -25,7 +26,7 @@ Root holds repo tooling: `scripts/` (infra ops + cache support scripts), `lib/` 
 | External image                       | optional `image:` in `services.yaml` (verbatim; skips GHCR) | `ghcr.io/example/app:latest`           |
 | S3 bucket (when owned by this stack) | `crvouga-<purpose>` or existing shared bucket keys in Vault | —                                      |
 
-Railway names come from [`services.yaml`](services.yaml) via `railwayServiceName()` in [`lib/services.ts`](lib/services.ts) — defaults to the service `id`. Legacy Fly.io apps used the `crvouga-` prefix; see `legacyFlyAppName()`.
+Railway names come from [`packages/infra/services.yaml`](packages/infra/services.yaml) via `railwayServiceName()` in [`packages/infra/lib/services.ts`](packages/infra/lib/services.ts) — defaults to the service `id`. Legacy Fly.io apps used the `crvouga-` prefix; see `legacyFlyAppName()`.
 
 Public DNS hostnames stay on the zone (`portfolio.chrisvouga.dev`, etc.); Railway custom domains are provisioned via the GraphQL API and synced to Cloudflare.
 
@@ -33,7 +34,7 @@ Public DNS hostnames stay on the zone (`portfolio.chrisvouga.dev`, etc.); Railwa
 
 ## Standalone vault (`packages/vault-service/`)
 
-Vault is **`standalone: true`** in [`services.yaml`](services.yaml) — excluded from the fleet **Deploy fleet** workflow, fleet DNS sync, and `destroy-fly`. It bootstraps from **GitHub repo secrets** (or exported env), not Vault KV / OIDC.
+Vault is **`standalone: true`** in [`packages/infra/services.yaml`](packages/infra/services.yaml) — excluded from the fleet **Deploy fleet** workflow, fleet DNS sync, and `destroy-fly`. It bootstraps from **GitHub repo secrets** (or exported env), not Vault KV / OIDC.
 
 | Resource        | Value                                                                                  |
 | --------------- | -------------------------------------------------------------------------------------- |
@@ -68,9 +69,9 @@ If `vault run` fails with `No value found at secret/personal/prd`, KV is empty �
 
 ## Turborepo remote cache (`packages/api` + `@pkgs/*`)
 
-The cache server is `packages/api` (`@apps/api`). Runtime dependency closure: `@pkgs/{assert,logger,object-store,secret-store,secret-string,vault}`. Support scripts live in root `scripts/` (`vault-secrets-registry.ts`, `ensure-vault-secrets.ts`, `check-vault-secrets.ts`, `smoke-test-cache.ts`, `seed-turbo-client-secrets.ts`, `verify-b2-s3.ts`, `vault-yaml-defaults.ts`).
+The cache server is `packages/api` (`@pkgs/api`). Runtime dependency closure: `@pkgs/{assert,logger,object-store,secret-store,secret-string,vault}`. Support scripts live in `packages/api/scripts/` (`vault-secrets-registry.ts`, `ensure-vault-secrets.ts`, `check-vault-secrets.ts`, `smoke-test-cache.ts`, `seed-turbo-client-secrets.ts`, `verify-b2-s3.ts`, `vault-yaml-defaults.ts`).
 
-- CI: **CI turborepo** (`.github/workflows/ci-turborepo.yml`) on `packages/**`, `scripts/**`, and root build config — check + publish on API changes.
+- CI: **CI turborepo** (`.github/workflows/ci-turborepo.yml`) on `packages/**` and root build config — check + publish on API changes.
 - Deploy: publish dispatches infra **Deploy fleet** for the `turborepo` service.
 
 ### Hard rules
@@ -86,7 +87,7 @@ CI publishes a **public** image to **GHCR** (`ghcr.io/crvouga/chrisvouga-turbore
 
 ### Vault secrets (source of truth)
 
-Canonical registry: [`scripts/vault-secrets-registry.ts`](scripts/vault-secrets-registry.ts)
+Canonical registry: [`packages/api/scripts/vault-secrets-registry.ts`](packages/api/scripts/vault-secrets-registry.ts)
 
 | Config | Purpose                                       |
 | ------ | --------------------------------------------- |

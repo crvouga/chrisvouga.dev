@@ -1,5 +1,5 @@
 {
-  "name": "@apps/api",
+  "name": "@pkgs/api",
   "version": "1.0.0",
   "private": true,
   "exports": {
@@ -11,9 +11,13 @@
   },
   "scripts": {
     "build": "test -f Dockerfile",
+    "check:vault-secrets": "bun run scripts/check-vault-secrets.ts",
     "dev": "bun --env-file=.env run src/api.ts",
     "lint": "eslint src --max-warnings 0",
+    "seed": "bun run scripts/ensure-vault-secrets.ts",
+    "seed:turbo-client": "bun run scripts/seed-turbo-client-secrets.ts",
     "setup": "bun run scripts/setup-dev-vars.ts",
+    "smoke": "bun run scripts/smoke-test-cache.ts",
     "tc": "tsc --noEmit -p tsconfig.json",
     "test": "bun test"
   },
