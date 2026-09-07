@@ -8,10 +8,8 @@ dist
 .vault-token
 *.env
 env
-services.yaml
-lib
-packages/9router/*
-!packages/9router/package.json
+packages/infra
+packages/9router
 packages/vault-service
 packages/workstation
 packages/eslint-rules

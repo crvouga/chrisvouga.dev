@@ -50,7 +50,7 @@ Derived automatically: `image_prefix` (`chrisvouga`), Vault URL (`https://vault.
 Inspect derived values:
 
 ```bash
-bun run scripts/print-platform-env.ts
+bun run print-platform-env
 ```
 
 ## First deploy
