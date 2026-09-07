@@ -66,11 +66,23 @@ function registerOpencode(program: Command, globals: () => GlobalOpts): void {
       cmdOpencodeSync({ ...globals(), strict: opts.strict })
     );
   opencode
-    .command('set-model <model>')
-    .description('Set default model (and small_model)')
-    .option('--small-model <model>', 'Small model override')
-    .action(async (model: string, opts: { smallModel?: string | undefined }) =>
-      cmdOpencodeSetModel(model, { ...globals(), smallModel: opts.smallModel })
+    .command('set-model')
+    .description('Pick build_model + plan_model from the model catalog')
+    .option('--build-model <ref>', 'Build model ref (skips picker)')
+    .option('--plan-model <ref>', 'Plan model ref (skips picker)')
+    .option('--refresh-models', 'Refresh the cached model catalog')
+    .action(
+      async (opts: {
+        buildModel?: string | undefined;
+        planModel?: string | undefined;
+        refreshModels?: boolean | undefined;
+      }) =>
+        cmdOpencodeSetModel({
+          ...globals(),
+          buildModel: opts.buildModel,
+          planModel: opts.planModel,
+          refreshModels: opts.refreshModels,
+        })
     );
   opencode
     .command('reset-model')

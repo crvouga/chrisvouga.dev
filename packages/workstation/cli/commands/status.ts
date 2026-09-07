@@ -7,6 +7,7 @@ import { describeLink, managedLinks } from '../lib/links';
 import {
   configPath,
   getModel,
+  getModelSlot,
   getSmallModel,
   listProviders,
   loadConfig,
@@ -39,6 +40,8 @@ export type WsStatus = {
     providers: string[];
     model: string | null;
     smallModel: string | null;
+    buildModel: string | null;
+    planModel: string | null;
   };
   vault: {
     addr: string;
@@ -92,6 +95,8 @@ function gatherOpencode(platform: Platform): WsStatus['opencode'] {
       providers: [],
       model: null,
       smallModel: null,
+      buildModel: null,
+      planModel: null,
     };
   }
   try {
@@ -102,6 +107,8 @@ function gatherOpencode(platform: Platform): WsStatus['opencode'] {
       providers: listProviders(cfg),
       model: getModel(cfg),
       smallModel: getSmallModel(cfg),
+      buildModel: getModelSlot(cfg, 'build_model'),
+      planModel: getModelSlot(cfg, 'plan_model'),
     };
   } catch {
     return {
@@ -110,6 +117,8 @@ function gatherOpencode(platform: Platform): WsStatus['opencode'] {
       providers: [],
       model: null,
       smallModel: null,
+      buildModel: null,
+      planModel: null,
     };
   }
 }

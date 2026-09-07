@@ -9,6 +9,12 @@ export const err = chalk.red;
 export const warn = chalk.yellow;
 export const label = chalk.bold.cyan;
 
+/**
+ * Visible rows for searchable menus/pickers. Bounded so prior output stays
+ * on screen — no scrolling up to see results.
+ */
+export const MENU_PAGE_SIZE = 10;
+
 /** Shared Inquirer theme for search / select / confirm / input / password. */
 export const cliTheme = {
   prefix: {

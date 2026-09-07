@@ -7,11 +7,13 @@ import {
   ensureAutoRouterDefaults,
   ensureSchema,
   getModel,
+  getModelSlot,
   getSmallModel,
   listProviders,
   loadConfig,
   removeProvider,
   setModel,
+  setModelSlots,
   writeConfig,
 } from './opencode-config';
 import { TmpPlatform } from './test-platform';
@@ -27,6 +29,17 @@ test('setModel sets and clears model + small_model', () => {
   const cleared = setModel(withModel, null, null);
   expect(getModel(cleared)).toBeNull();
   expect(getSmallModel(cleared)).toBeNull();
+});
+
+test('setModelSlots sets and clears build_model + plan_model', () => {
+  const set = setModelSlots({}, { build_model: 'b', plan_model: 'p' });
+  expect(getModelSlot(set, 'build_model')).toBe('b');
+  expect(getModelSlot(set, 'plan_model')).toBe('p');
+  expect(getModelSlot({}, 'build_model')).toBeNull();
+  const cleared = setModelSlots(set, { build_model: null, plan_model: null });
+  expect(getModelSlot(cleared, 'build_model')).toBeNull();
+  expect(getModelSlot(cleared, 'plan_model')).toBeNull();
+  expect('build_model' in cleared).toBe(false);
 });
 
 test('removeProvider deletes one provider and preserves the rest', () => {

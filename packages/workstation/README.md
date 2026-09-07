@@ -37,18 +37,18 @@ ws doctor [--fix]    # checks with actionable fixes
 
 Global flags: `--json` (parseable output, never prints secret values), `--yes` (skip confirmations), `--non-interactive` (fail instead of prompting). Exit codes: `0` ok, `1` error, `2` refusal/conflict.
 
-| Command                                                           | Purpose                                                         |
-| ----------------------------------------------------------------- | --------------------------------------------------------------- |
-| `ws status`                                                       | ws version, launcher, links, notifier, providers, model, Vault  |
-| `ws sync`                                                         | links + sounds + notifier build + providers (best-effort Vault) |
-| `ws doctor [--fix]`                                               | pass/warn/fail checks with fixes                                |
-| `ws opencode status\|sync\|set-model\|reset-model\|disable\|list` | OpenCode config management                                      |
-| `ws providers list\|sync`                                         | Vault-backed provider status + sync                             |
-| `ws notifications status\|enable\|disable\|test`                  | notification plugin toggles                                     |
-| `ws sounds list\|set\|reset`                                      | per-kind notification sounds                                    |
-| `ws backup\|backups\|reset`                                       | timestamped backup, list, reset config                          |
-| `ws install\|uninstall\|update`                                   | global launcher lifecycle                                       |
-| `ws vault`                                                        | resolved Vault coordinates                                      |
+| Command                                                           | Purpose                                                          |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `ws status`                                                       | ws version, launcher, links, notifier, providers, model, Vault   |
+| `ws sync`                                                         | links + sounds + notifier build + providers (best-effort Vault)  |
+| `ws doctor [--fix]`                                               | pass/warn/fail checks with fixes                                 |
+| `ws opencode status\|sync\|set-model\|reset-model\|disable\|list` | OpenCode config management (set-model picks build + plan models) |
+| `ws providers list\|sync`                                         | Vault-backed provider status + sync                              |
+| `ws notifications status\|enable\|disable\|test`                  | notification plugin toggles                                      |
+| `ws sounds list\|set\|reset`                                      | per-kind notification sounds                                     |
+| `ws backup\|backups\|reset`                                       | timestamped backup, list, reset config                           |
+| `ws install\|uninstall\|update`                                   | global launcher lifecycle                                        |
+| `ws vault`                                                        | resolved Vault coordinates                                       |
 
 ### Installation
 
@@ -254,7 +254,8 @@ Every OpenCode provider whose API key exists in the secret store is wired into t
 - **Sync logic:** `packages/workstation/cli/lib/providers-sync.ts` — reads `secret/data/personal/{config}` (default `prd`, overridable via `VAULT_*` env or `.vault.yaml`), validates each value through its `SecretStoreEntry`, and writes `~/.config/opencode/opencode.json` with `provider.<id>.options.apiKey` set inline. Shared by `ws opencode sync`, `ws sync`, and `opencode/configure-providers.ts`. Custom/local providers (Ollama, LM Studio) also get `npm` + `baseURL` + `models`.
 - **Delivery:** keys are embedded in the generated config, written **0600** into `$HOME`, never committed. The config is merged with any existing `opencode.json` (your other settings are preserved) and is only overwritten if it parses as JSON — a malformed/foreign config is refused rather than clobbered.
 - **Non-destructive:** providers with a missing or invalid key are **skipped** (not dropped) and reported with the entry's documentation so you know how to add/rotate the key. A missing key never aborts the run; an unavailable Vault is a warning (use `--strict` to make it fatal).
-- **Model control:** `ws opencode set-model <model> [--small-model <m>]`, `ws opencode reset-model`, `ws opencode disable <provider>` (removes it from the config; keys stay in Vault; re-enable with `ws opencode sync`).
+- **Model control:** `ws opencode set-model` opens a searchable model picker for the `build_model` slot (code + edits) and the `plan_model` slot (planning + research), sourced from the live OpenRouter catalog (cached 24h in `~/.cache/ws-models.json`, `--refresh-models` to refresh) with an offline fallback. Refs resolve to the directly connected provider when available, else route via `openrouter/<id>`. Scripted use: `ws opencode set-model --build-model <ref> --plan-model <ref>`. `ws opencode reset-model` clears the explicit `model`/`small_model` choice; `ws opencode disable <provider>` removes a provider from the config (keys stay in Vault; re-enable with `ws opencode sync`).
+- **Menu height:** searchable menus and pickers show 10 rows (`MENU_PAGE_SIZE`) so prior output stays visible without scrolling.
 - **Vault path:** the full catalog lives at `secret/data/personal/prd` (verified; the UI URL `/ui/vault/secrets/secret/show/secret` is a different entry that only holds `OPENAI_API_KEY` + `OPENROUTER_API_KEY`). Add keys there then re-run.
 
 ### How the keys get in

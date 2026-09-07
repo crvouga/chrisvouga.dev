@@ -8,7 +8,7 @@ import {
   Separator,
 } from '@inquirer/prompts';
 
-import { cliTheme, promptMessage } from './theme';
+import { cliTheme, MENU_PAGE_SIZE, promptMessage } from './theme';
 
 export { Separator };
 
@@ -76,10 +76,12 @@ export async function askSearch<T extends string>(opts: {
   message: string;
   choices: Array<{ name: string; value: T; description?: string }>;
   nonInteractive?: boolean;
+  pageSize?: number | undefined;
 }): Promise<T> {
   guard(opts.nonInteractive);
   return search({
     message: opts.message,
+    pageSize: opts.pageSize ?? MENU_PAGE_SIZE,
     theme: cliTheme,
     source: async (input) => {
       const term = (input ?? '').trim().toLowerCase();

@@ -1,7 +1,7 @@
 import { search } from '@inquirer/prompts';
 
 import { loadHistory } from './history';
-import { cliTheme } from './lib/theme';
+import { cliTheme, MENU_PAGE_SIZE } from './lib/theme';
 
 export type MenuCommand = {
   id: string;
@@ -23,7 +23,7 @@ export async function searchableMenu(
   const byId = new Map(commands.map((c) => [c.id, c]));
   const choice = await search({
     message: 'Choose a command',
-    pageSize: 18,
+    pageSize: MENU_PAGE_SIZE,
     theme: cliTheme,
     source: async (input) => {
       const term = input ?? '';

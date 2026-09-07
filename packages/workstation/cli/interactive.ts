@@ -1,7 +1,7 @@
 import { currentPlatform } from './lib/platform/index';
 import { workstationRoot } from './lib/paths';
 import { describeLink, managedLinks } from './lib/links';
-import { listProviders, loadConfig, getModel } from './lib/opencode-config';
+import { listProviders, loadConfig } from './lib/opencode-config';
 import { providerStatuses } from './lib/providers-sync';
 import { pushHistory } from './history';
 import { searchableMenu, type MenuCommand } from './menu';
@@ -61,14 +61,7 @@ async function interactiveProvidersPick(): Promise<void> {
 }
 
 async function interactiveSetModel(): Promise<void> {
-  const cfg = loadConfig(currentPlatform());
-  const current = getModel(cfg) ?? 'openrouter/openrouter/auto';
-  const model = await askInput({
-    message: 'Default model',
-    description: `Current: ${current} (e.g. openrouter/openrouter/auto)`,
-    default: current,
-  });
-  await cmdOpencodeSetModel(model, {});
+  await cmdOpencodeSetModel({});
 }
 
 async function interactiveDisableProvider(): Promise<void> {
@@ -178,8 +171,8 @@ function opencodeItemsSplit(): Item[] {
     },
     {
       id: 'set-model',
-      name: 'Set default model',
-      description: 'Change model + small_model',
+      name: 'Set build + plan models',
+      description: 'Searchable model picker for build_model + plan_model',
       run: interactiveSetModel,
     },
     {

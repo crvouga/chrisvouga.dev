@@ -45,8 +45,16 @@ export async function cmdStatus(opts: GlobalOpts): Promise<void> {
   console.log(
     `  ${status.opencode.exists ? ok('✓') : warnColor('!')} opencode.json ${muted(`${status.opencode.providers.length} provider(s)`)}${status.opencode.model ? ` · model ${status.opencode.model}` : ''}`
   );
+  printModelSlots(status.opencode.buildModel, status.opencode.planModel);
   console.log(
     `  ${status.vault.reachable ? ok('✓') : warnColor('!')} vault ${muted(status.vault.path)}`
+  );
+}
+
+function printModelSlots(build: string | null, plan: string | null): void {
+  if (build === null && plan === null) return;
+  console.log(
+    `  ${muted('build:')} ${build ?? muted('unset')} ${muted('plan:')} ${plan ?? muted('unset')}`
   );
 }
 

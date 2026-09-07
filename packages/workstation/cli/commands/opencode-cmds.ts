@@ -1,16 +1,22 @@
+import { pickModel } from './model-picker';
 import { currentPlatform } from '../lib/platform/index';
 import type { GlobalOpts } from '../lib/cli-opts';
 import { confirmOrThrow } from '../lib/cli-opts';
+import { resolveModelCatalog } from '../lib/models';
 import {
   ensureAutoRouterDefaults,
   ensureSchema,
   getModel,
+  getModelSlot,
   getSmallModel,
   listProviders,
   loadConfig,
   removeProvider,
   setModel,
+  setModelSlots,
   writeConfig,
+  type ModelSlot,
+  type OpencodeConfig,
 } from '../lib/opencode-config';
 import { syncProvidersFromVault } from '../lib/providers-sync';
 import {
@@ -25,7 +31,11 @@ import {
 } from '../lib/output-and-theme';
 
 type StrictOpts = GlobalOpts & { strict?: boolean | undefined };
-type SetModelOpts = GlobalOpts & { smallModel?: string | undefined };
+type SetModelOpts = GlobalOpts & {
+  buildModel?: string | undefined;
+  planModel?: string | undefined;
+  refreshModels?: boolean | undefined;
+};
 
 export async function cmdOpencodeStatus(opts: GlobalOpts): Promise<void> {
   const platform = currentPlatform();
@@ -37,6 +47,8 @@ export async function cmdOpencodeStatus(opts: GlobalOpts): Promise<void> {
     providers,
     model: getModel(cfg),
     smallModel: getSmallModel(cfg),
+    build_model: getModelSlot(cfg, 'build_model'),
+    plan_model: getModelSlot(cfg, 'plan_model'),
   };
   if (mode === 'json') {
     printJson({ ok: true, ...payload });
@@ -48,6 +60,8 @@ export async function cmdOpencodeStatus(opts: GlobalOpts): Promise<void> {
   );
   console.log(`  model: ${payload.model ?? muted('unset')}`);
   console.log(`  small_model: ${payload.smallModel ?? muted('unset')}`);
+  console.log(`  build_model: ${payload.build_model ?? muted('unset')}`);
+  console.log(`  plan_model: ${payload.plan_model ?? muted('unset')}`);
 }
 
 export async function cmdOpencodeSync(opts: StrictOpts): Promise<void> {
@@ -75,20 +89,71 @@ export async function cmdOpencodeSync(opts: StrictOpts): Promise<void> {
   }
 }
 
-export async function cmdOpencodeSetModel(
-  model: string,
-  opts: SetModelOpts
-): Promise<void> {
+type PickSlotOpts = {
+  slot: ModelSlot;
+  cfg: OpencodeConfig;
+  connected: string[];
+  refresh: boolean;
+  flag: string | undefined;
+  opts: GlobalOpts;
+};
+
+async function pickSlot(pick: PickSlotOpts): Promise<string> {
+  if (pick.flag !== undefined) return pick.flag;
+  const platform = currentPlatform();
+  const spinner = startSpinner(
+    `Loading model catalog for ${pick.slot}…`,
+    resolveOutputMode(pick.opts.json)
+  );
+  const catalog = await resolveModelCatalog(platform, {
+    refresh: pick.refresh,
+  });
+  spinner?.stop();
+  return pickModel({
+    slot: pick.slot,
+    current: getModelSlot(pick.cfg, pick.slot),
+    catalog: catalog.models,
+    connectedProviders: pick.connected,
+    nonInteractive: pick.opts.nonInteractive,
+  });
+}
+
+export async function cmdOpencodeSetModel(opts: SetModelOpts): Promise<void> {
   const platform = currentPlatform();
   const mode = resolveOutputMode(opts.json);
   const cfg = loadConfig(platform);
-  const small = opts.smallModel ?? getSmallModel(cfg) ?? model;
-  const path = writeConfig(platform, ensureSchema(setModel(cfg, model, small)));
+  const connected = listProviders(cfg);
+  const refresh = opts.refreshModels === true;
+  const build = await pickSlot({
+    slot: 'build_model',
+    cfg,
+    connected,
+    refresh,
+    flag: opts.buildModel,
+    opts,
+  });
+  const plan = await pickSlot({
+    slot: 'plan_model',
+    cfg,
+    connected,
+    refresh,
+    flag: opts.planModel,
+    opts,
+  });
+  const path = writeConfig(
+    platform,
+    ensureSchema(setModelSlots(cfg, { build_model: build, plan_model: plan }))
+  );
   if (mode === 'json') {
-    printJson({ ok: true, configPath: path, model, smallModel: small });
+    printJson({
+      ok: true,
+      configPath: path,
+      build_model: build,
+      plan_model: plan,
+    });
     return;
   }
-  printOk(`Model set to ${model} (small: ${small}) → ${path}`);
+  printOk(`Models set (build: ${build}, plan: ${plan}) → ${path}`);
 }
 
 export async function cmdOpencodeResetModel(opts: GlobalOpts): Promise<void> {

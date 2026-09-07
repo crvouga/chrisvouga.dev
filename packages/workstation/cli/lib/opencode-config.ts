@@ -90,6 +90,36 @@ export function getSmallModel(config: OpencodeConfig): string | null {
   return typeof small === 'string' ? small : null;
 }
 
+/** Task-model slots managed by `ws opencode set-model`. */
+export const MODEL_SLOTS = ['build_model', 'plan_model'] as const;
+
+export type ModelSlot = (typeof MODEL_SLOTS)[number];
+
+export function getModelSlot(
+  config: OpencodeConfig,
+  slot: ModelSlot
+): string | null {
+  const value = config[slot];
+  return typeof value === 'string' ? value : null;
+}
+
+/** Set (or clear with null) the build/plan model slots. */
+export function setModelSlots(
+  config: OpencodeConfig,
+  slots: Record<ModelSlot, string | null>
+): OpencodeConfig {
+  const next: OpencodeConfig = { ...config };
+  for (const slot of MODEL_SLOTS) {
+    const value = slots[slot];
+    if (value !== null) {
+      next[slot] = value;
+    } else {
+      delete next[slot];
+    }
+  }
+  return next;
+}
+
 export function setModel(
   config: OpencodeConfig,
   model: string | null,
