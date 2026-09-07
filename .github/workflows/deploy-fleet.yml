@@ -79,9 +79,9 @@ jobs:
           SID="${SERVICE_ID}"
           TAG="${IMAGE_TAG}"
           if [ -n "${SID}" ]; then
-            SERVICE_IDS="$(bun run list-deploy-service-ids --id "${SID}")"
+            SERVICE_IDS="$(bun run packages/infra/scripts/list-deploy-service-ids.ts --id "${SID}")"
           else
-            SERVICE_IDS="$(bun run list-deploy-service-ids)"
+            SERVICE_IDS="$(bun run packages/infra/scripts/list-deploy-service-ids.ts)"
           fi
           echo "service_id=${SID}" >> "$GITHUB_OUTPUT"
           echo "service_ids=${SERVICE_IDS}" >> "$GITHUB_OUTPUT"
