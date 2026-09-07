@@ -201,7 +201,10 @@ async function main(): Promise<void> {
   for (const cfg of OPENCODE_PROVIDER_CATALOG) {
     const raw = secrets[cfg.vaultKey];
     if (raw === null) {
-      skipped.push({ id: cfg.provider, reason: `missing ${cfg.vaultKey}` });
+      skipped.push({
+        id: cfg.provider,
+        reason: `optional — ${cfg.vaultKey} not set`,
+      });
       continue;
     }
     const transformed = cfg.entry.transform(raw);
@@ -247,7 +250,7 @@ async function main(): Promise<void> {
       console.log(`  − ${s.id}: ${s.reason}`);
     }
     console.log(
-      `\nAdd a missing key at ${vault.mount}/data/${vault.project}/${vault.config} in the Vault UI, then re-run.`
+      `\nOptional keys that are not set can be added later at ${vault.mount}/data/${vault.project}/${vault.config} in the Vault UI.`
     );
   }
 }

@@ -34,6 +34,42 @@ function vaultUiPath(key: string): string {
   return `${VAULT_UI_PATH_BASE}/${key}`;
 }
 
+/** Normalize a raw stored value before it is validated/used. */
+function transformTrim(value: string): string {
+  return value.trim();
+}
+
+type ApiKeyValidator = (value: string) => string | null;
+
+/** Validate an API key by minimum length (for providers without a stable prefix). */
+function validateMinLength(key: string, minLength: number): ApiKeyValidator {
+  return (value) => {
+    const v = value.trim();
+    if (v.length < minLength) {
+      return `${key} is too short (${v.length} chars); expected at least ${minLength}.`;
+    }
+    return null;
+  };
+}
+
+/** Validate an API key by a known stable prefix plus a minimum length. */
+function validatePrefix(
+  key: string,
+  prefixes: readonly string[],
+  minLength = 16
+): ApiKeyValidator {
+  return (value) => {
+    const v = value.trim();
+    if (!prefixes.some((p) => v.startsWith(p))) {
+      return `${key} must start with one of: ${prefixes.join(', ')}.`;
+    }
+    if (v.length < minLength) {
+      return `${key} is too short (${v.length} chars); expected at least ${minLength}.`;
+    }
+    return null;
+  };
+}
+
 /**
  * Central catalog of every OpenCode provider connection sourced from the
  * secret store. Each entry is `required: false` — the configure step only
@@ -45,6 +81,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'anthropic',
     name: 'Anthropic',
     vaultKey: 'ANTHROPIC_API_KEY',
+    validate: validatePrefix('ANTHROPIC_API_KEY', ['sk-ant-']),
     description: 'Claude models (Haiku/Sonnet/Opus) via Anthropic.',
     obtainUrl: 'https://console.anthropic.com/settings/keys',
     docsUrl: 'https://docs.anthropic.com',
@@ -54,6 +91,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'openai',
     name: 'OpenAI',
     vaultKey: 'OPENAI_API_KEY',
+    validate: validatePrefix('OPENAI_API_KEY', ['sk-']),
     description: 'GPT / o-series models via OpenAI.',
     obtainUrl: 'https://platform.openai.com/api-keys',
     docsUrl: 'https://platform.openai.com/docs',
@@ -63,6 +101,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'google',
     name: 'Google Gemini',
     vaultKey: 'GEMINI_API_KEY',
+    validate: validatePrefix('GEMINI_API_KEY', ['AIza', 'AQ.']),
     description: 'Gemini models via Google AI Studio.',
     obtainUrl: 'https://aistudio.google.com/apikey',
     docsUrl: 'https://ai.google.dev/gemini-api/docs',
@@ -72,6 +111,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'groq',
     name: 'Groq',
     vaultKey: 'GROQ_API_KEY',
+    validate: validatePrefix('GROQ_API_KEY', ['gsk_']),
     description: 'Fast inference (Llama, Mixtral) via Groq.',
     obtainUrl: 'https://console.groq.com/keys',
     docsUrl: 'https://console.groq.com/docs',
@@ -81,6 +121,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'deepseek',
     name: 'DeepSeek',
     vaultKey: 'DEEPSEEK_API_KEY',
+    validate: validatePrefix('DEEPSEEK_API_KEY', ['sk-']),
     description: 'DeepSeek models via DeepSeek API.',
     obtainUrl: 'https://platform.deepseek.com/api_keys',
     docsUrl: 'https://api-docs.deepseek.com',
@@ -90,6 +131,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'mistral',
     name: 'Mistral',
     vaultKey: 'MISTRAL_API_KEY',
+    validate: validateMinLength('MISTRAL_API_KEY', 16),
     description: 'Mistral models via Mistral AI.',
     obtainUrl: 'https://console.mistral.ai/api-keys',
     docsUrl: 'https://docs.mistral.ai',
@@ -99,6 +141,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'together',
     name: 'Together AI',
     vaultKey: 'TOGETHER_API_KEY',
+    validate: validateMinLength('TOGETHER_API_KEY', 16),
     description: 'Open-weights models via Together AI.',
     obtainUrl: 'https://api.together.xyz/settings/api-keys',
     docsUrl: 'https://docs.together.ai',
@@ -108,24 +151,27 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'fireworks',
     name: 'Fireworks AI',
     vaultKey: 'FIREWORKS_API_KEY',
+    validate: validatePrefix('FIREWORKS_API_KEY', ['fw_']),
     description: 'Open models via Fireworks AI.',
     obtainUrl: 'https://app.fireworks.ai/settings/api-keys',
     docsUrl: 'https://docs.fireworks.ai',
-    validExample: '…',
+    validExample: 'fw_…',
   }),
   opencodeEntry({
     provider: 'perplexity',
     name: 'Perplexity',
     vaultKey: 'PERPLEXITY_API_KEY',
+    validate: validatePrefix('PERPLEXITY_API_KEY', ['pplx-']),
     description: 'Search-grounded models via Perplexity.',
     obtainUrl: 'https://www.perplexity.ai/settings/api',
     docsUrl: 'https://docs.perplexity.ai',
-    validExample: '…',
+    validExample: 'pplx-…',
   }),
   opencodeEntry({
     provider: 'openrouter',
     name: 'OpenRouter',
     vaultKey: 'OPENROUTER_API_KEY',
+    validate: validatePrefix('OPENROUTER_API_KEY', ['sk-or-']),
     description: 'Many models via a single OpenRouter key.',
     obtainUrl: 'https://openrouter.ai/settings/keys',
     docsUrl: 'https://openrouter.ai/docs',
@@ -135,6 +181,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'xai',
     name: 'xAI',
     vaultKey: 'XAI_API_KEY',
+    validate: validatePrefix('XAI_API_KEY', ['xai-']),
     description: 'Grok models via xAI.',
     obtainUrl: 'https://console.x.ai',
     docsUrl: 'https://docs.x.ai',
@@ -144,6 +191,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'huggingface',
     name: 'Hugging Face',
     vaultKey: 'HUGGINGFACE_API_KEY',
+    validate: validatePrefix('HUGGINGFACE_API_KEY', ['hf_']),
     description: 'Inference Providers models via Hugging Face.',
     obtainUrl: 'https://huggingface.co/settings/tokens',
     docsUrl: 'https://huggingface.co/docs/inference-providers',
@@ -153,15 +201,17 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'cerebras',
     name: 'Cerebras',
     vaultKey: 'CEREBRAS_API_KEY',
+    validate: validatePrefix('CEREBRAS_API_KEY', ['csk-']),
     description: 'Cerebras inference models.',
     obtainUrl: 'https://cloud.cerebras.ai',
     docsUrl: 'https://inference-docs.cerebras.ai',
-    validExample: '…',
+    validExample: 'csk-…',
   }),
   opencodeEntry({
     provider: 'venice',
     name: 'Venice AI',
     vaultKey: 'VENICE_API_KEY',
+    validate: validateMinLength('VENICE_API_KEY', 16),
     description: 'Venice AI models.',
     obtainUrl: 'https://venice.ai',
     docsUrl: 'https://docs.venice.ai',
@@ -171,15 +221,17 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'poolside',
     name: 'Poolside',
     vaultKey: 'POOLSIDE_API_KEY',
+    validate: validatePrefix('POOLSIDE_API_KEY', ['sky_']),
     description: 'Poolside models.',
     obtainUrl: 'https://app.poolside.ai',
     docsUrl: 'https://docs.poolside.ai',
-    validExample: '…',
+    validExample: 'sky_…',
   }),
   opencodeEntry({
     provider: 'nvidia',
     name: 'NVIDIA',
     vaultKey: 'NVIDIA_API_KEY',
+    validate: validatePrefix('NVIDIA_API_KEY', ['nvapi-']),
     description: 'NVIDIA NIM / build.nvidia.com models.',
     obtainUrl: 'https://build.nvidia.com',
     docsUrl: 'https://docs.nvidia.com/nim',
@@ -189,6 +241,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'minimax',
     name: 'MiniMax',
     vaultKey: 'MINIMAX_API_KEY',
+    validate: validateMinLength('MINIMAX_API_KEY', 16),
     description: 'MiniMax models.',
     obtainUrl: 'https://platform.minimax.io',
     docsUrl: 'https://platform.minimax.io/docs',
@@ -198,6 +251,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'zai',
     name: 'Z.AI (GLM)',
     vaultKey: 'GLM_API_KEY',
+    validate: validateMinLength('GLM_API_KEY', 16),
     description: 'GLM models via Z.AI.',
     obtainUrl: 'https://open.bigmodel.cn',
     docsUrl: 'https://open.bigmodel.cn/dev/api',
@@ -207,6 +261,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'ollama',
     name: 'Ollama (local)',
     vaultKey: 'OLLAMA_API_KEY',
+    validate: validateMinLength('OLLAMA_API_KEY', 16),
     description: 'Local models served by Ollama (OpenAI-compatible).',
     obtainUrl: 'https://ollama.com/settings/keys',
     docsUrl: 'https://docs.ollama.com',
@@ -216,6 +271,7 @@ export const OPENCODE_PROVIDER_CATALOG: readonly OpenCodeProviderConfig[] = [
     provider: 'lmstudio',
     name: 'LM Studio (local)',
     vaultKey: 'LITELLM_LM_STUDIO_API_KEY',
+    validate: validateMinLength('LITELLM_LM_STUDIO_API_KEY', 16),
     description: 'Local models served by LM Studio (OpenAI-compatible).',
     obtainUrl: 'https://lmstudio.ai',
     docsUrl: 'https://lmstudio.ai/docs',
@@ -232,6 +288,8 @@ type EntryBase = {
   docsUrl?: string;
   validExample?: string;
   invalidHint?: string;
+  /** Format validation applied to the stored key (also drives skip reporting). */
+  validate?: ApiKeyValidator;
 };
 
 function opencodeEntry(base: EntryBase): OpenCodeProviderConfig {
@@ -263,6 +321,8 @@ function baseEntry(base: EntryBase): OpenCodeProviderConfig {
     invalidHint:
       base.invalidHint ??
       `Rotate ${base.vaultKey} at ${base.obtainUrl ?? 'the provider console'} and re-run \`bun run workstation:configure:opencode\`.`,
+    transform: transformTrim,
+    validate: base.validate,
   });
   return {
     provider: base.provider,
