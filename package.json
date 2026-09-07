@@ -6,10 +6,12 @@
     "packages/*"
   ],
   "scripts": {
-    "check": "bun run ci:format && turbo run tc lint test build",
+    "check": "bun run ci:install && bun run ci:format && turbo run tc lint test build",
+    "check:ci": "bun run ci:install && bun run check:vault-secrets && bun run check",
     "check:vault-secrets": "vault run --config dev -- bun run --filter @pkgs/api check:vault-secrets",
     "check:vault-secrets:prd": "vault run --config prd -- bun run --filter @pkgs/api check:vault-secrets",
     "ci:format": "prettier --check .",
+    "ci:install": "bun install --frozen-lockfile",
     "cleanup-railway-deployments": "bun run --filter @pkgs/infra cleanup-railway-deployments",
     "deploy": "echo 'Hosting is via infra — push main runs ci-turborepo.yml'",
     "deploy-railway": "bun run --filter @pkgs/infra deploy-railway",

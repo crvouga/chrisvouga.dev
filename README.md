@@ -137,12 +137,16 @@ gh workflow run deploy-fleet.yml -f service_id=portfolio -f image_tag=abc123
 ```bash
 bun install
 bun run typecheck
+bun check                             # CI-equivalent check (format + tc + lint + test + build)
+bun run check:ci                      # full CI reproduction (also runs the Vault dev-secret gate)
 bun run provision-railway --check --fleet-only   # CI drift check (excludes standalone vault)
 bun run provision-railway --apply   # create/update Railway resources
 bun run deploy-railway --id portfolio
 bun run sync-railway-secrets --id portfolio
 bun run sync-dns --apply
 ```
+
+See [`CHECKING.md`](CHECKING.md) for the full check/CI reference.
 
 ## Parallel validation (pre-cutover)
 

@@ -14,7 +14,7 @@ Single flat Turborepo + Bun workspace at the repo root. Every package is scoped 
 
 Root holds only monorepo orchestration: `package.json`, `turbo.json`, `tsconfig.json`, `tsconfig.strict.json`, `bun.lock`, dotfiles, `.vault.yaml`, CI workflows, `AGENTS.md`, `README.md`.
 
-`bun install` at the root installs all workspaces. `bun run check` runs prettier + `turbo run tc lint test build` across packages; `bun run tc` typechecks all packages. The root `tsconfig.json` typechecks `packages/workstation`; `tsconfig.strict.json` is the strict base `packages/api` + the `@pkgs/*` libs extend (`packages/infra` uses the loose root config).
+`bun install` at the root installs all workspaces. `bun run check` (alias `bun check`) runs `bun install --frozen-lockfile` + prettier + `turbo run tc lint test build` across packages, mirroring the CI check job; `bun run check:ci` additionally runs the Vault dev-secret gate; see `CHECKING.md`. `bun run tc` typechecks all packages. The root `tsconfig.json` typechecks `packages/workstation`; `tsconfig.strict.json` is the strict base `packages/api` + the `@pkgs/*` libs extend (`packages/infra` uses the loose root config).
 
 ## Global resource naming
 
