@@ -19,7 +19,9 @@ function toChoices(
 ): Array<{ name: string; value: string; description: string }> {
   return models.map((m) => {
     const ref = resolveModelRef(m.id, connected);
-    return { name: m.name, value: ref, description: ref };
+    // Names are not unique across providers (e.g. base vs batch vs
+    // contributor variants), so every row carries its catalog id.
+    return { name: `${m.name} (${m.id})`, value: ref, description: ref };
   });
 }
 
