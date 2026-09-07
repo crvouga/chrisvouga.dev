@@ -6,11 +6,13 @@ WORKDIR /app
 COPY package.json bun.lock ./
 COPY packages/api/package.json ./packages/api/
 COPY packages/assert/package.json ./packages/assert/
+COPY packages/infra/package.json ./packages/infra/
 COPY packages/logger/package.json ./packages/logger/
 COPY packages/object-store/package.json ./packages/object-store/
 COPY packages/secret-store/package.json ./packages/secret-store/
 COPY packages/secret-string/package.json ./packages/secret-string/
 COPY packages/vault/package.json ./packages/vault/
+COPY packages/workstation/package.json ./packages/workstation/
 COPY packages/9router/package.json ./packages/9router/
 
 RUN bun install --frozen-lockfile
