@@ -68,6 +68,7 @@ packages/workstation/
     │   └── notifications.ts           # global OpenCode notification plugin (source of truth)
     ├── provider-secrets.ts            # OpenCode provider → Vault key catalog (SecretStoreEntry + docs)
     ├── configure-providers.ts         # reads Vault, writes ~/.config/opencode/opencode.json (0600)
+    ├── sounds.ts                      # central notification sound map (single source of truth)
     ├── bin/
     │   ├── opencode-notifier          # CLI shim → OpenCodeNotifier.app (source of truth)
     │   └── focus-opencode             # notification click handler (source of truth)
@@ -83,6 +84,7 @@ Checked-in → home-directory mapping (installed by setup):
 | `packages/workstation/opencode/bin/opencode-notifier`           | `~/.config/opencode/bin/opencode-notifier` (symlink)                                            |
 | `packages/workstation/opencode/bin/focus-opencode`              | `~/.config/opencode/bin/focus-opencode` (symlink)                                               |
 | `packages/workstation/opencode/notifier/OpenCodeNotifier.swift` | compiled to `~/.config/opencode/bin/OpenCodeNotifier.app` (generated artifact, never committed) |
+| `packages/workstation/opencode/sounds.ts`                       | `~/.config/opencode/notifier-sounds.json` (generated runtime sound config, never committed)     |
 
 ## Setup
 
@@ -101,6 +103,7 @@ The command is idempotent and safe to run repeatedly (e.g. after cloning on a fr
 - installs managed configuration as **symlinks** pointing into the repository
 - an existing, correct symlink is treated as success (no-op)
 - compiles `OpenCodeNotifier.swift` into `~/.config/opencode/bin/OpenCodeNotifier.app` with `swiftc` (ad-hoc codesigned, `LSUIElement` — no Dock icon); rebuilds only when the source hash changes; skips with a warning when `swiftc` is missing (the plugin then falls back to plain notifications)
+- writes `~/.config/opencode/notifier-sounds.json` from the central `opencode/sounds.ts` on every run, and restarts the notifier daemon when the app was rebuilt (so the local OpenCode install always reflects the checked-in config)
 - generates `~/.config/opencode/opencode.json` from the secret store (best-effort — see [OpenCode providers](#opencode-providers))
 - refuses to overwrite anything not managed by this repository and exits with an actionable error message on conflict
 - never requires `sudo` and never touches configuration outside `$HOME`
@@ -110,6 +113,7 @@ What it changes in `$HOME` today:
 - creates `~/.config/opencode/plugins/` and `~/.config/opencode/bin/` if needed
 - links the plugin and CLI scripts (see table above)
 - builds `OpenCodeNotifier.app` and writes `~/.config/opencode/bin/.opencode-notifier.hash`
+- writes `~/.config/opencode/notifier-sounds.json` (the runtime sound map, from `opencode/sounds.ts`)
 - writes `~/.config/opencode/opencode.json` (0600) with provider connections sourced from Vault
 
 ## OpenCode
@@ -122,12 +126,12 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
 
   | Event                             | Notification                        | Sound                |
   | --------------------------------- | ----------------------------------- | -------------------- |
-  | `session.idle`                    | `OpenCode` / `Session finished`     | `Hero` (happy chime) |
-  | `session.error`                   | `OpenCode` / `Session error`        | `Sosumi` (error cue) |
-  | `permission.asked`                | `OpenCode` / `Permission required`  | `Ping` (alert)       |
-  | agent invokes the `question` tool | `OpenCode` / `Agent has a question` | `Ping` (alert)       |
+  | `session.idle`                    | `OpenCode` / `Session finished`     | `Glass` (soft chime) |
+  | `session.error`                   | `OpenCode` / `Session error`        | `Basso` (low, calm)  |
+  | `permission.asked`                | `OpenCode` / `Permission required`  | `Tink` (gentle bell) |
+  | agent invokes the `question` tool | `OpenCode` / `Agent has a question` | `Tink` (gentle bell) |
 
-- **Sound design:** each attention kind maps to a distinct macOS system sound so you can tell what the agent needs by ear. Completion plays a bright, rewarding chime (`Hero`); questions and permission asks play a clean attention-getting alert (`Ping`); errors play an unmistakable negative cue (`Sosumi`). The sound map lives in the notifier Swift source (`packages/workstation/opencode/notifier/OpenCodeNotifier.swift`) and is mirrored in the plugin fallback (`notifications.ts`) so the osascript path is just as distinct. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound.
+- **Sound design:** each attention kind maps to a macOS system sound, kept deliberately calm, neutral, happy and low-key — a soft glass chime for completion, a gentle bell for questions/permission asks, and a muted low note for errors (no jarring or alarming cues). The **single source of truth** is `packages/workstation/opencode/sounds.ts` (`NOTIFIER_SOUNDS`). `bun run opencode:setup` writes that map to `~/.config/opencode/notifier-sounds.json`, which **both** the notifier daemon and the plugin fallback read at notification time — so changing a sound is a one-file edit that a running daemon picks up without a rebuild. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound.
 
 - **Question detection:** the built-in `question` tool (`tool.execute.before` hook with `tool === "question"`). A question waits for user input but is not necessarily a permission request, so it is detected from the tool invocation itself. When a `permission.asked` event follows for the `question` permission, the plugin suppresses the redundant "Permission required" notification — one question produces exactly one useful notification.
 - **Payload:** each notification carries `{kind, title, message, subtitle, sessionID, directory, sessionTitle}` — `subtitle` is the session title (best-effort SDK lookup, 500ms timeout) so you can eyeball which session needs you; `directory` and `sessionTitle` drive click-to-focus. Notifications use the sessionID as identifier/thread, so a new event for the same session **replaces** the previous banner instead of stacking.

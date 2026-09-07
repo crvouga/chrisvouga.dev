@@ -30,6 +30,8 @@ import {
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 
+import { NOTIFIER_SOUNDS } from './opencode/sounds';
+
 const WORKSTATION_ROOT = import.meta.dir;
 
 type ManagedLink = {
@@ -42,6 +44,9 @@ type ManagedLink = {
 };
 
 const OPENCODE_DIR = join(homedir(), '.config/opencode');
+
+/** Runtime sound map written from `NOTIFIER_SOUNDS`; read by the notifier and the plugin. */
+const SOUNDS_CONFIG = join(OPENCODE_DIR, 'notifier-sounds.json');
 
 const LINKS: ManagedLink[] = [
   {
@@ -199,10 +204,34 @@ function main(): void {
     console.log(`  [${status}] ${managed.link}`);
     if (status === 'created') console.log(`      -> ${managed.target}`);
   }
+  writeSoundConfig();
   const build = buildNotifier();
   if (build !== 'skipped') console.log(`  [${build}] ${NOTIFIER_APP}`);
+  if (build === 'built') restartNotifierDaemon();
   configureOpenCodeProviders();
   console.log('Done.');
+}
+
+/**
+ * Write the runtime sound map consumed by the notifier daemon and the plugin
+ * (read per notification, so sound changes take effect without a rebuild).
+ * Always runs so a sound edit in `opencode/sounds.ts` is reflected on every
+ * `opencode:setup`.
+ */
+function writeSoundConfig(): void {
+  mkdirSync(dirname(SOUNDS_CONFIG), { recursive: true });
+  const json = `${JSON.stringify(NOTIFIER_SOUNDS, null, 2)}\n`;
+  writeFileSync(SOUNDS_CONFIG, json);
+  console.log(`  [written] ${SOUNDS_CONFIG}`);
+}
+
+/**
+ * Kill any running notifier daemon so the freshly built app is used on the next
+ * notification. Best-effort; the daemon is harmless to replace and restarts on
+ * the next `--post`.
+ */
+function restartNotifierDaemon(): void {
+  spawnSync('pkill', ['-f', 'OpenCodeNotifier.*--daemon'], { stdio: 'ignore' });
 }
 
 /**

@@ -18,8 +18,10 @@
 //
 // Notifications use the sessionID as identifier + threadIdentifier so a new
 // event for the same session replaces the previous banner. Each kind gets its
-// own sound (played via NSSound): Hero for finished, Ping for question and
-// permission, Sosumi for error.
+// own sound (played via NSSound); the sound map is read at runtime from
+// ~/.config/opencode/notifier-sounds.json (written by `bun run opencode:setup`
+// from packages/workstation/opencode/sounds.ts), so sounds are configurable
+// from one place and a running daemon picks up changes without a rebuild.
 //
 // On banner click the daemon runs ~/.config/opencode/bin/focus-opencode with
 // --kind/--session/--dir/--title so the right VS Code window, the opencode
@@ -149,23 +151,27 @@ func runFocusScript(userInfo info: [AnyHashable: Any]) {
 
 // MARK: - Notification sounds
 
-// Distinct sound per attention kind, mapped to macOS system sound names (from
-// /System/Library/Sounds). Using NSSound keeps audio assets out of the bundle
-// and makes the sound reliable regardless of the app's location on disk.
-//   finished   -> Hero     bright, rewarding "task complete" chime
-//   question   -> Ping     clean, attention-getting alert (agent needs input)
-//   permission -> Ping     same alert for a permission ask
-//   error      -> Sosumi   unmistakable "something went wrong" cue
-let SOUND_BY_KIND: [String: String] = [
-    "finished": "Hero",
-    "question": "Ping",
-    "permission": "Ping",
-    "error": "Sosumi",
-]
+// The per-kind sound map is read at runtime from ~/.config/opencode/notifier-sounds.json,
+// which `bun run opencode:setup` writes from the central config
+// (packages/workstation/opencode/sounds.ts). Reading it per notification keeps a
+// running daemon in sync when the config changes, and lets sounds be configured
+// from one place without rebuilding the app. A missing or unreadable config
+// falls back to a calm default sound.
+let DEFAULT_SOUND = "Tink"
+
+func loadSoundMap() -> [String: String] {
+    let path = NSHomeDirectory() + "/.config/opencode/notifier-sounds.json"
+    guard
+        let data = FileManager.default.contents(atPath: path),
+        let object = try? JSONSerialization.jsonObject(with: data),
+        let map = object as? [String: String]
+    else { return [:] }
+    return map
+}
 
 func soundName(forKind kind: String?) -> String {
-    guard let kind, let name = SOUND_BY_KIND[kind] else { return "Ping" }
-    return name
+    guard let kind else { return DEFAULT_SOUND }
+    return loadSoundMap()[kind] ?? DEFAULT_SOUND
 }
 
 // Play the per-kind sound. Loads a fresh instance from the system sound file

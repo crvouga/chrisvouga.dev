@@ -1,8 +1,9 @@
 import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 import type { Plugin, PluginInput } from '@opencode-ai/plugin';
+import { NOTIFIER_SOUNDS } from '../sounds';
 
 /**
  * Tool id of the built-in `question` tool. The agent invokes it when it needs
@@ -11,30 +12,33 @@ import type { Plugin, PluginInput } from '@opencode-ai/plugin';
  */
 const QUESTION_TOOL = 'question';
 
+type Kind = keyof typeof NOTIFIER_SOUNDS;
+
 /** Attention kinds and their exact notification copy. */
-const MESSAGES = {
+const MESSAGES: Record<Kind, string> = {
   finished: 'Session finished',
   question: 'Agent has a question',
   permission: 'Permission required',
   error: 'Session error',
-} as const;
-
-type Kind = keyof typeof MESSAGES;
+};
 
 /**
- * Distinct macOS system sound per attention kind, kept in sync with the
- * OpenCodeNotifier Swift source (packages/workstation/opencode/notifier/).
- *   finished   -> Hero     bright, rewarding "task complete" chime
- *   question   -> Ping     clean, attention-getting alert (agent needs input)
- *   permission -> Ping     same alert for a permission ask
- *   error      -> Sosumi   unmistakable "something went wrong" cue
+ * Runtime sound config written by `bun run opencode:setup` from the central
+ * `sounds.ts`. Read per notification so sound changes take effect without
+ * restarting opencode. Falls back to the central defaults when missing.
  */
-const SOUNDS: Record<Kind, string> = {
-  finished: 'Hero',
-  question: 'Ping',
-  permission: 'Ping',
-  error: 'Sosumi',
-};
+const SOUNDS_CONFIG = join(homedir(), '.config/opencode/notifier-sounds.json');
+
+function soundFor(kind: Kind): string {
+  try {
+    const parsed = JSON.parse(readFileSync(SOUNDS_CONFIG, 'utf8')) as Partial<
+      Record<Kind, string>
+    >;
+    return parsed[kind] ?? NOTIFIER_SOUNDS[kind];
+  } catch {
+    return NOTIFIER_SOUNDS[kind];
+  }
+}
 
 /** OpenCodeNotifier CLI linked into place by `bun run workstation:setup`. */
 const NOTIFIER_CLI = join(homedir(), '.config/opencode/bin/opencode-notifier');
@@ -104,7 +108,7 @@ function post(
   payload: { sessionID?: string; directory: string; sessionTitle?: string }
 ): void {
   const message = MESSAGES[kind];
-  const sound = SOUNDS[kind];
+  const sound = soundFor(kind);
   try {
     if (existsSync(NOTIFIER_CLI)) {
       const body = JSON.stringify({
