@@ -16,6 +16,8 @@ Root holds only monorepo orchestration: `package.json`, `turbo.json`, `tsconfig.
 
 `bun install` at the root installs all workspaces. `bun run check` (alias `bun check`) runs `bun install --frozen-lockfile` + prettier + `turbo run tc lint test build` across packages, mirroring the CI check job; `bun run check:ci` additionally runs the Vault dev-secret gate; see `ci.md`. `bun run tc` typechecks all packages. The root `tsconfig.json` typechecks `packages/workstation`; `tsconfig.strict.json` is the strict base `packages/api` + the `@pkgs/*` libs extend (`packages/infra` uses the loose root config).
 
+**A green `bun check` is not a green CI.** After pushing, watch the **CI turborepo** run (`bun run gh:ci:watch`) and fix any failure before declaring the task done. `bun check` only covers the `check` job — it does not validate the `publish` job (Docker image build from `packages/api/Dockerfile`), which can fail on `.dockerignore`/build-context errors that are invisible locally. See `ci.md` → **Watch CI & fix failures**.
+
 ## Global resource naming
 
 | Resource                             | Pattern                                                     | Example                                |

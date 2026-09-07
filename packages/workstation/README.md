@@ -92,6 +92,8 @@ Initializes workstation-managed configuration under the user's home directory:
 bun install && bun run workstation:setup
 ```
 
+`opencode:setup` is an alias at the repo root for the opencode portion of the same setup — it idempotently converges `~/.config/opencode` to the spec checked into this repo (plugin symlinks, notifier build, provider config). Both commands run the same script, so `opencode:setup` is the focused entry point if you only care about OpenCode.
+
 The command is idempotent and safe to run repeatedly (e.g. after cloning on a fresh machine, or after changing the notifier Swift source):
 
 - derives the `packages/workstation/` root from the location of `setup.ts` (works from any current working directory)
@@ -118,12 +120,14 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
 - **Resulting global plugin path:** `~/.config/opencode/plugins/notifications.ts` (a symlink)
 - **Events that generate notifications:**
 
-  | Event                             | Notification                        |
-  | --------------------------------- | ----------------------------------- |
-  | `session.idle`                    | `OpenCode` / `Session finished`     |
-  | `session.error`                   | `OpenCode` / `Session error`        |
-  | `permission.asked`                | `OpenCode` / `Permission required`  |
-  | agent invokes the `question` tool | `OpenCode` / `Agent has a question` |
+  | Event                             | Notification                        | Sound                |
+  | --------------------------------- | ----------------------------------- | -------------------- |
+  | `session.idle`                    | `OpenCode` / `Session finished`     | `Hero` (happy chime) |
+  | `session.error`                   | `OpenCode` / `Session error`        | `Sosumi` (error cue) |
+  | `permission.asked`                | `OpenCode` / `Permission required`  | `Ping` (alert)       |
+  | agent invokes the `question` tool | `OpenCode` / `Agent has a question` | `Ping` (alert)       |
+
+- **Sound design:** each attention kind maps to a distinct macOS system sound so you can tell what the agent needs by ear. Completion plays a bright, rewarding chime (`Hero`); questions and permission asks play a clean attention-getting alert (`Ping`); errors play an unmistakable negative cue (`Sosumi`). The sound map lives in the notifier Swift source (`packages/workstation/opencode/notifier/OpenCodeNotifier.swift`) and is mirrored in the plugin fallback (`notifications.ts`) so the osascript path is just as distinct. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound.
 
 - **Question detection:** the built-in `question` tool (`tool.execute.before` hook with `tool === "question"`). A question waits for user input but is not necessarily a permission request, so it is detected from the tool invocation itself. When a `permission.asked` event follows for the `question` permission, the plugin suppresses the redundant "Permission required" notification — one question produces exactly one useful notification.
 - **Payload:** each notification carries `{kind, title, message, subtitle, sessionID, directory, sessionTitle}` — `subtitle` is the session title (best-effort SDK lookup, 500ms timeout) so you can eyeball which session needs you; `directory` and `sessionTitle` drive click-to-focus. Notifications use the sessionID as identifier/thread, so a new event for the same session **replaces** the previous banner instead of stacking.

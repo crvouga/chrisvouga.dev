@@ -23,6 +23,9 @@
     "format": "prettier --write .",
     "gh": "open https://github.com/crvouga/workspace/actions",
     "gh:ci": "open https://github.com/crvouga/workspace/actions/workflows/ci-turborepo.yml",
+    "gh:ci:log": "gh run view \"$(gh run list --workflow ci-turborepo.yml --limit 1 --json databaseId --jq '.[0].databaseId')\" --log-failed",
+    "gh:ci:status": "gh run list --workflow ci-turborepo.yml --limit 3",
+    "gh:ci:watch": "gh run watch \"$(gh run list --workflow ci-turborepo.yml --limit 1 --json databaseId --jq '.[0].databaseId')\" --exit-status",
     "health-check": "bun run --filter @pkgs/infra health-check",
     "list-deploy-service-ids": "bun run --filter @pkgs/infra list-deploy-service-ids",
     "make-ghcr-public": "bun run --filter @pkgs/infra make-ghcr-public",
@@ -45,6 +48,7 @@
     "tc": "turbo run tc",
     "typecheck": "tsc --noEmit",
     "vault:login": "vault login --method=userpass username=crvouga",
+    "opencode:setup": "bun run packages/workstation/setup.ts",
     "workstation:setup": "bun run packages/workstation/setup.ts",
     "workstation:configure:opencode": "bun run --filter @pkgs/workstation configure:opencode"
   },

@@ -17,12 +17,15 @@
 //   }
 //
 // Notifications use the sessionID as identifier + threadIdentifier so a new
-// event for the same session replaces the previous banner.
+// event for the same session replaces the previous banner. Each kind gets its
+// own sound (played via NSSound): Hero for finished, Ping for question and
+// permission, Sosumi for error.
 //
 // On banner click the daemon runs ~/.config/opencode/bin/focus-opencode with
 // --kind/--session/--dir/--title so the right VS Code window, the opencode
 // terminal editor tab, and the attention session get focused.
 
+import AppKit
 import Foundation
 import UserNotifications
 
@@ -101,7 +104,9 @@ final class NotifierDelegate: NSObject, UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([.banner, .sound])
+        // The per-kind sound is played separately via NSSound, so the
+        // notification itself is silent (no default double-chime).
+        completionHandler([.banner])
     }
 
     func userNotificationCenter(
@@ -142,17 +147,51 @@ func runFocusScript(userInfo info: [AnyHashable: Any]) {
     }
 }
 
+// MARK: - Notification sounds
+
+// Distinct sound per attention kind, mapped to macOS system sound names (from
+// /System/Library/Sounds). Using NSSound keeps audio assets out of the bundle
+// and makes the sound reliable regardless of the app's location on disk.
+//   finished   -> Hero     bright, rewarding "task complete" chime
+//   question   -> Ping     clean, attention-getting alert (agent needs input)
+//   permission -> Ping     same alert for a permission ask
+//   error      -> Sosumi   unmistakable "something went wrong" cue
+let SOUND_BY_KIND: [String: String] = [
+    "finished": "Hero",
+    "question": "Ping",
+    "permission": "Ping",
+    "error": "Sosumi",
+]
+
+func soundName(forKind kind: String?) -> String {
+    guard let kind, let name = SOUND_BY_KIND[kind] else { return "Ping" }
+    return name
+}
+
+// Play the per-kind sound. Loads a fresh instance from the system sound file
+// (not the cached NSSound(named:) shared instance) so rapid successive
+// notifications always re-trigger. Fire-and-forget; never throws.
+func playSound(forKind kind: String?) {
+    let name = soundName(forKind: kind)
+    let url = URL(fileURLWithPath: "/System/Library/Sounds/\(name).aiff")
+    guard let sound = NSSound(contentsOf: url, byReference: true) else { return }
+    sound.play()
+}
+
 func postNotification(_ fields: [String: Any]) {
     let content = UNMutableNotificationContent()
     content.title = (fields["title"] as? String) ?? "OpenCode"
     content.body = (fields["message"] as? String) ?? ""
     if let subtitle = fields["subtitle"] as? String, !subtitle.isEmpty { content.subtitle = subtitle }
-    content.sound = .default
+    // Keep the notification silent; the per-kind sound is played by NSSound so
+    // the banner and the sound are decoupled and never conflict.
+    content.sound = nil
     let sessionID = (fields["sessionID"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? "opencode"
     content.threadIdentifier = sessionID
     content.userInfo = fields
     let request = UNNotificationRequest(identifier: "opencode-" + sessionID, content: content, trigger: nil)
     UNUserNotificationCenter.current().add(request)
+    playSound(forKind: fields["kind"] as? String)
 }
 
 func handleClient(fd: Int32) {

@@ -21,6 +21,21 @@ const MESSAGES = {
 
 type Kind = keyof typeof MESSAGES;
 
+/**
+ * Distinct macOS system sound per attention kind, kept in sync with the
+ * OpenCodeNotifier Swift source (packages/workstation/opencode/notifier/).
+ *   finished   -> Hero     bright, rewarding "task complete" chime
+ *   question   -> Ping     clean, attention-getting alert (agent needs input)
+ *   permission -> Ping     same alert for a permission ask
+ *   error      -> Sosumi   unmistakable "something went wrong" cue
+ */
+const SOUNDS: Record<Kind, string> = {
+  finished: 'Hero',
+  question: 'Ping',
+  permission: 'Ping',
+  error: 'Sosumi',
+};
+
 /** OpenCodeNotifier CLI linked into place by `bun run workstation:setup`. */
 const NOTIFIER_CLI = join(homedir(), '.config/opencode/bin/opencode-notifier');
 
@@ -38,9 +53,13 @@ function appleScriptString(value: string): string {
 }
 
 /** Fallback: plain osascript notification (no click actions). Never throws. */
-function notifyViaOsascript(title: string, message: string): void {
+function notifyViaOsascript(
+  title: string,
+  message: string,
+  sound: string
+): void {
   try {
-    const script = `display notification ${appleScriptString(message)} with title ${appleScriptString(title)}`;
+    const script = `display notification ${appleScriptString(message)} with title ${appleScriptString(title)} sound name ${appleScriptString(sound)}`;
     const child = spawn('osascript', ['-e', script], { stdio: 'ignore' });
     child.on('error', () => undefined);
     child.unref();
@@ -85,6 +104,7 @@ function post(
   payload: { sessionID?: string; directory: string; sessionTitle?: string }
 ): void {
   const message = MESSAGES[kind];
+  const sound = SOUNDS[kind];
   try {
     if (existsSync(NOTIFIER_CLI)) {
       const body = JSON.stringify({
@@ -100,16 +120,16 @@ function post(
       const child = spawn(NOTIFIER_CLI, ['--post', body], { stdio: 'ignore' });
       // --post exits 0 only when the payload reached the daemon; anything
       // else (spawn failure, exit != 0) falls back to a plain notification.
-      child.on('error', () => notifyViaOsascript('OpenCode', message));
+      child.on('error', () => notifyViaOsascript('OpenCode', message, sound));
       child.on('exit', (code) => {
-        if (code !== 0) notifyViaOsascript('OpenCode', message);
+        if (code !== 0) notifyViaOsascript('OpenCode', message, sound);
       });
       child.unref();
       return;
     }
-    notifyViaOsascript('OpenCode', message);
+    notifyViaOsascript('OpenCode', message, sound);
   } catch {
-    notifyViaOsascript('OpenCode', message);
+    notifyViaOsascript('OpenCode', message, sound);
   }
 }
 

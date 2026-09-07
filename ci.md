@@ -24,7 +24,14 @@ bun check
 
 Run `bun check`. Fix failures in the order the script reports them. After each
 fix, re-run `bun check`. Repeat until green. Do not stop after the first green —
-you must also push and confirm CI.
+you must also push and watch CI.
+
+`bun check` only covers the local `check` job. It does **not** validate the CI
+`publish` job, which builds and pushes the Docker image from
+`packages/api/Dockerfile` and can fail on Docker/build-context errors that are
+invisible locally (e.g. a `.dockerignore` rule excluding a workspace whose
+`package.json` the Dockerfile `COPY`s). A green `bun check` is **not** proof that
+CI is green — always watch the full CI run (see [Watch CI & fix failures](#watch-ci--fix-failures)).
 
 | Failure           | Fix                                                                                                                                                      |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -100,16 +107,24 @@ There is no separate "merge" step for this repo — committing to `main` and
 pushing **is** the merge. When the loop is green and good to merge, always end
 it by committing and pushing.
 
-## Verify CI
+## Watch CI & fix failures
 
-Open the last run after pushing:
+Pushing is not the end of the loop. After pushing, watch the **CI turborepo** run
+to completion and fix any failure before you are done:
 
 ```bash
-bun run gh:ci
+bun run gh:ci:watch     # blocks until the latest CI turborepo run finishes
+bun run gh:ci:status    # quick summary of the last few runs
+bun run gh:ci:log       # failed-step logs of the latest run (if it failed)
 ```
 
-Confirm the **CI turborepo** `check` job is green. If CI fails, read the failing
-step, fix locally, re-run the loop, and push again.
+If the run fails, read the failing step's logs and fix it locally. A `publish`
+job failure is usually a Docker/build issue — inspect `.dockerignore` and
+`packages/api/Dockerfile` (see the note above). Then re-run the loop and push
+again. Repeat until the CI run is green.
+
+The change is only done when the **full** CI run is green, not just `bun check`.
+To browse the run in a browser: `bun run gh:ci`.
 
 ## CI workflow
 
