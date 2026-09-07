@@ -3,11 +3,13 @@ import { ensureLink, managedLinks } from '../lib/links';
 import type { Platform } from '../lib/platform/types';
 import { workstationRoot } from '../lib/paths';
 import { syncProvidersFromVault } from '../lib/providers-sync';
+import { ensureTuiPlugin } from '../lib/tui-config';
 
 export type SyncResult = {
   links: Array<{ label: string; link: string; status: string }>;
   sounds: string;
   notifier: { result: string; detail: string };
+  tui: { path: string; status: string };
   providers: {
     connected: Array<{ id: string; vaultKey: string }>;
     skipped: Array<{ id: string; reason: string }>;
@@ -29,6 +31,7 @@ export async function converge(
 
   const sounds = writeSoundConfig(platform);
   const notifier = buildNotifier(root, platform);
+  const tui = ensureTuiPlugin(platform, root);
 
   const providers = await syncProvidersFromVault(platform, {
     strict: opts?.strictProviders ?? false,
@@ -38,6 +41,7 @@ export async function converge(
     links,
     sounds,
     notifier: { result: notifier.result, detail: notifier.detail },
+    tui: { path: tui.path, status: tui.status },
     providers: {
       connected: providers.connected,
       skipped: providers.skipped,

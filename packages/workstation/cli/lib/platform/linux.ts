@@ -82,4 +82,16 @@ export class LinuxPlatform implements Platform {
   restartNotifierDaemon(): void {
     // No daemon on Linux — no-op.
   }
+
+  availableSystemSounds(): string[] {
+    return [];
+  }
+
+  async playSystemSound(name: string): Promise<NotifierTestResult> {
+    void name;
+    return {
+      ok: false,
+      detail: 'sounds unsupported on Linux (notify-send has no sound API)',
+    };
+  }
 }

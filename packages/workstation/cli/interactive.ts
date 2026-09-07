@@ -3,15 +3,9 @@ import { workstationRoot } from './lib/paths';
 import { describeLink, managedLinks } from './lib/links';
 import { listProviders, loadConfig } from './lib/opencode-config';
 import { providerStatuses } from './lib/providers-sync';
-import { pushHistory } from './history';
 import { searchableMenu, type MenuCommand } from './menu';
 import { isExitPromptError } from './lib/cli-opts';
-import {
-  askCheckbox,
-  askInput,
-  askSelect,
-  NonInteractiveError,
-} from './lib/prompt';
+import { askCheckbox, askSelect, NonInteractiveError } from './lib/prompt';
 import {
   banner,
   cancelled,
@@ -36,10 +30,10 @@ import {
   cmdNotificationsTest,
 } from './commands/notifications-cmds';
 import {
-  cmdSoundsReset,
-  cmdSoundsSet,
-  readSounds,
-} from './commands/sounds-cmds';
+  cmdOpenRouterModels,
+  cmdOpenRouterStatus,
+} from './commands/openrouter-cmds';
+import { cmdSoundsConfigure, cmdSoundsList } from './commands/sounds-cmds';
 import { cmdStatus } from './commands/status-cmd';
 import { cmdSync } from './commands/sync-cmd';
 
@@ -57,7 +51,9 @@ async function interactiveProvidersPick(): Promise<void> {
   });
   if (picked.length === 0) return;
   console.log(`  ${muted(picked.join(', '))}`);
-  console.log(`  ${muted('Run "Sync providers from Vault" to apply.')}`);
+  console.log(
+    `  ${muted('Run "opencode › Sync providers from Vault" to apply.')}`
+  );
 }
 
 async function interactiveSetModel(): Promise<void> {
@@ -93,138 +89,155 @@ async function interactiveToggleNotifications(): Promise<void> {
         value: enabled ? 'disable' : 'enable',
       },
       { name: 'Send test notification', value: 'test' },
+      { name: 'Configure sounds…', value: 'sounds' },
     ],
   });
   if (action === 'enable') await cmdNotificationsEnable({});
   else if (action === 'disable') await cmdNotificationsDisable({ yes: true });
+  else if (action === 'sounds') await cmdSoundsConfigure({});
   else await cmdNotificationsTest('finished', {});
-}
-
-async function interactiveSounds(): Promise<void> {
-  const sounds = readSounds(currentPlatform());
-  const kind = await askSelect({
-    message: 'Notification sounds',
-    description: 'Pick a kind to change, or reset to defaults',
-    choices: [
-      ...Object.entries(sounds).map(([k, v]) => ({
-        name: `${k} (${v})`,
-        value: k,
-      })),
-      { name: 'Reset all to defaults', value: '__reset' },
-    ],
-  });
-  if (kind === '__reset') {
-    await cmdSoundsReset({});
-    return;
-  }
-  const sound = await askInput({
-    message: `Sound for ${kind}`,
-    description: 'macOS system sound name (e.g. Purr, Pop, Ping, Bottle)',
-    default: sounds[kind] ?? '',
-  });
-  await cmdSoundsSet(kind, sound, {});
 }
 
 type Item = {
   id: string;
+  domain: 'ws' | 'opencode' | 'openrouter';
   name: string;
   description: string;
   run: () => Promise<void>;
 };
 
-function coreItems(): Item[] {
+function wsItems(): Item[] {
   return [
     {
       id: 'status',
-      name: 'Status',
+      domain: 'ws',
+      name: 'ws › Status',
       description: 'Show ws + OpenCode + Vault state',
       run: () => cmdStatus({}),
     },
     {
       id: 'sync',
-      name: 'Sync workstation',
+      domain: 'ws',
+      name: 'ws › Sync workstation',
       description: 'Links + sounds + notifier + providers',
       run: () => cmdSync({}),
     },
-  ];
-}
-
-function opencodeItemsSplit(): Item[] {
-  return [
-    {
-      id: 'opencode-status',
-      name: 'OpenCode status',
-      description: 'Config, providers, model',
-      run: () => cmdOpencodeStatus({}),
-    },
-    {
-      id: 'providers-sync',
-      name: 'Sync providers from Vault',
-      description: 'Merge every valid Vault key into opencode.json',
-      run: () => cmdOpencodeSync({}),
-    },
-    {
-      id: 'providers-review',
-      name: 'Review providers',
-      description: 'Vault-backed status for every provider',
-      run: interactiveProvidersPick,
-    },
-    {
-      id: 'set-model',
-      name: 'Set build + plan models',
-      description: 'Searchable model picker for build_model + plan_model',
-      run: interactiveSetModel,
-    },
-    {
-      id: 'disable-provider',
-      name: 'Disable a provider',
-      description: 'Remove from opencode.json (keys stay in Vault)',
-      run: interactiveDisableProvider,
-    },
-    {
-      id: 'notifications',
-      name: 'Notifications',
-      description: 'Enable / disable / test',
-      run: interactiveToggleNotifications,
-    },
-    {
-      id: 'sounds',
-      name: 'Notification sounds',
-      description: 'Per-kind sounds + reset',
-      run: interactiveSounds,
-    },
-  ];
-}
-
-function opsItems(): Item[] {
-  return [
     {
       id: 'doctor',
-      name: 'Doctor',
+      domain: 'ws',
+      name: 'ws › Doctor',
       description: 'Checks with fixes',
       run: () => cmdDoctor({}),
     },
     {
       id: 'backup',
-      name: 'Backup config',
+      domain: 'ws',
+      name: 'ws › Backup config',
       description: 'Timestamped backup of opencode.json',
       run: () => cmdBackup({}),
     },
     {
       id: 'install',
-      name: 'Reinstall ws launcher',
+      domain: 'ws',
+      name: 'ws › Reinstall launcher',
       description: 'Refresh the global ws command',
       run: () => cmdInstall({ yes: true }),
     },
   ];
 }
 
+function opencodeItems(): Item[] {
+  return [
+    {
+      id: 'opencode-status',
+      domain: 'opencode',
+      name: 'opencode › Status',
+      description: 'Config, providers, model',
+      run: () => cmdOpencodeStatus({}),
+    },
+    {
+      id: 'providers-sync',
+      domain: 'opencode',
+      name: 'opencode › providers › Sync from Vault',
+      description: 'Merge every valid Vault key into opencode.json',
+      run: () => cmdOpencodeSync({}),
+    },
+    {
+      id: 'providers-review',
+      domain: 'opencode',
+      name: 'opencode › providers › Review',
+      description: 'Vault-backed status for every provider',
+      run: interactiveProvidersPick,
+    },
+    {
+      id: 'set-model',
+      domain: 'opencode',
+      name: 'opencode › Set build + plan models',
+      description: 'Searchable model picker for build_model + plan_model',
+      run: interactiveSetModel,
+    },
+    {
+      id: 'disable-provider',
+      domain: 'opencode',
+      name: 'opencode › Disable a provider',
+      description: 'Remove from opencode.json (keys stay in Vault)',
+      run: interactiveDisableProvider,
+    },
+    {
+      id: 'notifications',
+      domain: 'opencode',
+      name: 'opencode › notifications › Enable / disable / test',
+      description: 'Click-to-focus notification plugin',
+      run: interactiveToggleNotifications,
+    },
+    {
+      id: 'sounds-list',
+      domain: 'opencode',
+      name: 'opencode › notifications › sounds › List',
+      description: 'Per-kind sounds + available system sounds',
+      run: () => cmdSoundsList({}),
+    },
+    {
+      id: 'sounds-configure',
+      domain: 'opencode',
+      name: 'opencode › notifications › sounds › Configure…',
+      description: 'Pick a sound per event, with preview',
+      run: () => cmdSoundsConfigure({}),
+    },
+  ];
+}
+
+function openrouterItems(): Item[] {
+  return [
+    {
+      id: 'openrouter-status',
+      domain: 'openrouter',
+      name: 'openrouter › Status',
+      description: 'Key state + catalog source',
+      run: () => cmdOpenRouterStatus({}),
+    },
+    {
+      id: 'openrouter-models',
+      domain: 'openrouter',
+      name: 'openrouter › Browse models',
+      description: 'Live catalog used by opencode set-model',
+      run: () => cmdOpenRouterModels({}),
+    },
+  ];
+}
+
 function menuItems(): Item[] {
   return [
-    ...coreItems(),
-    ...opencodeItemsSplit(),
-    ...opsItems(),
-    { id: 'exit', name: 'Exit', description: 'Quit ws', run: async () => {} },
+    ...wsItems(),
+    ...opencodeItems(),
+    ...openrouterItems(),
+    {
+      id: 'exit',
+      domain: 'ws',
+      name: 'Exit',
+      description: 'Quit ws',
+      run: async () => {},
+    },
   ];
 }
 
@@ -232,7 +245,7 @@ function toMenuCommands(items: Item[]): MenuCommand[] {
   return items.map((i) => ({
     id: i.id,
     name: i.name,
-    description: i.description,
+    description: `[${i.domain}] ${i.description}`,
     run: i.run,
   }));
 }
@@ -255,7 +268,6 @@ async function runOnce(items: Item[]): Promise<boolean> {
   }
   const found = items.find((i) => i.id === selected?.id);
   if (found === undefined) return true;
-  pushHistory(found.id);
   section(found.name, found.description);
   try {
     await found.run();

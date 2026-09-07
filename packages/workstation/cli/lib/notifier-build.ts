@@ -3,8 +3,8 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { NOTIFIER_SOUNDS } from '../../opencode/sounds';
 import type { Platform } from './platform/types';
+import { readSounds, writeSounds } from './sounds';
 
 const INFO_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -43,11 +43,9 @@ export function notifierPaths(platform: Platform): {
 
 /** Write the runtime sound map consumed by the daemon + plugin fallback. */
 export function writeSoundConfig(platform: Platform): string {
-  const dest = join(platform.opencodeDir(), 'notifier-sounds.json');
-  mkdirSync(platform.opencodeDir(), { recursive: true });
-  const json = `${JSON.stringify(NOTIFIER_SOUNDS, null, 2)}\n`;
-  writeFileSync(dest, json);
-  return dest;
+  // Merge-preserving: a user's `sounds set` choice survives `ws sync`.
+  // New default kinds are added; existing overrides are kept.
+  return writeSounds(platform, readSounds(platform));
 }
 
 function commandExists(command: string): boolean {

@@ -47,6 +47,9 @@ export async function cmdStatus(opts: GlobalOpts): Promise<void> {
   );
   printModelSlots(status.opencode.buildModel, status.opencode.planModel);
   console.log(
+    `  ${status.tui.focusPluginRegistered ? ok('✓') : warnColor('!')} focus-session plugin ${muted(status.tui.configPath)}`
+  );
+  console.log(
     `  ${status.vault.reachable ? ok('✓') : warnColor('!')} vault ${muted(status.vault.path)}`
   );
 }

@@ -37,18 +37,24 @@ ws doctor [--fix]    # checks with actionable fixes
 
 Global flags: `--json` (parseable output, never prints secret values), `--yes` (skip confirmations), `--non-interactive` (fail instead of prompting). Exit codes: `0` ok, `1` error, `2` refusal/conflict.
 
-| Command                                                           | Purpose                                                          |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `ws status`                                                       | ws version, launcher, links, notifier, providers, model, Vault   |
-| `ws sync`                                                         | links + sounds + notifier build + providers (best-effort Vault)  |
-| `ws doctor [--fix]`                                               | pass/warn/fail checks with fixes                                 |
-| `ws opencode status\|sync\|set-model\|reset-model\|disable\|list` | OpenCode config management (set-model picks build + plan models) |
-| `ws providers list\|sync`                                         | Vault-backed provider status + sync                              |
-| `ws notifications status\|enable\|disable\|test`                  | notification plugin toggles                                      |
-| `ws sounds list\|set\|reset`                                      | per-kind notification sounds                                     |
-| `ws backup\|backups\|reset`                                       | timestamped backup, list, reset config                           |
-| `ws install\|uninstall\|update`                                   | global launcher lifecycle                                        |
-| `ws vault`                                                        | resolved Vault coordinates                                       |
+Commands are namespaced by **domain** — every leaf states its domain in `--help` (`[ws]`, `[opencode]`, `[openrouter]`):
+
+| Command                                                                      | Purpose                                                          |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `ws status`                                                                  | ws version, launcher, links, notifier, providers, model, Vault   |
+| `ws sync`                                                                    | links + sounds + notifier build + providers (best-effort Vault)  |
+| `ws doctor [--fix]`                                                          | pass/warn/fail checks with fixes                                 |
+| `ws opencode status\|sync\|set-model\|reset-model\|disable\|list`            | OpenCode config management (set-model picks build + plan models) |
+| `ws opencode providers list\|sync`                                           | Vault-backed provider status + sync                              |
+| `ws opencode backup\|backups\|reset`                                         | timestamped backup, list, reset config                           |
+| `ws opencode notifications status\|enable\|disable\|test`                    | notification plugin toggles                                      |
+| `ws opencode notifications focus\|focus-request\|tag`                        | click-to-focus manual tests (tab, session, tagging)              |
+| `ws opencode notifications sounds list\|status\|set\|play\|configure\|reset` | per-event notification sounds (preview + interactive configure)  |
+| `ws openrouter status\|models`                                               | OpenRouter key state + live model catalog used by `set-model`    |
+| `ws install\|uninstall\|update`                                              | global launcher lifecycle                                        |
+| `ws vault`                                                                   | resolved Vault coordinates                                       |
+
+The old flat names (`ws providers`, `ws notifications`, `ws sounds`, `ws backup|backups|reset`) remain as hidden deprecated aliases that forward to their `ws opencode …` path with a warning.
 
 ### Installation
 
@@ -108,10 +114,12 @@ packages/workstation/
 │   ├── bin.mjs                        # package binary (bun → tsx fallback)
 │   ├── index.ts                       # `ws` entry: interactive dashboard + subcommands
 │   ├── install-global.ts              # `bun run ws:install` implementation
-│   ├── menu.ts / history.ts           # searchable menu + recent-command history
+│   ├── menu.ts                        # searchable menu (always sorted, exit pinned last)
 │   ├── commands/
 │   │   ├── status.ts                  # state gathering (human + JSON)
-│   │   └── sync.ts                    # converge (links + sounds + notifier + providers)
+│   │   ├── sync.ts                    # converge (links + sounds + notifier + providers)
+│   │   ├── sounds-cmds.ts             # notification sounds (list/set/play/configure/reset)
+│   │   └── openrouter-cmds.ts         # OpenRouter key state + model catalog
 │   └── lib/
 │       ├── platform/                  # Platform interface + darwin/linux/windows/fallback adapters
 │       ├── paths.ts                   # workstationRoot / version
@@ -119,6 +127,9 @@ packages/workstation/
 │       ├── prompt.ts                  # @inquirer/prompts wrappers (+ --non-interactive guard)
 │       ├── links.ts                   # managed symlinks (idempotent + conflict-safe)
 │       ├── notifier-build.ts          # sound config writer + Swift notifier build
+│       ├── sounds.ts                  # sound map read/merge/write (user overrides survive sync)
+│       ├── tui-config.ts              # tui.json merge (registers focus-session plugin)
+│       ├── focus.ts                   # focus-opencode runner + terminal tagging (manual tests)
 │       ├── opencode-config.ts         # opencode.json read/merge/write (0600)
 │       ├── providers-sync.ts          # Vault → opencode.json sync (shared logic)
 │       ├── global-install.ts          # global launcher install + PATH helpers
@@ -128,6 +139,9 @@ packages/workstation/
 └── opencode/
     ├── plugins/
     │   └── notifications.ts           # global OpenCode notification plugin (source of truth)
+    ├── tui/
+    │   └── focus-session.ts           # TUI plugin: routes banner clicks to the session (source of truth)
+    ├── focus-request.ts               # shared click-to-focus protocol (tab queries + session routing)
     ├── provider-secrets.ts            # OpenCode provider → Vault key catalog (SecretStoreEntry + docs)
     ├── configure-providers.ts         # thin wrapper over providers-sync (configure:opencode script)
     ├── sounds.ts                      # central notification sound map (single source of truth)
@@ -143,6 +157,7 @@ Checked-in → home-directory mapping (installed by `ws sync`):
 | Checked-in (repo)                                               | Home directory                                                                                  |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `packages/workstation/opencode/plugins/notifications.ts`        | `~/.config/opencode/plugins/notifications.ts` (symlink)                                         |
+| `packages/workstation/opencode/tui/focus-session.ts`            | registered in `~/.config/opencode/tui.json` `plugin` (merged by `ws sync`, never overwritten)   |
 | `packages/workstation/opencode/bin/opencode-notifier`           | `~/.config/opencode/bin/opencode-notifier` (symlink)                                            |
 | `packages/workstation/opencode/bin/focus-opencode`              | `~/.config/opencode/bin/focus-opencode` (symlink)                                               |
 | `packages/workstation/opencode/notifier/OpenCodeNotifier.swift` | compiled to `~/.config/opencode/bin/OpenCodeNotifier.app` (generated artifact, never committed) |
@@ -164,7 +179,8 @@ ws   # interactive dashboard
 - installs managed configuration as **symlinks** pointing into the repository
 - an existing, correct symlink is treated as success (no-op)
 - compiles `OpenCodeNotifier.swift` into `~/.config/opencode/bin/OpenCodeNotifier.app` with `swiftc` on macOS (ad-hoc codesigned, `LSUIElement` — no Dock icon); rebuilds only when the source hash changes; skips with a warning when `swiftc` is missing or on other platforms (notifications fall back per platform)
-- writes `~/.config/opencode/notifier-sounds.json` from the central `opencode/sounds.ts` on every run, and restarts the notifier daemon when the app was rebuilt
+- writes `~/.config/opencode/notifier-sounds.json` on every run — merge-preserving, so a user's `sounds set` choice survives `ws sync` (missing kinds are filled from the checked-in `opencode/sounds.ts` defaults) — and restarts the notifier daemon when the app was rebuilt
+- ensures `~/.config/opencode/tui.json` registers the `focus-session` TUI plugin (merges into the existing `plugin` array — theme, keybinds, and other plugins are preserved; refuses to touch malformed JSON)
 - syncs `~/.config/opencode/opencode.json` from the secret store (best-effort — see [OpenCode providers](#opencode-providers))
 - refuses to overwrite anything not managed by this repository and exits with an actionable error message on conflict
 - never requires `sudo` and never touches configuration outside `$HOME` (plus the global launcher dir)
@@ -175,6 +191,7 @@ What it changes in `$HOME` today:
 - links the plugin and CLI scripts (see table above)
 - builds `OpenCodeNotifier.app` and writes `~/.config/opencode/bin/.opencode-notifier.hash`
 - writes `~/.config/opencode/notifier-sounds.json` (the runtime sound map, from `opencode/sounds.ts`)
+- writes/merges `~/.config/opencode/tui.json` (registers the `focus-session` TUI plugin)
 - writes `~/.config/opencode/opencode.json` (0600) with provider connections sourced from Vault
 - installs `~/.local/bin/ws` (the global launcher)
 
@@ -184,7 +201,7 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
 
 - **Checked-in plugin path:** `packages/workstation/opencode/plugins/notifications.ts`
 - **Resulting global plugin path:** `~/.config/opencode/plugins/notifications.ts` (a symlink)
-- **Toggle:** `ws notifications enable|disable|status|test`
+- **Toggle:** `ws opencode notifications enable|disable|status|test`
 - **Events that generate notifications:**
 
   | Event                             | Notification                        | Sound                  |
@@ -194,7 +211,7 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
   | `permission.asked`                | `OpenCode` / `Permission required`  | `Ping` (soft ping)     |
   | agent invokes the `question` tool | `OpenCode` / `Agent has a question` | `Pop` (subtle tap)     |
 
-- **Sound design:** each attention kind maps to a macOS system sound, kept deliberately calm, neutral, happy and low-key. The **single source of truth** is `packages/workstation/opencode/sounds.ts` (`NOTIFIER_SOUNDS`). `ws sync` writes that map to `~/.config/opencode/notifier-sounds.json`, which **both** the notifier daemon and the plugin fallback read at notification time — so changing a sound is a one-file edit that a running daemon picks up without a rebuild (`ws sounds set <kind> <sound>` overrides one kind; `ws sounds reset` restores defaults). Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound.
+- **Sound design:** each attention kind maps to a macOS system sound, kept deliberately calm, neutral, happy and low-key. The checked-in defaults live in `packages/workstation/opencode/sounds.ts` (`NOTIFIER_SOUNDS`); the runtime map is `~/.config/opencode/notifier-sounds.json`, which **both** the notifier daemon and the plugin fallback read at notification time — so a running daemon picks up a change without a rebuild. Sounds are first-class config under `ws opencode notifications sounds`: `list`/`status` shows per-kind sounds alongside the available system sounds (scanned from `/System/Library/Sounds`, `/Library/Sounds`, `~/Library/Sounds`), `set <kind> <sound>` overrides one kind (warns when the name is unknown), `play <kind|sound>` previews through `afplay`, `configure` walks kind → sound with a preview before saving (scriptable as `configure --kind finished --sound Purr [--play]`), and `reset` restores defaults. `ws sync` never wipes an override — it only fills in missing kinds. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound. On Linux/Windows sounds are unsupported (`notify-send` / toast have no sound API) — `list` says so and `play` fails with that reason instead of pretending.
 
 - **Question detection:** the built-in `question` tool (`tool.execute.before` hook with `tool === "question"`). A question waits for user input but is not necessarily a permission request, so it is detected from the tool invocation itself. When a `permission.asked` event follows for the `question` permission, the plugin suppresses the redundant "Permission required" notification — one question produces exactly one useful notification.
 - **Payload:** each notification carries `{kind, title, message, subtitle, sessionID, directory, sessionTitle, token}` — `subtitle` is the session title (best-effort SDK lookup, 500ms timeout) so you can eyeball which session it was, and `token` is the short per-session tab token (see below). Notifications use the sessionID as identifier/thread, so a new event for the same session **replaces** the previous banner instead of stacking.
@@ -219,13 +236,16 @@ notifications.ts ──tags terminal title with session token (OSC, /dev/tty)
                      daemon runs ~/.config/opencode/bin/focus-opencode
                         --kind K --session S --dir D --title T --token N
                                        │
-                     1. `code -r <dir>` → focuses (or opens) the VS Code window
+                     1. writes ~/.cache/opencode-focus-request.json {sessionID, timestamp}
+                        → the focus-session TUI plugin in the OWNING opencode TUI
+                           navigates to it via route.navigate("session", …)
+                     2. `code -r <dir>` → focuses (or opens) the VS Code window
                                        │    for that project — no permissions needed
-                     2. Poll (not sleep) until VS Code is frontmost
-                     3. System Events keystrokes (one-time Accessibility grant):
-                        ctrl+tab → type session token → Enter
-                        → focuses the exact opencode terminal editor tab
-                        → verified from the window title, retried once
+                     3. Poll (not sleep) until VS Code is frontmost
+                     4. System Events keystrokes (one-time Accessibility grant):
+                        Cmd+P → type session token → Enter (editor-area terminal)
+                        Cmd+P → type "term <token>" → Enter (panel terminal)
+                        → focuses the exact terminal tab running that session
                                        │
                      Done — the TUI shows the session that needs attention
 ```
@@ -235,9 +255,10 @@ Why this shape:
 - `terminal-notifier` is **not** used: it depends on the deprecated `NSUserNotification` API and its click actions do not work on macOS 26. OpenCodeNotifier uses `UNUserNotificationCenter` and is vendored in this repo (~200 lines Swift, built by sync) — no external binary gets notification or shell-exec permissions.
 - `code -r <folder>` is the official CLI behavior: it focuses the existing window that has the folder open (and opens one if none exists). This is the permission-free window-targeting step. `-r` reuses the window instead of opening a duplicate.
 - **Per-session token, not fuzzy title:** every notification first tags its controlling terminal's title with a short token derived from the session id (`opencode <token> · <session title>`, via an OSC sequence on `/dev/tty`). The opencode TUI never sets terminal titles, so the tag sticks. The click handler then matches the tab by that exact token instead of guessing from the session title — the session id is unique, so the pick can never land on the wrong tab. `token` travels in the notification payload; banners posted before tagging fall back to title matching.
+- **Quick Open (`Cmd+P`), not `Ctrl+Tab`:** the tab pick is `Cmd+P → type token → Enter`, a workbench-level shortcut that opens even when focus sits inside the opencode TUI terminal. The old `Ctrl+Tab` editor picker only lists editor tabs and can be swallowed by the terminal — opencode usually runs in a **panel** terminal, which never matched, so clicks focused the window but never the tab. Panel terminals are picked with a second pass, `Cmd+P → type "term <token>"` — the `term ` prefix is Quick Open's terminal list; plain queries only match editors. The editor pass is verified against the window title (which shows the active editor); the panel pass is fire-and-forget since panel terminals never appear there.
 - **No fixed sleeps on the focus path:** `code` returns before the window is frontmost, so the script polls for VS Code being frontmost (up to ~4s) instead of `sleep 0.4` — typing into the picker too early (or aborting because Code wasn't front yet) was the main focus flake.
-- The keystroke step is guarded: it only runs when VS Code is frontmost, and it is skipped when the window title already contains the token (meaning the tagged terminal is already the active editor). This guarantees the typed type-ahead text never lands inside the TUI prompt input.
-- The session inside the TUI is not externally targetable on OpenCode 1.18.29 (no session-select route on the server), so the click handler focuses the exact tab and the TUI is already on that session — deterministic with one terminal per session, and the notification subtitle tells you which session it was.
+- The keystroke step is guarded: it only runs when VS Code is frontmost, and it is skipped when the window title already contains the token (meaning the tagged terminal is already the active editor). The Quick Open overlay takes keyboard focus, so the typed query never lands inside the TUI prompt input.
+- **Session switching without keystrokes:** typing a session id into a waiting TUI (permission/question prompt) would corrupt user input, so the click handler never types into the terminal. Instead it writes a focus request (`~/.cache/opencode-focus-request.json`, `{sessionID, timestamp}`); the `focus-session` TUI plugin (registered in `tui.json` by `ws sync`, polling every ~750ms) navigates the owning TUI via the official `route.navigate("session", {sessionID})` API. Ownership is self-routing — every TUI sees the file but only the one holding that session acts — and requests expire after 60s so a stale file can never yank a TUI on startup. The shared protocol lives in `opencode/focus-request.ts` so the routing decision is unit-tested.
 - `focus-opencode` always exits 0; a missing Accessibility grant degrades to "window focus only" with a one-line stderr hint.
 
 ### macOS permissions (one-time)
@@ -267,7 +288,14 @@ ws opencode sync                                 # or: ws sync (runs it best-eff
 
 ### Adding or debugging a provider
 
-`SecretStoreEntry` carries documentation fields — `description`, `obtainUrl` (link to create/rotate a key), `docsUrl`, `vaultUiPath`, `validExample`, and `invalidHint` — that the sync prints for skipped providers, plus `transform` (normalizes the value, e.g. trimming) and `validate` (format/prefix check) for the smoke check. To add a provider, append an entry to `provider-secrets.ts` (a `SecretStoreEntry` plus optional `npm`/`baseURL`/`models`, and a `validate` if the key has a recognizable format), add the key in Vault, and re-run. `ws providers list [--json]` shows Vault-backed status for every catalogued provider without writing anything.
+`SecretStoreEntry` carries documentation fields — `description`, `obtainUrl` (link to create/rotate a key), `docsUrl`, `vaultUiPath`, `validExample`, and `invalidHint` — that the sync prints for skipped providers, plus `transform` (normalizes the value, e.g. trimming) and `validate` (format/prefix check) for the smoke check. To add a provider, append an entry to `provider-secrets.ts` (a `SecretStoreEntry` plus optional `npm`/`baseURL`/`models`, and a `validate` if the key has a recognizable format), add the key in Vault, and re-run. `ws opencode providers list [--json]` shows Vault-backed status for every catalogued provider without writing anything.
+
+### The `openrouter` domain
+
+`ws openrouter` owns the OpenRouter side of the model pipeline — the live catalog that `ws opencode set-model` picks from — without touching `opencode.json`:
+
+- `ws openrouter status` — OpenRouter key state (from Vault) + catalog source (`live` / `cache` / `cache-stale` / `curated`) and cache path.
+- `ws openrouter models [--refresh] [--query <q>] [--limit <n>]` — browse the same catalog the picker uses (cached 24h in `~/.cache/ws-models.json`).
 
 ### Default model: OpenRouter Auto
 
@@ -289,10 +317,14 @@ The `provider-secrets.ts` openrouter entry attaches `models: { "openrouter/auto"
   ws status --json | jq .
   ws doctor
   ws opencode status
-  ws providers list
-  ws notifications test --kind finished
+  ws opencode providers list
+  ws opencode notifications test --kind finished
+  ws opencode notifications sounds list
+  ws opencode notifications sounds play finished
+  ws openrouter status
+  ws openrouter models --query claude --limit 10
   ```
-- **Unit tests:** `bun run --filter @pkgs/workstation test` covers token derivation, provider catalog validation, platform detection, links, opencode-config merge logic, global installer helpers, and doctor summary.
+- **Unit tests:** `bun run --filter @pkgs/workstation test` covers token derivation, sound map merge/set/reset, focus-request routing (freshness/TTL/ownership), tui.json merge, the focus runner + terminal tagging, the `--dry-run` focus plan, provider catalog validation, platform detection, links, opencode-config merge logic, global installer helpers, and doctor summary.
 - **Idempotent sync:** run `ws sync` twice — the second run reports `[unchanged]` for links and the notifier.
 - **Notifier daemon (no OpenCode needed):**
   ```bash
@@ -301,12 +333,22 @@ The `provider-secrets.ts` openrouter entry attaches `models: { "openrouter/auto"
   ls ~/.cache/opencode-notifier.sock
   ```
   A banner should appear (after notifications are allowed); clicking it should focus the right VS Code window and terminal tab.
-- **Focus script directly:**
+- **Focus script directly (no banner needed):**
   ```bash
-  ~/.config/opencode/bin/focus-opencode --kind finished --session ses_test --dir /path/to/project --token est1234
+  ws opencode notifications focus --dir /path/to/project --session ses_test --dry-run
+  ws opencode notifications focus --dir /path/to/project --session ses_test --token est1234
   ```
-- **Terminal tagging:** trigger any notification (e.g. let a session finish) and check the opencode terminal tab title reads `opencode <token> · <session title>` — the click handler matches on `<token>`.
-- **End-to-end:** start an OpenCode session in another window, let it finish → `Session finished` banner (subtitle = session title) → click → VS Code focuses on that project's window and the opencode terminal tab.
+  The dry run prints the window/tab/session plan (Quick Open queries + focus-request payload) without touching anything; the real run executes the exact handler a banner click would.
+- **Session routing directly (no banner needed):**
+  ```bash
+  ws opencode notifications focus-request --session ses_test   # owning TUI navigates there
+  ws opencode notifications focus-request --read               # inspect freshness
+  ```
+- **Terminal tagging:** trigger any notification (e.g. let a session finish) and check the opencode terminal tab title reads `opencode <token> · <session title>` — the click handler matches on `<token>`. Or tag on demand from any terminal and watch the title change:
+  ```bash
+  ws opencode notifications tag --session ses_f8544b407ffeHmm0Sb9AtQbt0N --title "Fix login bug"
+  ```
+- **End-to-end:** start an OpenCode session in another window, let it finish → `Session finished` banner (subtitle = session title) → click → VS Code focuses on that project's window, the terminal tab running that session, and the TUI switches to that session.
 - **Fallbacks:** with the daemon killed (`pkill -f OpenCodeNotifier.*daemon`), the plugin posts plain `osascript` notifications instead.
 - **Conflict safety:**
   ```bash

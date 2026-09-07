@@ -13,6 +13,7 @@ import {
   loadConfig,
 } from '../lib/opencode-config';
 import type { Platform } from '../lib/platform/types';
+import { isTuiPluginRegistered, tuiConfigPath } from '../lib/tui-config';
 import { workstationRoot, workstationVersion } from '../lib/paths';
 import { resolveVaultConfig } from '../lib/vault-config';
 
@@ -42,6 +43,10 @@ export type WsStatus = {
     smallModel: string | null;
     buildModel: string | null;
     planModel: string | null;
+  };
+  tui: {
+    configPath: string;
+    focusPluginRegistered: boolean;
   };
   vault: {
     addr: string;
@@ -151,6 +156,10 @@ export async function gatherStatus(platform: Platform): Promise<WsStatus> {
     links: gatherLinks(platform),
     notifier: gatherNotifier(platform),
     opencode: gatherOpencode(platform),
+    tui: {
+      configPath: tuiConfigPath(platform),
+      focusPluginRegistered: isTuiPluginRegistered(platform, workstationRoot()),
+    },
     vault: gatherVault(),
   };
 }

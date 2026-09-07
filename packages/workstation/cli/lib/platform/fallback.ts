@@ -57,4 +57,13 @@ export class FallbackPlatform implements Platform {
   restartNotifierDaemon(): void {
     // No-op.
   }
+
+  availableSystemSounds(): string[] {
+    return [];
+  }
+
+  async playSystemSound(name: string): Promise<NotifierTestResult> {
+    void name;
+    return { ok: false, detail: 'sounds unsupported on this platform' };
+  }
 }

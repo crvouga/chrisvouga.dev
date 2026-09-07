@@ -1,10 +1,11 @@
 #!/bin/bash
 # OpenCode notification click handler — focus the correct VS Code window, then
-# the opencode terminal editor tab running the session that needs attention.
+# the terminal tab running the session that needs attention, and hand the
+# session to the TUI for in-app switching.
 #
 # Usage: focus-opencode --kind <finished|question|permission|error> \
 #                       --session <id> --dir <project-dir> [--title <session-title>] \
-#                       [--token <short-session-token>]
+#                       [--token <short-session-token>] [--dry-run]
 #
 # The plugin tags its controlling terminal's title with the per-session token
 # at notification time, so the tab is matched exactly (not by fuzzy session
@@ -12,10 +13,32 @@
 # and exits 0. Keystrokes require a one-time Accessibility + Automation grant
 # for OpenCodeNotifier (System Settings → Privacy & Security); without it the
 # correct VS Code window is still focused via the `code` CLI (no permissions).
+#
+# How the tab pick works (and why):
+# - `Cmd+P` (Quick Open) is a workbench-level shortcut, so it opens even when
+#   focus is inside the opencode TUI terminal. The old `Ctrl+Tab` editor picker
+#   only lists editor tabs AND can be swallowed by the terminal — panel
+#   terminals (where opencode usually runs) never matched, so clicks landed on
+#   the window but never on the tab.
+# - Editor-area terminals are matched with a plain `Cmd+P → type token`
+#   query (verified against the window title, which shows the active editor).
+# - Panel terminals are matched with `Cmd+P → type "term <token>"` — the
+#   `term ` prefix is Quick Open's terminal list. Panel terminals never appear
+#   in the window title, so that step is fire-and-forget.
+#
+# Session switching is NOT done with keystrokes (typing into a waiting TUI
+# prompt would corrupt it). Instead this script writes a focus-request file
+# (`~/.cache/opencode-focus-request.json`); the `focus-session` TUI plugin
+# running inside each opencode TUI picks it up and navigates the owning TUI to
+# the session via `route.navigate("session", …)`. See
+# `packages/workstation/opencode/focus-request.ts` for the shared protocol.
+#
+# `--dry-run` prints the plan without touching anything (used by
+# `ws notifications focus --dry-run` and the automated suite).
 
 set -u
 
-kind="" session="" dir="" title="" token=""
+kind="" session="" dir="" title="" token="" dry_run=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --kind) kind="${2:-}"; shift 2 ;;
@@ -23,6 +46,7 @@ while [[ $# -gt 0 ]]; do
     --dir) dir="${2:-}"; shift 2 ;;
     --title) title="${2:-}"; shift 2 ;;
     --token) token="${2:-}"; shift 2 ;;
+    --dry-run) dry_run=1; shift ;;
     *) shift ;;
   esac
 done
@@ -36,41 +60,90 @@ target="$token"
 [[ -n "$target" ]] || target="$title"
 [[ -n "$target" ]] || target="opencode"
 
+request_file="$HOME/.cache/opencode-focus-request.json"
+
+if [[ "$dry_run" == "1" ]]; then
+  ts_example="$(($(date +%s) * 1000))"
+  cat <<EOF
+focus-opencode plan (dry-run):
+  dir: $dir
+  session: ${session:-<none>}
+  target: $target
+  window: code -r "$dir" (reuse window, poll until Code/Cursor is frontmost)
+  editor-tab: Cmd+P → type "$target" → Enter (verify window title contains target)
+  panel-terminal: Cmd+P → type "term $target" → Enter (Quick Open terminal list)
+  focus-request: write {"sessionID":"$session","timestamp":$ts_example} to $request_file
+EOF
+  exit 0
+fi
+
+# 0. Hand the session to the TUI: the focus-session TUI plugin polls this
+#    file and navigates the owning TUI to the session. Best-effort — a failed
+#    write must never break window/tab focus.
+if [[ -n "$session" ]]; then
+  {
+    ts="$(($(date +%s) * 1000))"
+    mkdir -p "$(dirname "$request_file")"
+    printf '{"sessionID":%s,"timestamp":%s}\n' \
+      "$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$session" 2>/dev/null || printf '"%s"' "$session")" \
+      "$ts" >"$request_file"
+  } 2>/dev/null || true
+fi
+
 # 1. Focus (or open) the VS Code window for this project, reusing the existing
 #    window. `code` returns before the window is frontmost, so poll for it
-#    instead of a fixed sleep — typing into the tab picker before Code is
-#    front was the main focus flake.
-command -v code >/dev/null 2>&1 && code -r "$dir" 2>/dev/null
+#    instead of a fixed sleep — typing into Quick Open before Code is front
+#    was the main focus flake.
+if command -v code >/dev/null 2>&1; then
+  code -r "$dir" 2>/dev/null || true
+elif command -v cursor >/dev/null 2>&1; then
+  cursor -r "$dir" 2>/dev/null || true
+fi
 for _ in $(seq 1 40); do
   front="$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null)" || front=""
-  [[ "$front" == "Code" ]] && break
+  [[ "$front" == "Code" || "$front" == "Cursor" ]] && break
   sleep 0.1
 done
 
-# 2. Focus the opencode terminal editor tab via the editor quick pick
-#    (ctrl+tab → type-ahead → Enter). The token is unique per session, so the
-#    pick matches exactly one tab. Skipped when the tagged terminal is already
-#    the active editor (detected from the window title), which also guarantees
-#    the typed target never lands inside the TUI prompt input. Verified after
-#    picking, with one retry.
+# 2. Focus the terminal tab running this session via Quick Open (Cmd+P).
+#    Attempt 1 matches editor-area terminals (plain query, verified via the
+#    window title). Attempt 2 matches panel terminals (`term ` prefix — the
+#    only way to list them; unverifiable from the window title, so
+#    fire-and-forget). Skipped entirely when the tagged terminal is already
+#    the active editor, which also guarantees the typed query never lands
+#    inside the TUI prompt input.
 FOCUS_TARGET="$target" osascript <<'APPLESCRIPT' 2>/dev/null || \
   echo "focus-opencode: keystrokes skipped (grant Accessibility/Automation to OpenCodeNotifier)" >&2
 on run
   set target to system attribute "FOCUS_TARGET"
+  set panelQuery to "term " & target
   tell application "System Events"
-    if name of first application process whose frontmost is true is not "Code" then return "abort"
-    if name of front window of process "Code" contains target then return "already"
-    repeat 2 times
-      keystroke tab using control down
+    set frontmostName to name of first application process whose frontmost is true
+    if frontmostName is not "Code" and frontmostName is not "Cursor" then return "abort"
+    tell process frontmostName
+      if name of front window contains target then return "already"
+      -- Attempt 1: editor-area terminal via plain Quick Open query.
+      key code 53 -- Escape: close any open picker so Quick Open starts fresh
+      delay 0.2
+      keystroke "p" using command down -- Cmd+P: workbench Quick Open (works from terminal focus)
       delay 0.6
       keystroke target
       delay 0.3
       keystroke return
-      delay 0.5
-      if name of front window of process "Code" contains target then return "ok"
-    end repeat
-    return "miss"
-  end tell
+      delay 0.6
+      if name of front window contains target then return "ok-editor"
+      -- Attempt 2: panel terminal via the `term ` Quick Open prefix.
+      key code 53
+      delay 0.2
+      keystroke "p" using command down
+      delay 0.6
+      keystroke panelQuery
+      delay 0.3
+      keystroke return
+      delay 0.6
+      return "ok-panel"
+    end tell
+  end run
 end run
 APPLESCRIPT
 

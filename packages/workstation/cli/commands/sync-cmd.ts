@@ -26,6 +26,7 @@ export async function cmdSync(opts: SyncOpts): Promise<void> {
       console.log(`  [${link.status}] ${link.link}`);
     }
     console.log(`  [written] ${result.sounds}`);
+    console.log(`  [${result.tui.status}] tui plugins: ${result.tui.path}`);
     console.log(
       `  [${result.notifier.result}] notifier: ${result.notifier.detail}`
     );

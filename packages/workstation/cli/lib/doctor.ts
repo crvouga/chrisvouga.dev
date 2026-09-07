@@ -6,6 +6,7 @@ import { describeLink, managedLinks } from './links';
 import { configPath, listProviders } from './opencode-config';
 import { loadConfig } from './opencode-config';
 import type { Platform } from './platform/types';
+import { isTuiPluginRegistered, tuiConfigPath } from './tui-config';
 import { resolveVaultConfig } from './vault-config';
 import { globalLauncherPath, isOnPath } from './global-install';
 
@@ -129,6 +130,29 @@ function notifierChecks(platform: Platform): DoctorCheck[] {
   ];
 }
 
+function tuiPluginCheck(
+  platform: Platform,
+  workstationRootDir: string
+): DoctorCheck {
+  const path = tuiConfigPath(platform);
+  const registered = isTuiPluginRegistered(platform, workstationRootDir);
+  if (registered) {
+    return {
+      id: 'tui-focus-plugin',
+      label: 'focus-session TUI plugin',
+      severity: 'pass',
+      detail: path,
+    };
+  }
+  return {
+    id: 'tui-focus-plugin',
+    label: 'focus-session TUI plugin',
+    severity: 'warn',
+    detail: `not registered in ${path} — banner clicks focus the window/tab but the TUI keeps its current session`,
+    fix: 'Run `ws sync`.',
+  };
+}
+
 function configCheck(platform: Platform): DoctorCheck {
   const cfgPath = configPath(platform);
   if (!existsSync(cfgPath)) {
@@ -189,6 +213,7 @@ export function doctorChecks(
     launcherCheck(platform),
     ...linksChecks(platform, workstationRoot),
     ...notifierChecks(platform),
+    tuiPluginCheck(platform, workstationRoot),
     configCheck(platform),
     vaultCheck(),
   ];

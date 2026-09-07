@@ -61,4 +61,9 @@ export type Platform = {
   isNotifierDaemonRunning(): boolean;
   /** Best-effort daemon restart (kill so the next `--post` relaunches). */
   restartNotifierDaemon(): void;
+
+  /** System sound names available for per-kind configuration (sorted, unique). */
+  availableSystemSounds(): string[];
+  /** Preview a system sound by name. Never throws — returns a result. */
+  playSystemSound(name: string): Promise<NotifierTestResult>;
 };

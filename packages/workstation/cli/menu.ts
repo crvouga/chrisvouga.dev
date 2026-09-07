@@ -1,6 +1,5 @@
 import { search } from '@inquirer/prompts';
 
-import { loadHistory } from './history';
 import { cliTheme, MENU_PAGE_SIZE } from './lib/theme';
 
 export type MenuCommand = {
@@ -17,6 +16,13 @@ function matches(cmd: MenuCommand, term: string): boolean {
   return q.split(/\s+/).every((token) => hay.includes(token));
 }
 
+function compareCommands(a: MenuCommand, b: MenuCommand): number {
+  // `exit` always sorts last so it never floats mid-list.
+  if (a.id === 'exit' && b.id !== 'exit') return 1;
+  if (b.id === 'exit' && a.id !== 'exit') return -1;
+  return a.name.localeCompare(b.name);
+}
+
 export async function searchableMenu(
   commands: MenuCommand[]
 ): Promise<MenuCommand | null> {
@@ -27,37 +33,16 @@ export async function searchableMenu(
     theme: cliTheme,
     source: async (input) => {
       const term = input ?? '';
-      const filtering = term.trim().length > 0;
-      const items: Array<{ name: string; value: string; description: string }> =
-        [];
-      if (!filtering) {
-        const recent = loadHistory()
-          .map((id) => byId.get(id))
-          .filter((c): c is MenuCommand => c !== undefined && c.id !== 'exit');
-        for (const cmd of recent) {
-          items.push({
-            name: cmd.name,
-            value: `recent:${cmd.id}`,
-            description: cmd.description,
-          });
-        }
-      }
-      const visible = commands
+      return commands
         .filter((c) => matches(c, term))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      for (const cmd of visible) {
-        items.push({
+        .sort(compareCommands)
+        .map((cmd) => ({
           name: cmd.name,
           value: cmd.id,
           description: cmd.description,
-        });
-      }
-      return items;
+        }));
     },
   });
   if (!choice) return null;
-  const id = choice.startsWith('recent:')
-    ? choice.slice('recent:'.length)
-    : choice;
-  return byId.get(id) ?? null;
+  return byId.get(choice) ?? null;
 }

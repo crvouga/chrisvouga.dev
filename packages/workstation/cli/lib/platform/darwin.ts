@@ -1,4 +1,5 @@
 import { execSync, spawnSync } from 'node:child_process';
+import { existsSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -102,5 +103,56 @@ export class DarwinPlatform implements Platform {
     spawnSync('pkill', ['-f', 'OpenCodeNotifier.*--daemon'], {
       stdio: 'ignore',
     });
+  }
+
+  availableSystemSounds(): string[] {
+    const dirs = [
+      '/System/Library/Sounds',
+      '/Library/Sounds',
+      join(homedir(), 'Library/Sounds'),
+    ];
+    const names = new Set<string>();
+    for (const dir of dirs) {
+      let entries: string[] = [];
+      try {
+        entries = readdirSync(dir);
+      } catch {
+        continue;
+      }
+      for (const entry of entries) {
+        const m = entry.match(/^(.*)\.(aiff?|wav|mp3|m4a|caf)$/i);
+        if (m?.[1]) names.add(m[1]);
+      }
+    }
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }
+
+  async playSystemSound(name: string): Promise<NotifierTestResult> {
+    const trimmed = name.trim();
+    if (trimmed.length === 0) {
+      return { ok: false, detail: 'empty sound name' };
+    }
+    const dirs = [
+      '/System/Library/Sounds',
+      '/Library/Sounds',
+      join(homedir(), 'Library/Sounds'),
+    ];
+    const exts = ['aiff', 'aif', 'wav', 'mp3', 'm4a', 'caf'];
+    for (const dir of dirs) {
+      for (const ext of exts) {
+        const candidate = join(dir, `${trimmed}.${ext}`);
+        if (existsSync(candidate)) {
+          const r = spawnSync('afplay', [candidate], { stdio: 'ignore' });
+          if (r.status === 0) {
+            return { ok: true, detail: `played ${trimmed} via afplay` };
+          }
+          return { ok: false, detail: `afplay failed for ${trimmed}` };
+        }
+      }
+    }
+    return {
+      ok: false,
+      detail: `unknown sound "${trimmed}" (see \`ws opencode notifications sounds list\`)`,
+    };
   }
 }
