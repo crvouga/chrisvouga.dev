@@ -141,8 +141,8 @@ Vault KV at `secret/personal/prd`: `9ROUTER_PASSWORD`, `9ROUTER_JWT_SECRET`, `9R
 
 Portable local-machine configuration; the source of truth for the global OpenCode notification plugin and its click-to-focus stack.
 
-- Managed home links: `~/.config/opencode/plugins/notifications.ts`, `~/.config/opencode/bin/{opencode-notifier,focus-opencode}` → `packages/workstation/opencode/**`; `OpenCodeNotifier.swift` is compiled by setup into `~/.config/opencode/bin/OpenCodeNotifier.app`
-- Setup: `bun run workspace:setup` (or `bun run ws:setup`) installs dependencies and converges workstation configuration idempotently; it refuses to overwrite unmanaged files
+- Managed home links: `~/.config/opencode/plugins/notifications.ts`, `~/.config/opencode/bin/{opencode-notifier,focus-opencode}` → `packages/workstation/opencode/**`; `OpenCodeNotifier.swift` is compiled by `ws sync` into `~/.config/opencode/bin/OpenCodeNotifier.app`
+- Setup: `bun run ws:install` installs dependencies, registers the global `ws` CLI (`~/.local/bin/ws`), and converges workstation configuration idempotently; it refuses to overwrite unmanaged files. Day-to-day: run `ws` (interactive dashboard) or `ws sync`.
 - Canonical context: [`packages/workstation/README.md`](packages/workstation/README.md); agent directive: [`packages/workstation/AGENTS.md`](packages/workstation/AGENTS.md)
 - No secrets live here — they come from Vault KV at `secret/data/personal/{dev|prd}`.
 

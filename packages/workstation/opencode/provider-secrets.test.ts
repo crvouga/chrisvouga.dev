@@ -51,16 +51,22 @@ test('every catalogued provider carries obtainable docs (description/obtain/docs
   }
 });
 
+function sampleFor(vaultKey: string): string {
+  const sample = VALID_SAMPLES[vaultKey] ?? '';
+  expect(sample.length, vaultKey).toBeGreaterThan(0);
+  return sample;
+}
+
 test('transform trims whitespace before validation', () => {
   for (const p of OPENCODE_PROVIDER_CATALOG) {
-    const sample = VALID_SAMPLES[p.vaultKey];
+    const sample = sampleFor(p.vaultKey);
     expect(p.entry.transform(`  ${sample}  `), p.vaultKey).toBe(sample);
   }
 });
 
 test('each provider accepts a representative key and rejects a malformed one', () => {
   for (const p of OPENCODE_PROVIDER_CATALOG) {
-    const sample = VALID_SAMPLES[p.vaultKey];
+    const sample = sampleFor(p.vaultKey);
     expect(p.entry.validate(sample), p.vaultKey).toBeNull();
     expect(p.entry.validate('x'), p.vaultKey).not.toBeNull();
     expect(p.entry.validate(''), p.vaultKey).not.toBeNull();

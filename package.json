@@ -39,8 +39,7 @@
     "seed:turbo-client:prd": "vault run --config prd -- bun run --filter @pkgs/api seed:turbo-client",
     "seed-vault-github-secret": "bun run --filter @pkgs/infra seed-vault-github-secret",
     "setup": "VAULT_CONFIG=dev bun run --filter @pkgs/api setup && bun run --filter @pkgs/api seed",
-    "workspace:setup": "bun install --frozen-lockfile && bun run packages/workstation/setup.ts",
-    "ws:setup": "bun run workspace:setup",
+    "ws:install": "bun install --frozen-lockfile && bun run packages/workstation/cli/install-global.ts",
     "smoke": "vault run --config dev -- bun run --filter @pkgs/api smoke",
     "smoke:prd": "vault run --config prd -- bun run --filter @pkgs/api smoke",
     "sync-aliases": "bun run --filter @pkgs/infra sync-aliases",
@@ -74,8 +73,12 @@
     "node": ">=22"
   },
   "catalog": {
+    "@inquirer/prompts": "^8.5.2",
     "@types/bun": "^1.3.9",
     "@types/node": "^22.15.29",
+    "chalk": "^6.0.0",
+    "commander": "^14.0.2",
+    "ora": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "8.58.0",
     "@typescript-eslint/parser": "^8.58.0",
     "aws4fetch": "^1.0.20",

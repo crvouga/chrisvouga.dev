@@ -317,16 +317,20 @@ function baseEntry(base: EntryBase): OpenCodeProviderConfig {
     required: false,
     usedBy: ['opencode'],
     hint: `API key for the "${base.name}" OpenCode provider`,
-    description: base.description,
-    obtainUrl: base.obtainUrl,
-    docsUrl: base.docsUrl,
+    ...(base.description !== undefined
+      ? { description: base.description }
+      : {}),
+    ...(base.obtainUrl !== undefined ? { obtainUrl: base.obtainUrl } : {}),
+    ...(base.docsUrl !== undefined ? { docsUrl: base.docsUrl } : {}),
     vaultUiPath: vaultUiPath(base.vaultKey),
-    validExample: base.validExample,
+    ...(base.validExample !== undefined
+      ? { validExample: base.validExample }
+      : {}),
     invalidHint:
       base.invalidHint ??
-      `Rotate ${base.vaultKey} at ${base.obtainUrl ?? 'the provider console'} and re-run \`bun run --filter @pkgs/workstation configure:opencode\`.`,
+      `Rotate ${base.vaultKey} at ${base.obtainUrl ?? 'the provider console'} and re-run \`ws opencode sync\`.`,
     transform: transformTrim,
-    validate: base.validate,
+    ...(base.validate !== undefined ? { validate: base.validate } : {}),
   });
   return {
     provider: base.provider,

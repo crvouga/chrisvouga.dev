@@ -165,7 +165,7 @@ packages/
   {assert,logger,object-store,secret-store,secret-string,vault}/  # @pkgs/* libs
   9router/                 # local 9router CLI (@pkgs/9router)
   vault-service/           # OpenBao (deploy-vault workflow)
-  workstation/             # portable local-machine config (bun run workspace:setup)
+  workstation/             # ws CLI + portable local-machine config (bun run ws:install)
 .github/workflows/
   deploy-fleet.yml
   deploy-vault.yml

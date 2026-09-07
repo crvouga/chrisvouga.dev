@@ -9,7 +9,7 @@
  * Sound names are macOS system sounds (from `/System/Library/Sounds`). The set
  * is deliberately calm, neutral, happy and low-key — soft, warm, short cues with
  * no jarring or alarming tones. Edit this map, then run
- * `bun run workspace:setup` to sync the local OpenCode install.
+ * `ws sync` to sync the local OpenCode install.
  */
 export const NOTIFIER_SOUNDS = {
   finished: 'Purr',

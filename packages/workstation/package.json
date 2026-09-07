@@ -2,15 +2,32 @@
   "name": "@pkgs/workstation",
   "version": "0.0.0",
   "private": true,
+  "bin": {
+    "ws": "./cli/bin.mjs"
+  },
+  "exports": {
+    "./*": [
+      "./cli/*.ts",
+      "./cli/*/*.ts",
+      "./opencode/*.ts"
+    ]
+  },
   "scripts": {
     "configure:opencode": "bun run opencode/configure-providers.ts",
-    "test": "bun test"
+    "lint": "eslint cli opencode --max-warnings 0",
+    "tc": "tsc --noEmit -p tsconfig.json",
+    "test": "bun test",
+    "ws": "bun run cli/index.ts"
   },
   "dependencies": {
+    "@inquirer/prompts": "catalog:",
     "@pkgs/openrouter": "workspace:*",
     "@pkgs/secret-store": "workspace:*",
     "@pkgs/vault": "workspace:*",
     "@opencode-ai/plugin": "1.18.29",
+    "chalk": "catalog:",
+    "commander": "catalog:",
+    "ora": "catalog:",
     "yaml": "catalog:"
   }
 }

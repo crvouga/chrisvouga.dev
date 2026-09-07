@@ -34,7 +34,7 @@ const MESSAGES: Record<Kind, string> = {
 };
 
 /**
- * Runtime sound config written by `bun run workspace:setup` from the central
+ * Runtime sound config written by `ws sync` from the central
  * `sounds.ts`. Read per notification so sound changes take effect without
  * restarting opencode. Falls back to the central defaults when missing.
  */
@@ -51,7 +51,7 @@ function soundFor(kind: Kind): string {
   }
 }
 
-/** OpenCodeNotifier CLI linked into place by `bun run workspace:setup`. */
+/** OpenCodeNotifier CLI linked into place by `ws sync`. */
 const NOTIFIER_CLI = join(homedir(), '.config/opencode/bin/opencode-notifier');
 
 type OpencodeClient = PluginInput['client'];
@@ -141,7 +141,11 @@ function tagTerminal(
  */
 function post(
   kind: Kind,
-  payload: { sessionID?: string; directory: string; sessionTitle?: string }
+  payload: {
+    sessionID?: string | undefined;
+    directory: string;
+    sessionTitle?: string | undefined;
+  }
 ): void {
   const message = MESSAGES[kind];
   const sound = soundFor(kind);

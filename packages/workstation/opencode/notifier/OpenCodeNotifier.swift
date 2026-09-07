@@ -20,7 +20,7 @@
 // Notifications use the sessionID as identifier + threadIdentifier so a new
 // event for the same session replaces the previous banner. Each kind gets its
 // own sound (played via NSSound); the sound map is read at runtime from
-// ~/.config/opencode/notifier-sounds.json (written by `bun run workspace:setup`
+// ~/.config/opencode/notifier-sounds.json (written by `ws sync`
 // from packages/workstation/opencode/sounds.ts), so sounds are configurable
 // from one place and a running daemon picks up changes without a rebuild.
 //
@@ -153,7 +153,7 @@ func runFocusScript(userInfo info: [AnyHashable: Any]) {
 // MARK: - Notification sounds
 
 // The per-kind sound map is read at runtime from ~/.config/opencode/notifier-sounds.json,
-// which `bun run workspace:setup` writes from the central config
+// which `ws sync` writes from the central config
 // (packages/workstation/opencode/sounds.ts). Reading it per notification keeps a
 // running daemon in sync when the config changes, and lets sounds be configured
 // from one place without rebuilding the app. A missing or unreadable config
