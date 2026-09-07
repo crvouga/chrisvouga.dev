@@ -45,7 +45,8 @@
     "tc": "turbo run tc",
     "typecheck": "tsc --noEmit",
     "vault:login": "vault login --method=userpass username=crvouga",
-    "workstation:setup": "bun run packages/workstation/setup.ts"
+    "workstation:setup": "bun run packages/workstation/setup.ts",
+    "workstation:configure:opencode": "bun run --filter @pkgs/workstation configure:opencode"
   },
   "devDependencies": {
     "@opencode-ai/plugin": "1.18.29",

@@ -41,6 +41,7 @@ Only the currently-listed managed configuration below is implemented. Nothing el
 ## Current managed configuration
 
 - **OpenCode click-to-focus notifications** — native macOS notifications when an OpenCode agent needs attention, with click-to-focus of the right VS Code window, the opencode terminal editor tab, and the attention session. See [OpenCode](#opencode).
+- **OpenCode LLM provider connections (from the secret store)** — every OpenCode provider with a valid API key in Vault is wired into `~/.config/opencode/opencode.json`, so `opencode /models` lists all connected models. See [OpenCode providers](#opencode-providers).
 
 ## Non-goals
 
@@ -60,10 +61,13 @@ At this stage, `packages/workstation/` is explicitly **not**:
 packages/workstation/
 ├── README.md                          # this file — canonical context
 ├── AGENTS.md                          # short agent instructions → points here
-├── setup.ts                           # idempotent links + notifier build (bun run workstation:setup)
+├── package.json                       # workspace pkg (deps: secret-store, vault) + configure:opencode script
+├── setup.ts                           # idempotent links + notifier build + provider config (bun run workstation:setup)
 └── opencode/
     ├── plugins/
     │   └── notifications.ts           # global OpenCode notification plugin (source of truth)
+    ├── provider-secrets.ts            # OpenCode provider → Vault key catalog (SecretStoreEntry + docs)
+    ├── configure-providers.ts         # reads Vault, writes ~/.config/opencode/opencode.json (0600)
     ├── bin/
     │   ├── opencode-notifier          # CLI shim → OpenCodeNotifier.app (source of truth)
     │   └── focus-opencode             # notification click handler (source of truth)
@@ -95,6 +99,7 @@ The command is idempotent and safe to run repeatedly (e.g. after cloning on a fr
 - installs managed configuration as **symlinks** pointing into the repository
 - an existing, correct symlink is treated as success (no-op)
 - compiles `OpenCodeNotifier.swift` into `~/.config/opencode/bin/OpenCodeNotifier.app` with `swiftc` (ad-hoc codesigned, `LSUIElement` — no Dock icon); rebuilds only when the source hash changes; skips with a warning when `swiftc` is missing (the plugin then falls back to plain notifications)
+- generates `~/.config/opencode/opencode.json` from the secret store (best-effort — see [OpenCode providers](#opencode-providers))
 - refuses to overwrite anything not managed by this repository and exits with an actionable error message on conflict
 - never requires `sudo` and never touches configuration outside `$HOME`
 
@@ -103,6 +108,7 @@ What it changes in `$HOME` today:
 - creates `~/.config/opencode/plugins/` and `~/.config/opencode/bin/` if needed
 - links the plugin and CLI scripts (see table above)
 - builds `OpenCodeNotifier.app` and writes `~/.config/opencode/bin/.opencode-notifier.hash`
+- writes `~/.config/opencode/opencode.json` (0600) with provider connections sourced from Vault
 
 ## OpenCode
 
@@ -163,6 +169,30 @@ Why this shape:
 - **Accessibility / Automation**: the first banner click runs keystrokes via System Events; macOS will prompt to allow OpenCodeNotifier to control System Events / VS Code. Grant it. Without it, clicking still focuses the correct VS Code **window** (the `code <dir>` step needs no permissions) — the terminal-tab pick is skipped with a stderr hint.
 - Notification Center settings (Focus/Do Not Disturb, banner style) affect visibility as with any app.
 
+## OpenCode providers
+
+Every OpenCode provider whose API key exists in the secret store is wired into the global OpenCode config so `opencode /models` lists the connected models. This is the first concrete use of the secret-store integration (see [Secret integration](#secret-integration)).
+
+- **Catalog:** `packages/workstation/opencode/provider-secrets.ts` — a declarative list mapping each OpenCode provider id to its Vault key, expressed as `@pkgs/secret-store`'s `SecretStoreEntry` (key + required + validation + documentation).
+- **Generator:** `packages/workstation/opencode/configure-providers.ts` — reads `secret/data/personal/{config}` (default `prd`, overridable via `VAULT_*` env or `.vault.yaml`), validates each value through its `SecretStoreEntry`, and writes `~/.config/opencode/opencode.json` with `provider.<id>.options.apiKey` set inline. Custom/local providers (Ollama, LM Studio) also get `npm` + `baseURL` + `models`.
+- **Delivery:** keys are embedded in the generated config, written **0600** into `$HOME`, never committed. The config is merged with any existing `opencode.json` (your other settings are preserved) and is only overwritten if it parses as JSON — a malformed/foreign config is refused rather than clobbered.
+- **Non-destructive:** providers with a missing or invalid key are **skipped** (not dropped) and reported with the entry's documentation so you know how to add/rotate the key. A missing key never aborts the run; an unavailable Vault is a warning (use `--strict` to make it fatal).
+- **Vault path:** the full catalog lives at `secret/data/personal/prd` (verified; the UI URL `/ui/vault/secrets/secret/show/secret` is a different entry that only holds `OPENAI_API_KEY` + `OPENROUTER_API_KEY`). Add keys there then re-run.
+
+### How the keys get in
+
+```bash
+vault login -method=userpass username=crvouga     # once (or export VAULT_TOKEN)
+bun run workstation:setup                          # runs the config step best-effort
+bun run --filter @pkgs/workstation configure:opencode   # or run it directly
+```
+
+The config step is also invoked (best-effort, never fails setup) at the end of `workstation:setup`.
+
+### Adding or debugging a provider
+
+`SecretStoreEntry` carries documentation fields — `description`, `obtainUrl` (link to create/rotate a key), `docsUrl`, `vaultUiPath`, `validExample`, and `invalidHint` — that the generator prints for skipped providers. To add a provider, append an entry to `provider-secrets.ts` (a `SecretStoreEntry` plus optional `npm`/`baseURL`/`models`), add the key in Vault, and re-run.
+
 ## Testing
 
 - **Symlink setup:**
@@ -193,6 +223,14 @@ Why this shape:
   bun run workstation:setup          # succeeds again
   ```
 - **Type check:** `bun run typecheck` (also runs in the Deploy fleet CI) covers `packages/workstation/**/*.ts`.
+- **Provider config:**
+  ```bash
+  bun run --filter @pkgs/workstation configure:opencode
+  ls -l ~/.config/opencode/opencode.json            # -rw------- (0600)
+  jq '.provider | keys | length' ~/.config/opencode/opencode.json   # number connected
+  opencode debug config                             # resolved providers listed
+  ```
+  Re-running is idempotent and only adds providers that have a valid key.
 
 ## Adding another workstation-managed tool
 
@@ -218,7 +256,7 @@ Ground rules:
 - do not introduce plaintext `.env` files as the long-term distribution mechanism
 - when secret integration is added, prefer runtime env injection, then OS-native keychain storage, then tool-specific credential files with restrictive permissions
 
-The current OpenCode notification plugin needs no secrets and must stay that way.
+The OpenCode **notification plugin** needs no secrets and must stay that way. The OpenCode **provider config** is the one piece that reads from the secret store; it writes keys to a tool-specific credential file (`~/.config/opencode/opencode.json`) with restrictive (0600) permissions — the lowest-priority, last-resort option — because OpenCode's global config cannot source secrets purely from env without a wrapper. See [OpenCode providers](#opencode-providers).
 
 ## Agent/LLM context
 

@@ -1,0 +1,14 @@
+{
+  "name": "@pkgs/workstation",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "configure:opencode": "bun run opencode/configure-providers.ts"
+  },
+  "dependencies": {
+    "@pkgs/secret-store": "workspace:*",
+    "@pkgs/vault": "workspace:*",
+    "@opencode-ai/plugin": "1.18.29",
+    "yaml": "catalog:"
+  }
+}

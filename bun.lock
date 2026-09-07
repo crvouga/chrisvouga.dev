@@ -127,6 +127,16 @@
         "typescript": "catalog:",
       },
     },
+    "packages/workstation": {
+      "name": "@pkgs/workstation",
+      "version": "0.0.0",
+      "dependencies": {
+        "@opencode-ai/plugin": "1.18.29",
+        "@pkgs/secret-store": "workspace:*",
+        "@pkgs/vault": "workspace:*",
+        "yaml": "catalog:",
+      },
+    },
   },
   "catalog": {
     "@types/bun": "^1.3.9",
@@ -338,6 +348,8 @@
     "@pkgs/secret-string": ["@pkgs/secret-string@workspace:packages/secret-string"],
 
     "@pkgs/vault": ["@pkgs/vault@workspace:packages/vault"],
+
+    "@pkgs/workstation": ["@pkgs/workstation@workspace:packages/workstation"],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 

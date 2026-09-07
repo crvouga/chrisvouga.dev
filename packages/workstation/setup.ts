@@ -201,7 +201,28 @@ function main(): void {
   }
   const build = buildNotifier();
   if (build !== 'skipped') console.log(`  [${build}] ${NOTIFIER_APP}`);
+  configureOpenCodeProviders();
   console.log('Done.');
+}
+
+/**
+ * Generate the global OpenCode provider config from the secret store. Best
+ * effort: this never fails setup — when Vault is unavailable (or a provider
+ * key is missing) it logs a warning and the notification setup still works.
+ */
+function configureOpenCodeProviders(): void {
+  const script = join(WORKSTATION_ROOT, 'opencode/configure-providers.ts');
+  if (!existsSync(script)) return;
+  const result = spawnSync('bun', [script], {
+    encoding: 'utf8',
+    stdio: 'inherit',
+  });
+  if (result.status === null || result.status !== 0) {
+    console.warn(
+      `  warn: OpenCode provider config skipped (see messages above).\n` +
+        `       Re-run \`bun run --filter @pkgs/workstation configure:opencode\` after authenticating to Vault.`
+    );
+  }
 }
 
 main();

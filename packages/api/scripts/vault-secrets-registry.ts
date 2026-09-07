@@ -1,4 +1,4 @@
-import { SecretStoreEntry, type SecretUsedBy } from './secret-store-entry';
+import { SecretStoreEntry, type SecretUsedBy } from '@pkgs/secret-store';
 
 /** Public hostname for the self-hosted Turborepo remote cache server. */
 export const CACHE_PUBLIC_HOSTNAME = 'turborepo.chrisvouga.dev';
@@ -11,6 +11,10 @@ export const CACHE_PUBLIC_ORIGIN = `https://${CACHE_PUBLIC_HOSTNAME}`;
 
 /** GHCR repository for the cache server image (CI publishes via infra ci-turborepo workflow). */
 export const GHCR_IMAGE_REPOSITORY = 'ghcr.io/crvouga/chrisvouga-turborepo';
+
+/** Base Vault UI link for the cache-secret KV path (project/config appended). */
+export const VAULT_UI_BASE =
+  'https://vault.chrisvouga.dev/ui/vault/secrets/secret/show';
 
 /** Stable Vault secret key literals — single source of truth. */
 export const VaultSecretKey = {
@@ -70,6 +74,10 @@ export const VAULT_SECRET_REGISTRY: readonly SecretStoreEntry[] = [
     required: true,
     usedBy: ['server', 'client'],
     hint: 'Bearer token Turbo clients send and the cache server validates',
+    description: 'Shared secret for the self-hosted Turborepo remote cache.',
+    docsUrl: 'https://turborepo.com/docs/reference/remote-caching',
+    obtainUrl: `${VAULT_UI_BASE}/personal/{{config}}`,
+    vaultUiPath: `${VAULT_UI_BASE}/personal/{{config}}`,
   }),
   new SecretStoreEntry({
     key: VaultSecretKey.turboApi,
@@ -92,18 +100,28 @@ export const VAULT_SECRET_REGISTRY: readonly SecretStoreEntry[] = [
     required: true,
     usedBy: ['server'],
     hint: 'Backblaze B2 S3 endpoint URL (e.g. https://s3.us-west-004.backblazeb2.com)',
+    obtainUrl: 'https://secure.backblaze.com/b2_buckets.htm',
+    validExample: 'https://s3.us-west-004.backblazeb2.com',
+    invalidHint:
+      'Copy the S3 endpoint from the B2 application key details page.',
   }),
   new SecretStoreEntry({
     key: VaultSecretKey.b2S3Region,
     required: true,
     usedBy: ['server'],
     hint: 'B2 region slug (e.g. us-west-004)',
+    validExample: 'us-west-004',
+    invalidHint:
+      "The region matches the bucket's datacenter (e.g. us-west-004).",
   }),
   new SecretStoreEntry({
     key: VaultSecretKey.b2S3AccessKeyId,
     required: true,
     usedBy: ['server'],
     hint: 'B2 application key ID for the S3-compatible API (starts with 004)',
+    obtainUrl: 'https://secure.backblaze.com/app_keys.htm',
+    validExample: '0046…',
+    invalidHint: 'Recreate the application key; the key ID starts with "004".',
     validate: validateB2AccessKeyId,
   }),
   new SecretStoreEntry({
@@ -111,6 +129,10 @@ export const VAULT_SECRET_REGISTRY: readonly SecretStoreEntry[] = [
     required: true,
     usedBy: ['server'],
     hint: 'B2 application key secret (shown once at key creation; starts with K)',
+    obtainUrl: 'https://secure.backblaze.com/app_keys.htm',
+    validExample: 'K…',
+    invalidHint:
+      'The secret is only shown once — recreate the key if it was lost.',
     validate: validateB2SecretAccessKey,
   }),
   new SecretStoreEntry({
@@ -118,12 +140,17 @@ export const VAULT_SECRET_REGISTRY: readonly SecretStoreEntry[] = [
     required: true,
     usedBy: ['server'],
     hint: 'B2 bucket name for cache artifacts',
+    obtainUrl: 'https://secure.backblaze.com/b2_buckets.htm',
   }),
   new SecretStoreEntry({
     key: VaultSecretKey.vaultToken,
     required: true,
     usedBy: ['server'],
     hint: 'Long-lived Vault read token for server boot-time secret loading',
+    docsUrl: 'https://openbao.org/docs/concepts/tokens/',
+    obtainUrl: `${VAULT_UI_BASE}/personal/{{config}}`,
+    invalidHint:
+      'Create a long-lived read token via `vault token create -policy=default`.',
   }),
   new SecretStoreEntry({
     key: VaultSecretKey.turboCache,
