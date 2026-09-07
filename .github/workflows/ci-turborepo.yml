@@ -91,7 +91,7 @@ jobs:
           GITHUB_ACTIONS: true
           VAULT_CONFIG: prd
           VAULT_PROJECT: personal
-        run: bun run smoke
+        run: bun run --filter @pkgs/api smoke
 
   changes:
     runs-on: ubuntu-latest
