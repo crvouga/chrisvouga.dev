@@ -1,0 +1,6 @@
+#!/bin/bash
+# CLI shim for WsNotifier (built into ~/.config/ws-notifier/bin by
+# `ws sync`). Forwards to the bundled binary.
+#
+# Usage: ws-notify --post '<payload-json>'
+exec "$HOME/.config/ws-notifier/bin/WsNotifier.app/Contents/MacOS/WsNotifier" "$@"

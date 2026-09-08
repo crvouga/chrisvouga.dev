@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "catalog:",
+    "@pkgs/assert": "workspace:*",
     "@pkgs/openrouter": "workspace:*",
     "@pkgs/secret-store": "workspace:*",
     "@pkgs/vault": "workspace:*",

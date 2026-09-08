@@ -7,7 +7,7 @@
 //
 // Payload (compact, newline-free JSON sent over ~/.cache/opencode-notifier.sock):
 //   {
-//     "kind": "finished" | "question" | "permission" | "error",
+//   "kind": "finished" | "interrupted" | "question" | "permission" | "error",
 //     "title": "OpenCode",
 //     "message": "Session finished",
 //     "subtitle": "session title or project name",

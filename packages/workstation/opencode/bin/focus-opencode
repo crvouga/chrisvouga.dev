@@ -3,7 +3,7 @@
 # the terminal tab running the session that needs attention, and hand the
 # session to the TUI for in-app switching.
 #
-# Usage: focus-opencode --kind <finished|question|permission|error> \
+# Usage: focus-opencode --kind <finished|interrupted|question|permission|error> \
 #                       --session <id> --dir <project-dir> [--title <session-title>] \
 #                       [--token <short-session-token>] [--dry-run]
 #
@@ -13,6 +13,16 @@
 # and exits 0. Keystrokes require a one-time Accessibility + Automation grant
 # for OpenCodeNotifier (System Settings → Privacy & Security); without it the
 # correct VS Code window is still focused via the `code` CLI (no permissions).
+#
+# How the window pick works (and why):
+# - The handler NEVER opens a folder or window: it raises the existing Code
+#   / Cursor window whose title contains the project folder name (VS Code's
+#   default window title shows the root folder), via AXRaise + frontmost.
+#   `code -r <dir>` must not be used — with no matching window it reuses the
+#   most-recent window for the folder (a full reload that kills integrated
+#   terminals, including the opencode session) or opens a new window. No
+#   match → the running app is activated only (or nothing, when not
+#   running), and the tab pick is skipped.
 #
 # How the tab pick works (and why):
 # - `Cmd+P` (Quick Open) is a workbench-level shortcut, so it opens even when
@@ -53,6 +63,9 @@ done
 
 [[ -n "$dir" ]] || exit 0
 
+# Project folder name: the raise-only window match below keys on this.
+project="$(basename "$dir")"
+
 # Exact-match target for the terminal tab: the per-session token the plugin
 # wrote into the terminal title at notification time. Older banners without a
 # token fall back to the session title, then the process name.
@@ -67,9 +80,10 @@ if [[ "$dry_run" == "1" ]]; then
   cat <<EOF
 focus-opencode plan (dry-run):
   dir: $dir
+  project: $project
   session: ${session:-<none>}
   target: $target
-  window: code -r "$dir" (reuse window, poll until Code/Cursor is frontmost)
+  window: raise existing "$project" window (never opens or reloads; app activated only when missing)
   editor-tab: Cmd+P → type "$target" → Enter (verify window title contains target)
   panel-terminal: Cmd+P → type "term $target" → Enter (Quick Open terminal list)
   focus-request: write {"sessionID":"$session","timestamp":$ts_example} to $request_file
@@ -90,20 +104,58 @@ if [[ -n "$session" ]]; then
   } 2>/dev/null || true
 fi
 
-# 1. Focus (or open) the VS Code window for this project, reusing the existing
-#    window. `code` returns before the window is frontmost, so poll for it
-#    instead of a fixed sleep — typing into Quick Open before Code is front
-#    was the main focus flake.
-if command -v code >/dev/null 2>&1; then
-  code -r "$dir" 2>/dev/null || true
-elif command -v cursor >/dev/null 2>&1; then
-  cursor -r "$dir" 2>/dev/null || true
+# 1. Raise the existing VS Code window for this project — never open one.
+#    `code -r <dir>` is deliberately NOT used: when no window has the folder
+#    it opens the folder in the most-recently-used window (a full window
+#    reload that kills integrated terminals, including the opencode session)
+#    or in a brand-new window. Raising matches the window whose title
+#    contains the project folder name (VS Code's default window title shows
+#    the root folder) and changes nothing inside it. No match → activate the
+#    running app only (or nothing when it is not running), then stop: the
+#    tab pick below only runs against a verified project window.
+win="missing"
+if [[ -n "$project" && "$project" != "/" ]]; then
+  # (Heredoc on a simple command redirecting to a file: `$(...)` + heredoc
+  # prints a spurious parser warning on this platform's bash.)
+  raise_out="$(mktemp)" || raise_out=""
+  if [[ -n "$raise_out" ]]; then
+    FOCUS_PROJECT="$project" osascript <<'APPLESCRIPT' >"$raise_out" 2>/dev/null || true
+on run
+  set projectName to system attribute "FOCUS_PROJECT"
+  tell application "System Events"
+    repeat with appName in {"Code", "Cursor"}
+      if exists (first process whose name is appName) then
+        tell (first process whose name is appName)
+          repeat with w in (get windows)
+            if name of w contains projectName then
+              perform action "AXRaise" of w
+              set frontmost to true
+              return "ok"
+            end if
+          end repeat
+        end tell
+      end if
+    end repeat
+  end tell
+  return "missing"
+end run
+APPLESCRIPT
+    win="$(cat "$raise_out" 2>/dev/null)" || win="missing"
+    rm -f "$raise_out"
+  fi
 fi
-for _ in $(seq 1 40); do
-  front="$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null)" || front=""
-  [[ "$front" == "Code" || "$front" == "Cursor" ]] && break
-  sleep 0.1
-done
+if [[ "$win" != ok* ]]; then
+  # Never open or reload anything: bring the already-running app forward, or
+  # do nothing when it is not running. (`open -a` with no arguments only
+  # activates — it cannot open windows or reload folders.)
+  if pgrep -xq "Code" 2>/dev/null; then
+    open -a "Visual Studio Code" 2>/dev/null || true
+  elif pgrep -xq "Cursor" 2>/dev/null; then
+    open -a "Cursor" 2>/dev/null || true
+  fi
+  echo "focus-opencode: no VS Code window for \"$project\" — app activated only (grant Accessibility/Automation for precise focus)" >&2
+  exit 0
+fi
 
 # 2. Focus the terminal tab running this session via Quick Open (Cmd+P).
 #    Attempt 1 matches editor-area terminals (plain query, verified via the
@@ -143,7 +195,7 @@ on run
       delay 0.6
       return "ok-panel"
     end tell
-  end run
+  end tell
 end run
 APPLESCRIPT
 

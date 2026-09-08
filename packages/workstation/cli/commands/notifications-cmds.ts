@@ -34,6 +34,7 @@ import {
 
 const KINDS: NotificationKind[] = [
   'finished',
+  'interrupted',
   'question',
   'permission',
   'error',

@@ -32,6 +32,7 @@ ws                   # interactive dashboard (status, sync, opencode, notificati
 ws status            # human-readable state
 ws status --json     # machine-readable state (LLM-friendly, secrets redacted)
 ws sync              # converge home directory to the checked-in spec
+ws update            # pull latest from GitHub + reinstall deps/launcher + sync
 ws doctor [--fix]    # checks with actionable fixes
 ```
 
@@ -61,6 +62,16 @@ The old flat names (`ws providers`, `ws notifications`, `ws sounds`, `ws backup|
 `bun run ws:install` (replaces the old `workspace:setup` / `ws:setup`) installs dependencies, writes/overwrites the global launcher (`~/.local/bin/ws` on macOS/Linux, `ws.cmd` on Windows — a shim that execs the checked-in CLI via bun, so `ws` always runs the latest repo source), then converges. Re-running updates the launcher in place. If `~/.local/bin` is not on `PATH`, it prints the export line (or appends it with `--yes`).
 
 `packages/workstation/setup.ts` is a deprecated shim that forwards to the installer.
+
+### Updating
+
+After the one-time install, never open the repo again — `ws update` pulls the
+workspace checkout to the latest upstream (`git pull --ff-only`), refreshes
+dependencies (`bun install` at the repo root), then reinstalls the global
+launcher and converges, exactly like `ws install`. It refuses to pull with
+uncommitted changes (commit or stash first) and refuses a diverged branch
+(reconcile manually, e.g. `git pull --rebase`). `ws update --json` reports
+`{ ok, before, after, updated, launcher, sync }`.
 
 ### Platform design
 
@@ -119,6 +130,7 @@ packages/workstation/
 │   │   ├── status.ts                  # state gathering (human + JSON)
 │   │   ├── sync.ts                    # converge (links + sounds + notifier + providers)
 │   │   ├── sounds-cmds.ts             # notification sounds (list/set/play/configure/reset)
+│   │   ├── update-cmds.ts             # ws update (git pull + bun install + reinstall + sync)
 │   │   └── openrouter-cmds.ts         # OpenRouter key state + model catalog
 │   └── lib/
 │       ├── platform/                  # Platform interface + darwin/linux/windows/fallback adapters
@@ -133,6 +145,7 @@ packages/workstation/
 │       ├── opencode-config.ts         # opencode.json read/merge/write (0600)
 │       ├── providers-sync.ts          # Vault → opencode.json sync (shared logic)
 │       ├── global-install.ts          # global launcher install + PATH helpers
+│       ├── repo-update.ts             # git fast-forward pull (dirty/diverged refusals)
 │       ├── vault-config.ts            # Vault coordinates (env > .vault.yaml > defaults)
 │       ├── doctor.ts                  # checks + summary
 │       └── backup.ts                  # timestamped backups
@@ -207,9 +220,12 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
   | Event                             | Notification                        | Sound                  |
   | --------------------------------- | ----------------------------------- | ---------------------- |
   | `session.idle`                    | `OpenCode` / `Session finished`     | `Purr` (soft, warm)    |
+  | interrupt (Esc / abort)           | `OpenCode` / `Session interrupted`  | `Sosumi` (neutral)     |
   | `session.error`                   | `OpenCode` / `Session error`        | `Bottle` (gentle bell) |
   | `permission.asked`                | `OpenCode` / `Permission required`  | `Ping` (soft ping)     |
   | agent invokes the `question` tool | `OpenCode` / `Agent has a question` | `Pop` (subtle tap)     |
+
+- **Interrupt vs. finished:** an interrupt (Esc / `session.interrupt` / abort) surfaces as the same `session.idle` as a clean finish, so the plugin tracks abort signals — `session.error` with a `MessageAbortedError`, an aborted assistant `message.updated`, and the `session.interrupt` TUI command — and resolves that idle to `Session interrupted` instead of `Session finished`. The finish is held ~800ms so an abort/error landing just after the idle still wins (no false "finished" flash), and an idle right after a real error is suppressed so the error banner is not replaced. One interrupt produces exactly one banner either way.
 
 - **Sound design:** each attention kind maps to a macOS system sound, kept deliberately calm, neutral, happy and low-key. The checked-in defaults live in `packages/workstation/opencode/sounds.ts` (`NOTIFIER_SOUNDS`); the runtime map is `~/.config/opencode/notifier-sounds.json`, which **both** the notifier daemon and the plugin fallback read at notification time — so a running daemon picks up a change without a rebuild. Sounds are first-class config under `ws opencode notifications sounds`: `list`/`status` shows per-kind sounds alongside the available system sounds (scanned from `/System/Library/Sounds`, `/Library/Sounds`, `~/Library/Sounds`), `set <kind> <sound>` overrides one kind (warns when the name is unknown), `play <kind|sound>` previews through `afplay`, `configure` walks kind → sound with a preview before saving (scriptable as `configure --kind finished --sound Purr [--play]`), and `reset` restores defaults. `ws sync` never wipes an override — it only fills in missing kinds. Sounds are played via `NSSound` (fire-and-forget) and the notification banner itself is kept silent, so the sound and banner never double up and never conflict with the system notification sound. On Linux/Windows sounds are unsupported (`notify-send` / toast have no sound API) — `list` says so and `play` fails with that reason instead of pretending.
 
@@ -219,7 +235,7 @@ OpenCode loads global plugins from `~/.config/opencode/plugins/` automatically. 
 ### Click-to-focus architecture
 
 ```
-session.idle / session.error / permission.asked / question tool
+session.idle / interrupt / session.error / permission.asked / question tool
         │
         ▼
 notifications.ts ──tags terminal title with session token (OSC, /dev/tty)
@@ -239,10 +255,10 @@ notifications.ts ──tags terminal title with session token (OSC, /dev/tty)
                      1. writes ~/.cache/opencode-focus-request.json {sessionID, timestamp}
                         → the focus-session TUI plugin in the OWNING opencode TUI
                            navigates to it via route.navigate("session", …)
-                     2. `code -r <dir>` → focuses (or opens) the VS Code window
-                                       │    for that project — no permissions needed
-                     3. Poll (not sleep) until VS Code is frontmost
-                     4. System Events keystrokes (one-time Accessibility grant):
+                     2. raise the existing VS Code window whose title contains
+                                        │    the project folder (never opens or reloads anything;
+                                        │    no match means the running app is activated only)
+                     3. System Events keystrokes (one-time Accessibility grant):
                         Cmd+P → type session token → Enter (editor-area terminal)
                         Cmd+P → type "term <token>" → Enter (panel terminal)
                         → focuses the exact terminal tab running that session
@@ -253,18 +269,18 @@ notifications.ts ──tags terminal title with session token (OSC, /dev/tty)
 Why this shape:
 
 - `terminal-notifier` is **not** used: it depends on the deprecated `NSUserNotification` API and its click actions do not work on macOS 26. OpenCodeNotifier uses `UNUserNotificationCenter` and is vendored in this repo (~200 lines Swift, built by sync) — no external binary gets notification or shell-exec permissions.
-- `code -r <folder>` is the official CLI behavior: it focuses the existing window that has the folder open (and opens one if none exists). This is the permission-free window-targeting step. `-r` reuses the window instead of opening a duplicate.
+- **Raise, never open:** the click handler raises the existing Code/Cursor window whose title contains the project folder (VS Code's default window title shows the root folder) via AXRaise + frontmost, changing nothing inside it. `code -r <folder>` is deliberately not used — with no matching window it opens the folder in the most-recently-used window (a full reload that kills integrated terminals, including the opencode session) or in a brand-new window. No match means the running app is activated only (or nothing, when it is not running) and the tab pick is skipped.
 - **Per-session token, not fuzzy title:** every notification first tags its controlling terminal's title with a short token derived from the session id (`opencode <token> · <session title>`, via an OSC sequence on `/dev/tty`). The opencode TUI never sets terminal titles, so the tag sticks. The click handler then matches the tab by that exact token instead of guessing from the session title — the session id is unique, so the pick can never land on the wrong tab. `token` travels in the notification payload; banners posted before tagging fall back to title matching.
 - **Quick Open (`Cmd+P`), not `Ctrl+Tab`:** the tab pick is `Cmd+P → type token → Enter`, a workbench-level shortcut that opens even when focus sits inside the opencode TUI terminal. The old `Ctrl+Tab` editor picker only lists editor tabs and can be swallowed by the terminal — opencode usually runs in a **panel** terminal, which never matched, so clicks focused the window but never the tab. Panel terminals are picked with a second pass, `Cmd+P → type "term <token>"` — the `term ` prefix is Quick Open's terminal list; plain queries only match editors. The editor pass is verified against the window title (which shows the active editor); the panel pass is fire-and-forget since panel terminals never appear there.
-- **No fixed sleeps on the focus path:** `code` returns before the window is frontmost, so the script polls for VS Code being frontmost (up to ~4s) instead of `sleep 0.4` — typing into the picker too early (or aborting because Code wasn't front yet) was the main focus flake.
+- **No fixed sleeps on the focus path:** raising is synchronous (AXRaise + frontmost in one osascript call), so the tab pick runs against a verified project window with no polling and no race.
 - The keystroke step is guarded: it only runs when VS Code is frontmost, and it is skipped when the window title already contains the token (meaning the tagged terminal is already the active editor). The Quick Open overlay takes keyboard focus, so the typed query never lands inside the TUI prompt input.
 - **Session switching without keystrokes:** typing a session id into a waiting TUI (permission/question prompt) would corrupt user input, so the click handler never types into the terminal. Instead it writes a focus request (`~/.cache/opencode-focus-request.json`, `{sessionID, timestamp}`); the `focus-session` TUI plugin (registered in `tui.json` by `ws sync`, polling every ~750ms) navigates the owning TUI via the official `route.navigate("session", {sessionID})` API. Ownership is self-routing — every TUI sees the file but only the one holding that session acts — and requests expire after 60s so a stale file can never yank a TUI on startup. The shared protocol lives in `opencode/focus-request.ts` so the routing decision is unit-tested.
-- `focus-opencode` always exits 0; a missing Accessibility grant degrades to "window focus only" with a one-line stderr hint.
+- `focus-opencode` always exits 0 and never opens, reloads, or refreshes anything. A missing Accessibility grant (or no matching window) degrades to app-activate-only with a one-line stderr hint, and the tab pick is skipped.
 
 ### macOS permissions (one-time)
 
 - **Notifications → OpenCodeNotifier**: allow when the first prompt appears (or System Settings → Notifications → OpenCodeNotifier). Until granted, banners are dropped silently while the rest of the pipeline keeps working.
-- **Accessibility / Automation**: the first banner click runs keystrokes via System Events; macOS will prompt to allow OpenCodeNotifier to control System Events / VS Code. Grant it. Without it, clicking still focuses the correct VS Code **window** (the `code <dir>` step needs no permissions) — the terminal-tab pick is skipped with a stderr hint.
+- **Accessibility / Automation**: the first banner click runs window-raising + keystrokes via System Events; macOS will prompt to allow OpenCodeNotifier to control System Events / VS Code. Grant it. Without it, clicking only brings the running VS Code app forward (precise window + tab focus both need the grant) — nothing is ever opened or reloaded, and the tab pick is skipped with a stderr hint.
 - Notification Center settings (Focus/Do Not Disturb, banner style) affect visibility as with any app.
 
 ## OpenCode providers
@@ -324,7 +340,7 @@ The `provider-secrets.ts` openrouter entry attaches `models: { "openrouter/auto"
   ws openrouter status
   ws openrouter models --query claude --limit 10
   ```
-- **Unit tests:** `bun run --filter @pkgs/workstation test` covers token derivation, sound map merge/set/reset, focus-request routing (freshness/TTL/ownership), tui.json merge, the focus runner + terminal tagging, the `--dry-run` focus plan, provider catalog validation, platform detection, links, opencode-config merge logic, global installer helpers, and doctor summary.
+- **Unit tests:** `bun run --filter @pkgs/workstation test` covers token derivation, sound map merge/set/reset, interrupt/abort detection, focus-request routing (freshness/TTL/ownership), tui.json merge, the focus runner + terminal tagging, the `--dry-run` focus plan, provider catalog validation, platform detection, links, opencode-config merge logic, global installer helpers, and doctor summary.
 - **Idempotent sync:** run `ws sync` twice — the second run reports `[unchanged]` for links and the notifier.
 - **Notifier daemon (no OpenCode needed):**
   ```bash

@@ -36,6 +36,7 @@ import {
 import { cmdSoundsConfigure, cmdSoundsList } from './commands/sounds-cmds';
 import { cmdStatus } from './commands/status-cmd';
 import { cmdSync } from './commands/sync-cmd';
+import { cmdUpdate } from './commands/update-cmds';
 
 async function interactiveProvidersPick(): Promise<void> {
   const statuses = await providerStatuses();
@@ -142,6 +143,13 @@ function wsItems(): Item[] {
       name: 'ws › Reinstall launcher',
       description: 'Refresh the global ws command',
       run: () => cmdInstall({ yes: true }),
+    },
+    {
+      id: 'update',
+      domain: 'ws',
+      name: 'ws › Update to latest',
+      description: 'Pull from GitHub + reinstall + sync',
+      run: () => cmdUpdate({ yes: true }),
     },
   ];
 }

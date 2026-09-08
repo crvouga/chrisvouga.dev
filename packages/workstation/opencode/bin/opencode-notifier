@@ -1,6 +1,0 @@
-#!/bin/bash
-# CLI shim for OpenCodeNotifier (built into ~/.config/opencode/bin by
-# `ws sync`). Forwards to the bundled binary.
-#
-# Usage: opencode-notifier --post '<payload-json>'
-exec "$HOME/.config/opencode/bin/OpenCodeNotifier.app/Contents/MacOS/OpenCodeNotifier" "$@"

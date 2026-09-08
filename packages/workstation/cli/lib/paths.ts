@@ -10,6 +10,14 @@ export function workstationRoot(): string {
   return join(import.meta.dir, '..', '..');
 }
 
+/**
+ * Absolute root of the `workspace` monorepo checkout that contains
+ * `packages/workstation/` (works from any CWD).
+ */
+export function workspaceRoot(): string {
+  return join(workstationRoot(), '..', '..');
+}
+
 /** Version string for `--version` (package.json, best-effort). */
 export async function workstationVersion(): Promise<string> {
   try {

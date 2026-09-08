@@ -8,7 +8,8 @@
 
 export type PlatformName = 'darwin' | 'linux' | 'windows' | 'unknown';
 
-export type NotificationKind = 'finished' | 'question' | 'permission' | 'error';
+export type NotificationKind =
+  'finished' | 'interrupted' | 'question' | 'permission' | 'error';
 
 export type NotifierCapability = {
   /** Native rich notifications (click actions where supported). */

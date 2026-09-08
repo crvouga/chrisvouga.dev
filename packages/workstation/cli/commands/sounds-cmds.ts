@@ -1,4 +1,4 @@
-import { NOTIFIER_SOUNDS } from '../../opencode/sounds';
+import { NOTIFIER_SOUNDS } from '../../notifier/sounds';
 import type { GlobalOpts } from '../lib/cli-opts';
 import { currentPlatform } from '../lib/platform/index';
 import type { Platform } from '../lib/platform/types';
@@ -260,7 +260,8 @@ async function pickSound(
   if (picked !== '__custom') return picked;
   return askInput({
     message: `Sound for ${kind}`,
-    description: 'macOS system sound name (e.g. Purr, Pop, Ping, Bottle)',
+    description:
+      'macOS system sound name (e.g. Purr, Sosumi, Pop, Ping, Bottle)',
     default: sounds[kind] ?? '',
     ...(opts.nonInteractive !== undefined
       ? { nonInteractive: opts.nonInteractive }
@@ -272,6 +273,8 @@ function kindBlurb(kind: string): string {
   switch (kind) {
     case 'finished':
       return 'Session finished';
+    case 'interrupted':
+      return 'Session interrupted';
     case 'question':
       return 'Agent has a question';
     case 'permission':

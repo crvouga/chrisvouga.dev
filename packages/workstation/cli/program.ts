@@ -34,6 +34,7 @@ import {
 } from './commands/sounds-cmds';
 import { cmdStatus } from './commands/status-cmd';
 import { cmdSync } from './commands/sync-cmd';
+import { cmdUpdate } from './commands/update-cmds';
 import { resolveVaultConfig } from './lib/vault-config';
 import type { GlobalOpts } from './lib/cli-opts';
 import { readVersion } from './lib/cli-opts';
@@ -47,7 +48,7 @@ import {
 /**
  * Command domains:
  *
- *   ws …            workstation itself (status/sync/doctor/install/vault)
+ *   ws …            workstation itself (status/sync/doctor/install/update/vault)
  *   ws opencode …   OpenCode config (providers, models, notifications, backups)
  *   ws openrouter … OpenRouter catalog (model list used by opencode set-model)
  *
@@ -150,7 +151,11 @@ function registerNotifications(
   notifications
     .command('test')
     .description('Post a test notification')
-    .option('--kind <kind>', 'finished|question|permission|error', 'finished')
+    .option(
+      '--kind <kind>',
+      'finished|interrupted|question|permission|error',
+      'finished'
+    )
     .action(async (opts: { kind: string }) =>
       cmdNotificationsTest(opts.kind, globals())
     );
@@ -170,7 +175,11 @@ function registerNotificationTests(
     .option('--session <id>', 'Session id the banner belongs to')
     .option('--token <token>', 'Short session token (defaults from --session)')
     .option('--title <title>', 'Session title (token fallback)')
-    .option('--kind <kind>', 'finished|question|permission|error', 'finished')
+    .option(
+      '--kind <kind>',
+      'finished|interrupted|question|permission|error',
+      'finished'
+    )
     .option('--dry-run', 'Print the focus plan without acting')
     .action(
       async (opts: {
@@ -403,7 +412,11 @@ function aliasNotifications(program: Command, globals: () => GlobalOpts): void {
   notifications
     .command('test')
     .description('(deprecated)')
-    .option('--kind <kind>', 'finished|question|permission|error', 'finished')
+    .option(
+      '--kind <kind>',
+      'finished|interrupted|question|permission|error',
+      'finished'
+    )
     .action(async (opts: { kind: string }) => {
       deprecated('opencode notifications test');
       await cmdNotificationsTest(opts.kind, globals());
@@ -473,6 +486,10 @@ function registerLifecycle(program: Command, globals: () => GlobalOpts): void {
     .action(async (opts: { removeLinks?: boolean | undefined }) =>
       cmdUninstall({ ...globals(), removeLinks: opts.removeLinks })
     );
+  program
+    .command('update')
+    .description('[ws] Pull latest from GitHub + reinstall + sync')
+    .action(async () => cmdUpdate(globals()));
   program
     .command('vault')
     .description('[ws] Show resolved Vault coordinates')

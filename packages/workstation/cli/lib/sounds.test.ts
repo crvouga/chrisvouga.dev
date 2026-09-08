@@ -5,7 +5,7 @@ import { describe, expect, test } from 'bun:test';
 
 import { TmpPlatform } from './test-platform';
 import { isKnownKind, readSounds, resetSounds, setSound } from './sounds';
-import { NOTIFIER_SOUNDS } from '../../opencode/sounds';
+import { NOTIFIER_SOUNDS } from '../../notifier/sounds';
 
 function fresh(): TmpPlatform {
   return new TmpPlatform(mkdtempSync(join(tmpdir(), 'ws-sounds-')));

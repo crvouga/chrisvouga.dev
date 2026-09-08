@@ -13,6 +13,7 @@
  */
 export const NOTIFIER_SOUNDS = {
   finished: 'Purr',
+  interrupted: 'Sosumi',
   question: 'Pop',
   permission: 'Ping',
   error: 'Bottle',

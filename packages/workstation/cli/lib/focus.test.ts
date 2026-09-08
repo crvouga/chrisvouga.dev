@@ -142,6 +142,8 @@ test('focus-opencode --dry-run prints the Cmd+P + term plan (no side effects)', 
   // Panel terminals only appear under the `term ` prefix — the old
   // plain-query-only handler could never match them (the reported bug).
   expect(result.stdout).toContain('term AtQbt0N');
-  expect(result.stdout).toContain('code -r');
+  // Raise-only window targeting: never opens or reloads VS Code.
+  expect(result.stdout).not.toContain('code -r');
+  expect(result.stdout).toContain('never opens');
   expect(result.stdout).toContain('focus-request');
 });
