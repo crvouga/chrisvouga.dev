@@ -3,6 +3,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { applyEnvFile } from "./env.ts";
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import { ENV_FILE, LOCAL_BASE_URL, ROOT, dataDirFromEnvFile, resolveDataDir } from "./paths.ts";
 import { ensureAppSecrets } from "./secrets.ts";
 
@@ -33,7 +36,9 @@ export function resolveBaseUrl(): string {
     process.env.BASE_URL?.trim() ||
     process.env.NEXT_PUBLIC_BASE_URL?.trim() ||
     LOCAL_BASE_URL;
-  return fromEnv.replace(/\/$/, "");
+  const resolved = fromEnv.replace(/\/$/, "");
+  assert.nonEmptyString(resolved, "resolved base URL must be non-empty");
+  return resolved;
 }
 
 /** Candidate DATA_DIR roots where 9Router may have written machine-id / cli-secret. */
@@ -48,6 +53,10 @@ export function candidateDataDirs(): string[] {
   add(dataDirFromEnvFile());
   add(join(ROOT, "data"));
   add(join(homedir(), ".9router"));
+  assert.nonEmptyArray(dirs, "candidate data dirs must be non-empty");
+  for (const dir of dirs) {
+    ha.nonEmptyString(dir, "candidate data dir must be non-empty");
+  }
   return dirs;
 }
 
@@ -56,22 +65,33 @@ export function candidateDataDirs(): string[] {
  * Prefers reading the server-written machine-id + auth/cli-secret.
  */
 export function computeCliToken(dataDir: string): string | null {
+  assert.nonEmptyString(dataDir, "data dir must be non-empty");
   const machineIdPath = join(dataDir, "machine-id");
   const cliSecretPath = join(dataDir, "auth", "cli-secret");
   if (!existsSync(machineIdPath) || !existsSync(cliSecretPath)) return null;
   const raw = readFileSync(machineIdPath, "utf8").trim();
   const secret = readFileSync(cliSecretPath, "utf8").trim();
   if (!raw || !secret) return null;
-  return createHash("sha256")
+  const token = createHash("sha256")
     .update(raw + CLI_TOKEN_SALT + secret)
     .digest("hex")
     .substring(0, 16);
+  // NOTE: token bytes never enter assert context — only the data-dir label.
+  assert.ok(token.length === 16, "computed CLI token must be 16 chars", {
+    dataDir,
+  });
+  return token;
 }
 
 export function findCliToken(): { token: string; dataDir: string } | null {
-  for (const dir of candidateDataDirs()) {
+  const dirs = candidateDataDirs();
+  assert.nonEmptyArray(dirs, "candidate data dirs must be non-empty");
+  for (const dir of dirs) {
     const token = computeCliToken(dir);
-    if (token) return { token, dataDir: dir };
+    if (token) {
+      assert.nonEmptyString(dir, "token data dir must be non-empty");
+      return { token, dataDir: dir };
+    }
   }
   return null;
 }
@@ -112,12 +132,21 @@ export class NineRouterClient {
   cliToken: string | null;
 
   constructor(opts: ClientOptions) {
+    assert.record(opts, "client options must be a record");
+    assert.nonEmptyString(opts.baseUrl, "client base URL must be non-empty");
     this.baseUrl = opts.baseUrl.replace(/\/$/, "");
+    assert.nonEmptyString(this.baseUrl, "client base URL must be non-empty");
     this.jar = opts.jar ?? new Map();
     this.cliToken = opts.cliToken ?? null;
   }
 
   async fetch(path: string, init: RequestInit = {}): Promise<Response> {
+    assert.nonEmptyString(path, "client fetch path must be non-empty");
+    assert.ok(
+      path.startsWith("/"),
+      "client fetch path must start with /",
+      { path },
+    );
     const headers = new Headers(init.headers);
     const cookie = cookieHeader(this.jar);
     if (cookie) headers.set("cookie", cookie);
@@ -176,6 +205,12 @@ export class NineRouterClient {
   }
 
   async login(password: string): Promise<void> {
+    // NOTE: password bytes never enter assert context — only its length.
+    assert.ok(
+      typeof password === "string" && password.length > 0,
+      "login password must be non-empty",
+      { baseUrl: this.baseUrl },
+    );
     const res = await this.fetch("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ password }),
@@ -210,6 +245,7 @@ export async function createAuthedClient(): Promise<NineRouterClient> {
   await ensureAppSecrets();
   applyEnvFile(ENV_FILE);
   const baseUrl = resolveBaseUrl();
+  assert.nonEmptyString(baseUrl, "resolved base URL must be non-empty");
   const found = findCliToken();
   logClient(`Connecting to ${baseUrl}…`);
   const client = new NineRouterClient({
@@ -222,8 +258,10 @@ export async function createAuthedClient(): Promise<NineRouterClient> {
 
   if (client.cliToken) {
     logClient(`Auth: probing CLI token from ${found!.dataDir}…`);
+    assert.nonEmptyString(found!.dataDir, "CLI token data dir must be non-empty");
     if (await client.isAuthorized()) {
       logClient("Auth OK (CLI token)");
+      assert.nonEmptyString(client.baseUrl, "authed client base URL must be set");
       return client;
     }
     logClient("Auth: CLI token rejected");

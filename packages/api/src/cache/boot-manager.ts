@@ -1,3 +1,4 @@
+import { assert } from '@pkgs/assert';
 import { createLogger } from '@pkgs/logger';
 import {
   isSecretStoreError,
@@ -31,10 +32,18 @@ function isTransientVaultBootError(err: unknown): boolean {
 }
 
 async function bootApp(env: CacheServerEnv): Promise<App> {
+  assert.record(env, 'bootApp requires env');
   const token = assertVaultToken(env);
+  assert.nonEmptyString(token, 'bootApp requires vault token');
   const { addr, project, config } = readVaultScopeBindings(env);
   const secretStore = createCacheSecretStore(token, { addr, project, config });
+  assert.defined(secretStore, 'bootApp requires secret store');
   const bootConfig = await loadCacheBootConfig(secretStore);
+  assert.nonEmptyString(
+    bootConfig.turboToken,
+    'bootConfig requires turboToken'
+  );
+  assert.defined(bootConfig.objectStore, 'bootConfig requires objectStore');
   return createCacheApp(bootConfig);
 }
 
@@ -42,13 +51,16 @@ export class CacheBootManager {
   private bootState: BootState = { kind: 'pending' };
   private fatalLogged = false;
 
-  constructor(private readonly env: CacheServerEnv) {}
+  constructor(private readonly env: CacheServerEnv) {
+    assert.record(this.env, 'CacheBootManager requires env');
+  }
 
   fatalReason(): string | null {
     return this.bootState.kind === 'fatal' ? this.bootState.reason : null;
   }
 
   private latchFatal(reason: string): void {
+    assert.nonEmptyString(reason, 'latchFatal requires reason');
     this.bootState = { kind: 'fatal', reason };
     if (!this.fatalLogged) {
       log.error('cache fatal: refusing to serve', { reason });
@@ -59,9 +71,11 @@ export class CacheBootManager {
   async ensureApp(): Promise<App | null> {
     if (this.bootState.kind === 'ready') return this.bootState.app;
     if (this.bootState.kind === 'fatal') return null;
+    assert.equals(this.bootState.kind, 'pending', 'boot state must be pending');
 
     try {
       const app = await bootApp(this.env);
+      assert.defined(app, 'bootApp must return app');
       this.bootState = { kind: 'ready', app };
       return app;
     } catch (err: unknown) {

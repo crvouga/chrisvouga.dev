@@ -23,6 +23,7 @@
     "tc": "tsc --noEmit"
   },
   "dependencies": {
+    "@pkgs/assert": "workspace:*",
     "yaml": "catalog:"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
+import { assert } from '@pkgs/assert';
 import { ObjectStoreImplInMemory } from '@pkgs/object-store/impl-in-memory';
 
 import { createCacheApp } from './create-app';
@@ -13,6 +14,7 @@ describe('createCacheApp', () => {
       turboToken: TOKEN,
       objectStore: new ObjectStoreImplInMemory(),
     });
+    assert.defined(app, 'test app must be defined');
   });
 
   test('GET /health is public', async () => {

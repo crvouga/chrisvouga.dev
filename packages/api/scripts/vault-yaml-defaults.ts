@@ -1,3 +1,4 @@
+import { assert } from '@pkgs/assert';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -10,7 +11,11 @@ export type VaultYamlDefaults = {
 
 const VAULT_YAML = join(import.meta.dirname, '..', '..', '..', '.vault.yaml');
 
+assert.nonEmptyString(VAULT_YAML, 'vault yaml path must be non-empty');
+
 function parseYamlValue(text: string, key: string): string | undefined {
+  assert.string(text, 'parseYamlValue requires text');
+  assert.nonEmptyString(key, 'parseYamlValue requires key');
   const match = text.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
   if (match === null || match[1] === undefined) return undefined;
   const raw = match[1].trim();
@@ -20,6 +25,7 @@ function parseYamlValue(text: string, key: string): string | undefined {
 }
 
 export function readVaultYamlDefaults(): VaultYamlDefaults {
+  assert.nonEmptyString(VAULT_YAML, 'vault yaml path must be non-empty');
   let text: string;
   try {
     text = readFileSync(VAULT_YAML, 'utf8');
@@ -41,6 +47,10 @@ export function readVaultYamlDefaults(): VaultYamlDefaults {
       `could not parse addr/mount/project/config from ${VAULT_YAML}`
     );
   }
+  assert.nonEmptyString(addr, 'vault yaml addr must be non-empty');
+  assert.nonEmptyString(mount, 'vault yaml mount must be non-empty');
+  assert.nonEmptyString(project, 'vault yaml project must be non-empty');
+  assert.nonEmptyString(config, 'vault yaml config must be non-empty');
   return { addr, mount, project, config };
 }
 
@@ -49,8 +59,11 @@ export function resolveVaultScope(options: {
   envProject?: string | undefined;
   envConfig?: string | undefined;
 }): Pick<VaultYamlDefaults, 'project' | 'config'> {
+  assert.record(options, 'resolveVaultScope requires options');
   const fromYaml = readVaultYamlDefaults();
   const project = options.envProject?.trim() || fromYaml.project;
   const config = options.envConfig?.trim() || fromYaml.config;
+  assert.nonEmptyString(project, 'vault scope project must be non-empty');
+  assert.nonEmptyString(config, 'vault scope config must be non-empty');
   return { project, config };
 }

@@ -1,3 +1,6 @@
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import {
   findServiceByName,
   resolveProjectContext,
@@ -21,12 +24,14 @@ const RAILWAY_VAULT_CONFIG: VaultKvConfig = "prd";
 let cachedVaultSecrets: Record<string, string> | null | undefined;
 
 export async function loadVaultSecretEnv(force = false): Promise<Record<string, string>> {
+  assert.ok(typeof force === "boolean", "force must be a boolean");
   if (!force && cachedVaultSecrets !== undefined) return cachedVaultSecrets ?? {};
   cachedVaultSecrets = null;
 
   try {
     const { vaultKvGetPrd } = await import("./vault-kv.js");
     cachedVaultSecrets = await vaultKvGetPrd();
+    assert.record(cachedVaultSecrets, "vault secrets must be a record");
     return cachedVaultSecrets;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -40,6 +45,9 @@ function resolveSecret(
   spec: SecretSpec,
   vaultData: Record<string, string>,
 ): string | null {
+  assert.record(spec, "secret spec must be a record");
+  assert.nonEmptyString(spec.name, "secret name must be non-empty");
+  assert.record(vaultData, "vault data must be a record");
   if (spec.source === "literal") return spec.value;
 
   const fromEnv = process.env[spec.name]?.trim();
@@ -68,6 +76,9 @@ export function collectServiceVariables(
   service: ServiceSpec,
   vaultData: Record<string, string> = {},
 ): { readonly variables: Record<string, string>; readonly missing: readonly string[] } {
+  assert.record(service, "service spec must be a record");
+  assert.nonEmptyString(service.id, "service id must be non-empty");
+  assert.record(vaultData, "vault data must be a record");
   const variables: Record<string, string> = { ...(service.env ?? {}) };
   // Railway injects PORT when unset; custom domains use services.yaml `port` as targetPort.
   if (service.port != null) {
@@ -75,7 +86,10 @@ export function collectServiceVariables(
   }
   const missing: string[] = [];
 
-  for (const spec of service.secrets ?? []) {
+  const specs = service.secrets ?? [];
+  assert.array(specs, "service secrets must be an array");
+  for (const spec of specs) {
+    ha.nonEmptyString(spec.name, "secret name must be non-empty");
     const value = resolveSecret(spec, vaultData);
     if (value == null) {
       missing.push(spec.name);
@@ -84,6 +98,8 @@ export function collectServiceVariables(
     variables[spec.name] = value;
   }
 
+  assert.record(variables, "collected variables must be a record");
+  assert.array(missing, "missing secrets must be an array");
   return { variables, missing };
 }
 
@@ -95,6 +111,9 @@ export async function syncServiceVariablesToRailway(
     readonly vaultData?: Record<string, string>;
   },
 ): Promise<void> {
+  assert.record(service, "service spec must be a record");
+  assert.nonEmptyString(service.id, "service id must be non-empty");
+  if (options?.vaultData !== undefined) assert.record(options.vaultData, "vault data must be a record");
   const vaultData = options?.vaultData ?? (await loadVaultSecretEnv());
   const { variables, missing } = collectServiceVariables(service, vaultData);
 

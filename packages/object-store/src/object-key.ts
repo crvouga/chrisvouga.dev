@@ -1,3 +1,5 @@
+import { assert } from '@pkgs/assert';
+
 export const OBJECT_KEY_PREFIX = 'turbo-cache' as const;
 
 export type PrefixedObjectKey = string & {
@@ -7,6 +9,7 @@ export type PrefixedObjectKey = string & {
 const PREFIX_WITH_SLASH = `${OBJECT_KEY_PREFIX}/`;
 
 function validateSegment(segment: string): void {
+  assert.string(segment, 'validateSegment: segment must be a string');
   if (!segment || segment === '.' || segment === '..') {
     throw new Error(`Invalid object key segment: ${segment}`);
   }
@@ -18,6 +21,7 @@ function validateSegment(segment: string): void {
 }
 
 function toPrefixedKey(key: string): PrefixedObjectKey {
+  assert.nonEmptyString(key, 'toPrefixedKey: key must be non-empty');
   if (!key.startsWith(PREFIX_WITH_SLASH)) {
     throw new Error(
       `Object key must start with "${PREFIX_WITH_SLASH}": ${key}`
@@ -26,13 +30,22 @@ function toPrefixedKey(key: string): PrefixedObjectKey {
   if (key.includes('..')) {
     throw new Error(`Object key must not contain path traversal: ${key}`);
   }
-  return key as PrefixedObjectKey;
+  const out = key as PrefixedObjectKey;
+  assert.ok(
+    out.startsWith(PREFIX_WITH_SLASH),
+    'toPrefixedKey: prefix invariant'
+  );
+  return out;
 }
 
 /**
  * Validate a store namespace segment (single path component, no separators).
  */
 export function validateStoreNamespace(namespace: string): void {
+  assert.string(
+    namespace,
+    'validateStoreNamespace: namespace must be a string'
+  );
   validateSegment(namespace);
 }
 
@@ -40,14 +53,25 @@ export function validateStoreNamespace(namespace: string): void {
  * Full physical key prefix for a store namespace: `turbo-cache/<namespace>`.
  */
 export function fullStoreKeyPrefix(storeNamespace: string): string {
+  assert.string(
+    storeNamespace,
+    'fullStoreKeyPrefix: namespace must be a string'
+  );
   validateStoreNamespace(storeNamespace);
-  return `${OBJECT_KEY_PREFIX}/${storeNamespace}`;
+  const prefix = `${OBJECT_KEY_PREFIX}/${storeNamespace}`;
+  assert.nonEmptyString(prefix, 'fullStoreKeyPrefix: prefix must be non-empty');
+  assert.ok(
+    prefix.startsWith(PREFIX_WITH_SLASH),
+    'fullStoreKeyPrefix: prefix invariant'
+  );
+  return prefix;
 }
 
 /**
  * Enforce the app key prefix at runtime. Prepends when missing; throws on escape.
  */
 export function enforceKeyPrefix(key: string): PrefixedObjectKey {
+  assert.string(key, 'enforceKeyPrefix: key must be a string');
   if (key.startsWith('..') || key.startsWith('/') || key.startsWith('\\')) {
     throw new Error(
       `Object key must not start with a path separator or traversal: ${key}`
@@ -60,6 +84,10 @@ export function enforceKeyPrefix(key: string): PrefixedObjectKey {
   const normalized = key.startsWith(PREFIX_WITH_SLASH)
     ? key
     : `${PREFIX_WITH_SLASH}${key}`;
+  assert.nonEmptyString(
+    normalized,
+    'enforceKeyPrefix: normalized must be non-empty'
+  );
   return toPrefixedKey(normalized);
 }
 
@@ -72,9 +100,15 @@ export function applyStoreKeyPrefix(
   key: string,
   storeNamespace: string
 ): PrefixedObjectKey {
+  assert.string(key, 'applyStoreKeyPrefix: key must be a string');
+  assert.string(
+    storeNamespace,
+    'applyStoreKeyPrefix: namespace must be a string'
+  );
   validateStoreNamespace(storeNamespace);
   const logicalKey = enforceKeyPrefix(key);
   const afterApp = logicalKey.slice(PREFIX_WITH_SLASH.length);
+  assert.string(afterApp, 'applyStoreKeyPrefix: remainder must be a string');
 
   if (
     afterApp === storeNamespace ||

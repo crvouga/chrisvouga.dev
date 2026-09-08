@@ -1,6 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { assert } from "@pkgs/assert";
 import { ENV_FILE, REPO_ROOT, SECRET_KEYS, type SecretKey } from "./paths.ts";
 import { requireCmd, run } from "./spawn.ts";
 
@@ -17,18 +18,27 @@ export const VAULT_TO_APP_SECRET_MAP: Readonly<
 };
 
 export function defaultVaultKvConfig(): VaultKvConfig {
-  return (process.env.VAULT_KV_CONFIG?.trim() || "prd") as VaultKvConfig;
+  const raw = process.env.VAULT_KV_CONFIG?.trim() || "prd";
+  assert.enum(raw, ["dev", "prd"], "VAULT_KV_CONFIG must be dev or prd");
+  return raw;
 }
 
 export function vaultKvCliPath(config: VaultKvConfig = defaultVaultKvConfig()): string {
-  return `secret/personal/${config}`;
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
+  const path = `secret/personal/${config}`;
+  assert.nonEmptyString(path, "vault KV CLI path must be non-empty");
+  return path;
 }
 
 export function vaultKvDataPath(config: VaultKvConfig = defaultVaultKvConfig()): string {
-  return `secret/data/personal/${config}`;
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
+  const path = `secret/data/personal/${config}`;
+  assert.nonEmptyString(path, "vault KV data path must be non-empty");
+  return path;
 }
 
 export function authHelp(kvPath: string): void {
+  assert.nonEmptyString(kvPath, "vault KV path must be non-empty");
   console.error(`
 Vault auth failed (token missing, expired, or lacks read on ${kvPath}).
 
@@ -61,6 +71,8 @@ export function resolveSecretFromKv(
   appKey: SecretKey,
   kvData: Record<string, string>,
 ): string | undefined {
+  assert.nonEmptyString(appKey, "app secret key label must be non-empty");
+  assert.record(kvData, "vault KV data must be a record", { appKey });
   for (const vaultKey of VAULT_TO_APP_SECRET_MAP[appKey]) {
     const value = kvData[vaultKey]?.trim();
     if (value) return value;
@@ -72,6 +84,11 @@ export function resolveSecretFromKv(
 export function resolveAppSecrets(
   kvData: Record<string, string>,
 ): Partial<Record<SecretKey, string>> {
+  assert.record(kvData, "vault KV data must be a record");
+  assert.nonNegative(
+    Object.keys(kvData).length,
+    "vault KV field count must be non-negative",
+  );
   const out: Partial<Record<SecretKey, string>> = {};
   for (const key of SECRET_KEYS) {
     const value = resolveSecretFromKv(key, kvData);
@@ -83,6 +100,7 @@ export function resolveAppSecrets(
 export async function fetchVaultKvViaApi(
   config: VaultKvConfig = defaultVaultKvConfig(),
 ): Promise<Record<string, string>> {
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
   const token = process.env.VAULT_TOKEN?.trim();
   if (!token) throw new Error("VAULT_TOKEN not set");
   const addr = (
@@ -97,12 +115,15 @@ export async function fetchVaultKvViaApi(
     throw new Error(`Vault GET ${path} failed (${res.status}): ${text}`);
   }
   const body = (await res.json()) as { data?: { data?: Record<string, string> } };
-  return body.data?.data ?? {};
+  const data = body.data?.data ?? {};
+  assert.record(data, "vault KV response data must be a record", { config });
+  return data;
 }
 
 export function fetchVaultKvViaCli(
   config: VaultKvConfig = defaultVaultKvConfig(),
 ): Record<string, string> {
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
   requireCmd("vault");
   const kvPath = vaultKvCliPath(config);
   const result = run("vault", ["kv", "get", "-format=json", kvPath], {
@@ -117,13 +138,16 @@ export function fetchVaultKvViaCli(
   const body = JSON.parse(result.stdout) as {
     data?: { data?: Record<string, string> };
   };
-  return body.data?.data ?? {};
+  const data = body.data?.data ?? {};
+  assert.record(data, "vault KV CLI data must be a record", { config });
+  return data;
 }
 
 /** Read KV via VAULT_TOKEN API, falling back to active vault login session. */
 export async function fetchVaultKv(
   config: VaultKvConfig = defaultVaultKvConfig(),
 ): Promise<Record<string, string>> {
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
   try {
     return await fetchVaultKvViaApi(config);
   } catch {
@@ -133,6 +157,10 @@ export async function fetchVaultKv(
 
 /** Apply vault run–injected 9ROUTER_* env vars to upstream app env names. */
 export function applyVaultRunEnv(): void {
+  assert.nonEmptyArray(
+    SECRET_KEYS,
+    "app secret key labels must be non-empty",
+  );
   for (const appKey of SECRET_KEYS) {
     if (process.env[appKey]?.trim()) continue;
     for (const vaultKey of VAULT_TO_APP_SECRET_MAP[appKey]) {
@@ -156,6 +184,8 @@ export async function patchVaultKvViaApi(
   fields: Record<string, string>,
   config: VaultKvConfig = defaultVaultKvConfig(),
 ): Promise<void> {
+  assert.record(fields, "vault patch fields must be a record", { config });
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
   const token = process.env.VAULT_TOKEN?.trim();
   if (!token) throw new Error("VAULT_TOKEN not set");
   if (Object.keys(fields).length === 0) return;
@@ -179,6 +209,8 @@ export function patchVaultKvViaCli(
   fields: Record<string, string>,
   config: VaultKvConfig = defaultVaultKvConfig(),
 ): void {
+  assert.record(fields, "vault patch fields must be a record", { config });
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
   requireCmd("vault");
   if (Object.keys(fields).length === 0) return;
   const kvPath = vaultKvCliPath(config);
@@ -213,6 +245,8 @@ export async function patchVaultKv(
   fields: Record<string, string>,
   config: VaultKvConfig = defaultVaultKvConfig(),
 ): Promise<void> {
+  assert.record(fields, "vault patch fields must be a record", { config });
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
   if (Object.keys(fields).length === 0) return;
   if (process.env.VAULT_TOKEN?.trim()) {
     try {

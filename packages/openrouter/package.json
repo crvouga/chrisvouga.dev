@@ -15,7 +15,9 @@
     "tc": "tsc --noEmit",
     "test": "bun test --pass-with-no-tests"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@pkgs/assert": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "catalog:",
     "eslint-plugin-lingui": "catalog:",

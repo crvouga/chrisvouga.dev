@@ -18,6 +18,9 @@
  *   bun run seed:turbo-client:mirror-prd
  *     Copy client TURBO_* secrets from dev → prd in this repo's Vault project.
  */
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
+
+const ha: Assert = hotAssert();
 import { VaultCli } from '@pkgs/vault';
 
 import {
@@ -37,6 +40,7 @@ type CliOptions = {
 };
 
 function fail(message: string): never {
+  assert.nonEmptyString(message, 'fail requires message');
   console.error(`seed-turbo-client-secrets: ${message}`);
   process.exit(1);
 }
@@ -103,15 +107,22 @@ function parseCliOptions(): CliOptions {
 }
 
 function readEnvSecret(key: string): string | null {
+  assert.nonEmptyString(key, 'readEnvSecret requires key');
   const value = process.env[key]?.trim() ?? '';
   return value.length > 0 ? value : null;
 }
 
 function resolveClientSecretsFromEnv(): Record<string, string> {
+  assert.nonEmptyArray(
+    TURBO_CLIENT_REQUIRED_KEYS,
+    'required client keys must be non-empty'
+  );
   const defaults = turboClientRegistryDefaults();
+  assert.record(defaults, 'client registry defaults must be a record');
   const secrets: Record<string, string> = {};
 
   for (const key of TURBO_CLIENT_REQUIRED_KEYS) {
+    ha.nonEmptyString(key, 'client secret key must be non-empty');
     const fromEnv = readEnvSecret(key);
     const fallback = defaults[key];
     const value = fromEnv ?? fallback ?? null;
@@ -124,12 +135,14 @@ function resolveClientSecretsFromEnv(): Record<string, string> {
   }
 
   for (const key of TURBO_CLIENT_OPTIONAL_KEYS) {
+    ha.nonEmptyString(key, 'optional client key must be non-empty');
     const fromEnv = readEnvSecret(key);
     if (fromEnv !== null) {
       secrets[key] = fromEnv;
     }
   }
 
+  assert.record(secrets, 'client secrets must be a record');
   return secrets;
 }
 
@@ -138,10 +151,20 @@ function resolveClientSecretsFromVault(
   project: string,
   config: string
 ): Record<string, string> {
+  assert.defined(cli, 'resolveClientSecretsFromVault requires cli');
+  assert.nonEmptyString(
+    project,
+    'resolveClientSecretsFromVault requires project'
+  );
+  assert.nonEmptyString(
+    config,
+    'resolveClientSecretsFromVault requires config'
+  );
   const defaults = turboClientRegistryDefaults();
   const secrets: Record<string, string> = {};
 
   for (const key of TURBO_CLIENT_REQUIRED_KEYS) {
+    ha.nonEmptyString(key, 'client secret key must be non-empty');
     const fromVault = cli.kvGetField(project, config, key);
     const fallback = defaults[key];
     const value = fromVault ?? fallback ?? null;
@@ -154,6 +177,7 @@ function resolveClientSecretsFromVault(
   }
 
   for (const key of TURBO_CLIENT_OPTIONAL_KEYS) {
+    ha.nonEmptyString(key, 'optional client key must be non-empty');
     const fromVault = cli.kvGetField(project, config, key);
     if (fromVault !== null && fromVault.length > 0) {
       secrets[key] = fromVault;
@@ -164,6 +188,7 @@ function resolveClientSecretsFromVault(
 }
 
 function shellEscape(value: string): string {
+  assert.string(value, 'shellEscape requires string');
   if (/^[A-Za-z0-9_./:-]+$/.test(value)) {
     return value;
   }
@@ -231,7 +256,19 @@ function pushClientSecrets(
   targetProject: string,
   targetConfig: string
 ): void {
+  assert.defined(cli, 'pushClientSecrets requires cli');
+  assert.record(secrets, 'pushClientSecrets requires secrets');
+  assert.nonEmptyString(
+    targetProject,
+    'pushClientSecrets requires targetProject'
+  );
+  assert.nonEmptyString(
+    targetConfig,
+    'pushClientSecrets requires targetConfig'
+  );
   for (const [key, value] of Object.entries(secrets)) {
+    ha.nonEmptyString(key, 'client secret key must be non-empty');
+    ha.string(value, 'client secret value must be string');
     cli.kvUpsertField(targetProject, targetConfig, key, value);
     console.log(`set ${targetProject}/${targetConfig} ${key}`);
   }
@@ -242,6 +279,8 @@ function pushClientSecrets(
 }
 
 function mirrorDevToPrd(cli: VaultCli, project: string): void {
+  assert.defined(cli, 'mirrorDevToPrd requires cli');
+  assert.nonEmptyString(project, 'mirrorDevToPrd requires project');
   const secrets = resolveClientSecretsFromVault(cli, project, 'dev');
 
   for (const key of [

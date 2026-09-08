@@ -1,3 +1,4 @@
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
 import type { SecretString } from '@pkgs/secret-string/secret-string';
 import {
   SecretBlankError,
@@ -46,6 +47,7 @@ type VaultFetch = (
 const defaultFetch: VaultFetch = (input, init) => globalThis.fetch(input, init);
 
 function assertNonBlankName(name: string): void {
+  assert.string(name, 'Vault: secret name must be a string');
   if (name.length === 0) {
     throw new SecretStoreRequestError('Secret name must be non-empty');
   }
@@ -57,6 +59,8 @@ function parseSecret(
   body: Record<string, unknown>,
   name: string
 ): ParsedSecret {
+  assert.record(body, 'parseSecret: body must be an object');
+  assert.nonEmptyString(name, 'parseSecret: name must be non-empty');
   if (!(name in body)) {
     return 'missing';
   }
@@ -67,6 +71,7 @@ function parseSecret(
   if (typeof raw !== 'string') {
     return 'blank';
   }
+  assert.string(raw, 'parseSecret: raw must be a string here');
   const trimmed = raw.trim();
   if (trimmed.length === 0) {
     return 'blank';
@@ -75,9 +80,15 @@ function parseSecret(
 }
 
 function trimOpt(value: string | undefined): string | null {
+  assert.ok(
+    value === undefined || typeof value === 'string',
+    'trimOpt: value must be a string or undefined'
+  );
   if (value === undefined) return null;
   const t = value.trim();
-  return t.length > 0 ? t : null;
+  if (t.length === 0) return null;
+  assert.nonEmptyString(t, 'trimOpt: trimmed value must be non-empty here');
+  return t;
 }
 
 const DEFAULT_RATE_LIMIT_RETRIES = 3;
@@ -86,12 +97,21 @@ const defaultSleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 function parseRetryAfterMs(header: string | null): number | null {
+  assert.ok(
+    header === null || typeof header === 'string',
+    'parseRetryAfterMs: header must be a string or null'
+  );
   if (header === null) return null;
   const trimmed = header.trim();
   if (trimmed.length === 0) return null;
   const seconds = Number(trimmed);
   if (!Number.isFinite(seconds) || seconds < 0) return null;
-  return Math.min(Math.round(seconds * 1000), RATE_LIMIT_BACKOFF_CAP_MS);
+  const ms = Math.min(Math.round(seconds * 1000), RATE_LIMIT_BACKOFF_CAP_MS);
+  assert.nonNegativeInteger(
+    ms,
+    'parseRetryAfterMs: result must be a non-negative integer'
+  );
+  return ms;
 }
 
 type KvV2Response = {
@@ -101,6 +121,7 @@ type KvV2Response = {
 };
 
 function parseKvDataObject(json: unknown): Record<string, unknown> {
+  assert.defined(json, 'parseKvDataObject: body must be defined');
   if (json === null || typeof json !== 'object' || Array.isArray(json)) {
     throw new SecretStoreParseError('Vault KV read: expected JSON object body');
   }
@@ -115,6 +136,7 @@ function parseKvDataObject(json: unknown): Record<string, unknown> {
       'Vault KV read: .data.data must be an object'
     );
   }
+  assert.record(data, 'parseKvDataObject: .data.data must be an object here');
   return data;
 }
 
@@ -122,6 +144,9 @@ async function readVaultKvBody(
   response: Response,
   path: string
 ): Promise<Record<string, unknown>> {
+  assert.defined(response, 'readVaultKvBody: response is required');
+  assert.nonEmptyString(path, 'readVaultKvBody: path must be non-empty');
+  assert.integer(response.status, 'readVaultKvBody: status must be an integer');
   if (response.status === 404) {
     throw new SecretStoreRequestError(
       `Vault KV read failed: secret not found at ${path}`,
@@ -149,7 +174,84 @@ async function readVaultKvBody(
       'Vault KV read: response body is not valid JSON'
     );
   }
+  assert.defined(json, 'readVaultKvBody: parsed body must be defined');
   return parseKvDataObject(json);
+}
+
+type NormalizedVaultOptions = {
+  token: string;
+  addr: string;
+  mount: string;
+  project: string;
+  config: string;
+  fetchFn: VaultFetch;
+  rateLimitRetries: number;
+  sleep: (ms: number) => Promise<void>;
+};
+
+function normalizeRateLimitRetries(value: number | undefined): number {
+  assert.ok(
+    value === undefined || typeof value === 'number',
+    'Vault: rateLimitRetries must be a number when provided'
+  );
+  const retries =
+    value !== undefined
+      ? Math.max(0, Math.floor(value))
+      : DEFAULT_RATE_LIMIT_RETRIES;
+  assert.nonNegativeInteger(
+    retries,
+    'Vault: rateLimitRetries must be a non-negative integer'
+  );
+  return retries;
+}
+
+function normalizeVaultOptions(
+  options: VaultSecretStoreOptions
+): NormalizedVaultOptions {
+  assert.string(options.token, 'Vault: token must be a string');
+  assert.ok(
+    options.addr === undefined || typeof options.addr === 'string',
+    'Vault: addr must be a string when provided'
+  );
+  assert.ok(
+    options.mount === undefined || typeof options.mount === 'string',
+    'Vault: mount must be a string when provided'
+  );
+  const token = options.token.trim();
+  if (token.length === 0) {
+    throw new SecretStoreRequestError(
+      'Vault: token is required (non-empty string)'
+    );
+  }
+  const project = trimOpt(options.project);
+  const config = trimOpt(options.config);
+  if (project === null || config === null) {
+    throw new SecretStoreRequestError(
+      'Vault: project and config are required (non-empty strings)'
+    );
+  }
+  assert.nonEmptyString(DEFAULT_ADDR, 'Vault: DEFAULT_ADDR must be non-empty');
+  assert.nonEmptyString(
+    DEFAULT_MOUNT,
+    'Vault: DEFAULT_MOUNT must be non-empty'
+  );
+  const addr = trimOpt(options.addr) ?? DEFAULT_ADDR;
+  const mount = trimOpt(options.mount) ?? DEFAULT_MOUNT;
+  assert.defined(defaultFetch, 'Vault: defaultFetch must be set');
+  assert.defined(defaultSleep, 'Vault: defaultSleep must be set');
+  const fetchFn = options.fetchFn ?? defaultFetch;
+  const rateLimitRetries = normalizeRateLimitRetries(options.rateLimitRetries);
+  const sleep = options.sleep ?? defaultSleep;
+  return {
+    token,
+    addr,
+    mount,
+    project,
+    config,
+    fetchFn,
+    rateLimitRetries,
+    sleep,
+  };
 }
 
 /**
@@ -169,34 +271,27 @@ export class VaultSecretStore implements SecretStore {
   private inflightDownload: Promise<Record<string, ParsedSecret>> | null = null;
 
   constructor(options: VaultSecretStoreOptions) {
-    const t = options.token.trim();
-    if (t.length === 0) {
-      throw new SecretStoreRequestError(
-        'VaultSecretStore: token is required (non-empty string)'
-      );
-    }
-    const project = trimOpt(options.project);
-    const config = trimOpt(options.config);
-    if (project === null || config === null) {
-      throw new SecretStoreRequestError(
-        'VaultSecretStore: project and config are required (non-empty strings)'
-      );
-    }
-    this.token = t;
-    this.addr = trimOpt(options.addr) ?? DEFAULT_ADDR;
-    this.mount = trimOpt(options.mount) ?? DEFAULT_MOUNT;
-    this.project = project;
-    this.config = config;
-    this.fetchFn = options.fetchFn ?? defaultFetch;
-    this.rateLimitRetries =
-      options.rateLimitRetries !== undefined
-        ? Math.max(0, Math.floor(options.rateLimitRetries))
-        : DEFAULT_RATE_LIMIT_RETRIES;
-    this.sleep = options.sleep ?? defaultSleep;
+    assert.record(options, 'Vault: options must be an object');
+    const normalized = normalizeVaultOptions(options);
+    this.token = normalized.token;
+    this.addr = normalized.addr;
+    this.mount = normalized.mount;
+    this.project = normalized.project;
+    this.config = normalized.config;
+    this.fetchFn = normalized.fetchFn;
+    this.rateLimitRetries = normalized.rateLimitRetries;
+    this.sleep = normalized.sleep;
+    assert.equals(this.token, normalized.token, 'Vault: token invariant');
+    assert.equals(this.project, normalized.project, 'Vault: project invariant');
+    assert.equals(this.config, normalized.config, 'Vault: config invariant');
+    assert.defined(this.fetchFn, 'Vault: fetchFn must be set');
+    assert.defined(this.sleep, 'Vault: sleep must be set');
   }
 
   kvDataPath(): string {
-    return `${this.addr.replace(/\/$/, '')}/v1/${this.mount}/data/${this.project}/${this.config}`;
+    const path = `${this.addr.replace(/\/$/, '')}/v1/${this.mount}/data/${this.project}/${this.config}`;
+    assert.nonEmptyString(path, 'kvDataPath: path must be non-empty');
+    return path;
   }
 
   async getRequired(
@@ -221,17 +316,29 @@ export class VaultSecretStore implements SecretStore {
     names: readonly string[],
     init?: SecretStoreGetInit
   ): Promise<Record<string, SecretString>> {
+    assert.array(names, 'getRequiredMany: names must be an array');
     if (names.length === 0) {
       return {};
     }
+    const haRequired: Assert = hotAssert();
     for (const n of names) {
+      haRequired.nonEmptyString(n, 'getRequiredMany: name must be non-empty');
       assertNonBlankName(n);
     }
     const row = await this.downloadSecretRow(init);
     const out: Record<string, SecretString> = {};
     for (const name of names) {
+      haRequired.nonEmptyString(
+        name,
+        'getRequiredMany: name must be non-empty'
+      );
       out[name] = wrapSecret(name, this.requiredFromRow(row, name));
     }
+    assert.equals(
+      Object.keys(out).length,
+      names.length,
+      'getRequiredMany: one entry per name'
+    );
     return out;
   }
 
@@ -239,17 +346,29 @@ export class VaultSecretStore implements SecretStore {
     names: readonly string[],
     init?: SecretStoreGetInit
   ): Promise<Record<string, SecretString | null>> {
+    assert.array(names, 'getOptionalMany: names must be an array');
     if (names.length === 0) {
       return {};
     }
+    const haOptional: Assert = hotAssert();
     for (const n of names) {
+      haOptional.nonEmptyString(n, 'getOptionalMany: name must be non-empty');
       assertNonBlankName(n);
     }
     const row = await this.downloadSecretRow(init);
     const out: Record<string, SecretString | null> = {};
     for (const name of names) {
+      haOptional.nonEmptyString(
+        name,
+        'getOptionalMany: name must be non-empty'
+      );
       out[name] = wrapSecretOptional(name, this.optionalFromRow(row, name));
     }
+    assert.equals(
+      Object.keys(out).length,
+      names.length,
+      'getOptionalMany: one entry per name'
+    );
     return out;
   }
 
@@ -261,6 +380,7 @@ export class VaultSecretStore implements SecretStore {
     _value: string,
     _init?: SecretStoreSetInit
   ): Promise<void> {
+    assert.nonEmptyString(name, 'setSecret: name must be non-empty');
     throw new SecretStoreRequestError(
       `VaultSecretStore is HTTP-read-only; cannot setSecret("${name}"). ` +
         'For Bun/Node scripts use VaultCli.kvPatch/kvPut.'
@@ -271,6 +391,8 @@ export class VaultSecretStore implements SecretStore {
     row: Record<string, ParsedSecret>,
     name: string
   ): string {
+    assert.record(row, 'requiredFromRow: row must be an object');
+    assert.nonEmptyString(name, 'requiredFromRow: name must be non-empty');
     const p = row[name];
     if (p === undefined || p === 'missing') {
       throw new SecretMissingError(name);
@@ -278,6 +400,8 @@ export class VaultSecretStore implements SecretStore {
     if (p === 'blank') {
       throw new SecretBlankError(name);
     }
+    assert.record(p, 'requiredFromRow: entry must be a value here');
+    assert.string(p.value, 'requiredFromRow: value must be a string');
     return p.value;
   }
 
@@ -285,16 +409,24 @@ export class VaultSecretStore implements SecretStore {
     row: Record<string, ParsedSecret>,
     name: string
   ): string | null {
+    assert.record(row, 'optionalFromRow: row must be an object');
+    assert.nonEmptyString(name, 'optionalFromRow: name must be non-empty');
     const p = row[name];
     if (p === undefined || p === 'missing' || p === 'blank') {
       return null;
     }
+    assert.record(p, 'optionalFromRow: entry must be a value here');
+    assert.string(p.value, 'optionalFromRow: value must be a string');
     return p.value;
   }
 
   private async downloadSecretRow(
     init?: SecretStoreGetInit
   ): Promise<Record<string, ParsedSecret>> {
+    assert.ok(
+      init === undefined || typeof init === 'object',
+      'downloadSecretRow: init must be an object when provided'
+    );
     if (init?.force !== true && this.cachedBody !== null) {
       return this.cachedBody;
     }
@@ -309,8 +441,11 @@ export class VaultSecretStore implements SecretStore {
     }
 
     const download = this.fetchSecretBody(init).then((body) => {
+      assert.record(body, 'Vault: fetched body must be an object');
       const out: Record<string, ParsedSecret> = {};
+      const ha: Assert = hotAssert();
       for (const key of Object.keys(body)) {
+        ha.nonEmptyString(key, 'Vault: body key must be non-empty');
         out[key] = parseSecret(body, key);
       }
       this.cachedBody = out;
@@ -326,6 +461,7 @@ export class VaultSecretStore implements SecretStore {
     init?: SecretStoreGetInit
   ): Promise<Record<string, unknown>> {
     const url = this.kvDataPath();
+    assert.nonEmptyString(url, 'fetchSecretBody: url must be non-empty');
     const requestInit: RequestInit = {
       method: 'GET',
       headers: {
@@ -334,10 +470,16 @@ export class VaultSecretStore implements SecretStore {
       },
     };
     if (init?.signal !== undefined) {
+      assert.instanceOf(
+        init.signal,
+        AbortSignal,
+        'fetchSecretBody: signal must be an AbortSignal'
+      );
       requestInit.signal = init.signal;
     }
 
     const response = await this.fetchWithRateLimitRetry(url, requestInit);
+    assert.defined(response, 'fetchSecretBody: response is required');
     return readVaultKvBody(response, `${this.project}/${this.config}`);
   }
 
@@ -345,6 +487,15 @@ export class VaultSecretStore implements SecretStore {
     url: string,
     init: RequestInit
   ): Promise<Response> {
+    assert.nonEmptyString(
+      url,
+      'fetchWithRateLimitRetry: url must be non-empty'
+    );
+    assert.record(init, 'fetchWithRateLimitRetry: init must be an object');
+    assert.nonNegativeInteger(
+      this.rateLimitRetries,
+      'fetchWithRateLimitRetry: rateLimitRetries invariant'
+    );
     let attempt = 0;
     while (true) {
       let response: Response;

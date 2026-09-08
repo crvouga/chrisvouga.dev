@@ -4,8 +4,12 @@
  * Requires TURBO_API and TURBO_TOKEN in env (via `vault run`).
  * CI: `bun run smoke:prd` after deploy.
  */
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
+
 import { VaultSecretKey } from './vault-secrets-registry';
 import { verifyB2S3Credentials } from './verify-b2-s3';
+
+const ha: Assert = hotAssert();
 
 const READINESS_ATTEMPTS = 10;
 const READINESS_DELAY_MS = 5_000;
@@ -14,6 +18,7 @@ type SmokeResult =
   { readonly ok: true } | { readonly ok: false; readonly error: string };
 
 function fail(message: string): never {
+  assert.nonEmptyString(message, 'fail requires message');
   console.error('');
   console.error('════════════════════════════════════════════════════════');
   console.error('  Remote cache smoke test FAILED');
@@ -24,6 +29,7 @@ function fail(message: string): never {
 }
 
 function requireEnv(key: string): string {
+  assert.nonEmptyString(key, 'requireEnv requires key');
   const value = process.env[key]?.trim() ?? '';
   if (value.length === 0) {
     fail(
@@ -34,10 +40,12 @@ function requireEnv(key: string): string {
 }
 
 function baseUrl(apiUrl: string): string {
+  assert.nonEmptyString(apiUrl, 'baseUrl requires apiUrl');
   return apiUrl.replace(/\/$/, '');
 }
 
 function authHeaders(token: string): Record<string, string> {
+  assert.nonEmptyString(token, 'authHeaders requires token');
   return { Authorization: `Bearer ${token}` };
 }
 
@@ -46,6 +54,9 @@ async function formatHttpError(
   url: string,
   res: Response
 ): Promise<string> {
+  assert.nonEmptyString(method, 'formatHttpError requires method');
+  assert.nonEmptyString(url, 'formatHttpError requires url');
+  assert.defined(res, 'formatHttpError requires response');
   const status = String(res.status);
   let detail = '';
   try {
@@ -68,10 +79,13 @@ async function formatHttpError(
 }
 
 function sleep(ms: number): Promise<void> {
+  assert.nonNegativeInteger(ms, 'sleep requires non-negative ms');
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function waitForReady(apiUrl: string, token: string): Promise<void> {
+  assert.nonEmptyString(apiUrl, 'waitForReady requires apiUrl');
+  assert.nonEmptyString(token, 'waitForReady requires token');
   const url = `${baseUrl(apiUrl)}/v8/artifacts/status`;
   console.log(
     `Waiting for cache readiness (${String(READINESS_ATTEMPTS)} attempts)…`
@@ -114,6 +128,8 @@ async function waitForReady(apiUrl: string, token: string): Promise<void> {
 }
 
 function logCheck(name: string, result: SmokeResult): void {
+  assert.nonEmptyString(name, 'logCheck requires name');
+  assert.record(result, 'logCheck requires result');
   if (result.ok) {
     console.log(`PASS  ${name}`);
     return;
@@ -122,6 +138,7 @@ function logCheck(name: string, result: SmokeResult): void {
 }
 
 async function checkHealth(apiUrl: string): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'checkHealth requires apiUrl');
   const url = `${baseUrl(apiUrl)}/health`;
   try {
     const res = await fetch(url);
@@ -146,6 +163,7 @@ async function checkHealth(apiUrl: string): Promise<SmokeResult> {
 }
 
 async function checkStatusUnauth(apiUrl: string): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'checkStatusUnauth requires apiUrl');
   const url = `${baseUrl(apiUrl)}/v8/artifacts/status`;
   try {
     const res = await fetch(url);
@@ -166,6 +184,8 @@ async function checkStatusAuth(
   apiUrl: string,
   token: string
 ): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'checkStatusAuth requires apiUrl');
+  assert.nonEmptyString(token, 'checkStatusAuth requires token');
   const url = `${baseUrl(apiUrl)}/v8/artifacts/status`;
   try {
     const res = await fetch(url, { headers: authHeaders(token) });
@@ -196,6 +216,11 @@ async function checkPutArtifact(
   bytes: Uint8Array,
   tag: string
 ): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'checkPutArtifact requires apiUrl');
+  assert.nonEmptyString(token, 'checkPutArtifact requires token');
+  assert.nonEmptyString(hash, 'checkPutArtifact requires hash');
+  assert.instanceOf(bytes, Uint8Array, 'checkPutArtifact requires bytes');
+  assert.nonEmptyString(tag, 'checkPutArtifact requires tag');
   const url = `${baseUrl(apiUrl)}/v8/artifacts/${hash}`;
   try {
     const res = await fetch(url, {
@@ -231,6 +256,9 @@ async function checkHeadArtifact(
   token: string,
   hash: string
 ): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'checkHeadArtifact requires apiUrl');
+  assert.nonEmptyString(token, 'checkHeadArtifact requires token');
+  assert.nonEmptyString(hash, 'checkHeadArtifact requires hash');
   const url = `${baseUrl(apiUrl)}/v8/artifacts/${hash}`;
   try {
     const res = await fetch(url, {
@@ -257,6 +285,15 @@ async function checkGetArtifact(
   expectedBytes: Uint8Array,
   expectedTag: string
 ): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'checkGetArtifact requires apiUrl');
+  assert.nonEmptyString(token, 'checkGetArtifact requires token');
+  assert.nonEmptyString(hash, 'checkGetArtifact requires hash');
+  assert.instanceOf(
+    expectedBytes,
+    Uint8Array,
+    'checkGetArtifact requires expectedBytes'
+  );
+  assert.nonEmptyString(expectedTag, 'checkGetArtifact requires expectedTag');
   const url = `${baseUrl(apiUrl)}/v8/artifacts/${hash}`;
   try {
     const res = await fetch(url, { headers: authHeaders(token) });
@@ -281,6 +318,7 @@ async function checkGetArtifact(
       };
     }
     for (let i = 0; i < body.length; i++) {
+      ha.ok(i >= 0, 'byte index must be non-negative');
       if (body[i] !== expectedBytes[i]) {
         return {
           ok: false,
@@ -301,6 +339,13 @@ async function checkExistenceMap(
   existingHash: string,
   missingHash: string
 ): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'checkExistenceMap requires apiUrl');
+  assert.nonEmptyString(token, 'checkExistenceMap requires token');
+  assert.nonEmptyString(
+    existingHash,
+    'checkExistenceMap requires existingHash'
+  );
+  assert.nonEmptyString(missingHash, 'checkExistenceMap requires missingHash');
   const url = `${baseUrl(apiUrl)}/v8/artifacts`;
   try {
     const res = await fetch(url, {
@@ -332,6 +377,8 @@ async function checkExistenceMap(
 }
 
 async function runSuite(apiUrl: string, token: string): Promise<void> {
+  assert.nonEmptyString(apiUrl, 'runSuite requires apiUrl');
+  assert.nonEmptyString(token, 'runSuite requires token');
   const hash = `smoke-${String(Date.now())}-${crypto.randomUUID()}`;
   const missingHash = `smoke-missing-${crypto.randomUUID()}`;
   const bytes = new Uint8Array(16);
@@ -368,6 +415,8 @@ async function runSuite(apiUrl: string, token: string): Promise<void> {
 
   const failures: string[] = [];
   for (const check of checks) {
+    ha.nonEmptyString(check.name, 'check name must be non-empty');
+    ha.defined(check.run, 'check run must be defined');
     const result = await check.run();
     logCheck(check.name, result);
     if (!result.ok) {

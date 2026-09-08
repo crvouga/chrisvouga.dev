@@ -12,6 +12,8 @@
  * allowed/excluded models are sent per-request via the `auto-router` plugin.
  */
 
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
+
 /** The OpenRouter model slug for the Auto Router. */
 export const AUTO_ROUTER_MODEL_ID = 'openrouter/auto' as const;
 
@@ -75,22 +77,76 @@ export type OpenCodeModelConfig = {
   request: { body: AutoRouterRequest };
 };
 
+function assertAutoRouterOptions(options: AutoRouterOptions): void {
+  assert.ok(
+    options.costTier === undefined || typeof options.costTier === 'string',
+    'autoRouterPlugin: costTier must be a string when provided'
+  );
+  assert.ok(
+    options.allowedModels === undefined || Array.isArray(options.allowedModels),
+    'autoRouterPlugin: allowedModels must be an array when provided'
+  );
+  assert.ok(
+    options.excludedModels === undefined ||
+      Array.isArray(options.excludedModels),
+    'autoRouterPlugin: excludedModels must be an array when provided'
+  );
+}
+
+function copyModelPatterns(
+  patterns: readonly AutoRouterModelPattern[],
+  label: string
+): readonly AutoRouterModelPattern[] {
+  const ha: Assert = hotAssert();
+  for (const m of patterns) {
+    ha.nonEmptyString(m, label);
+  }
+  return patterns;
+}
+
 /** Build the `auto-router` plugin payload for a request. */
 export function autoRouterPlugin(
   options: AutoRouterOptions = {}
 ): AutoRouterPlugin {
+  assert.record(options, 'autoRouterPlugin: options must be an object');
+  assertAutoRouterOptions(options);
   const plugin: AutoRouterPlugin = { id: AUTO_ROUTER_PLUGIN_ID };
+  assert.defined(
+    DEFAULT_AUTO_ROUTER_COST_TIER,
+    'autoRouterPlugin: default cost tier fallback valid'
+  );
   const costTier = options.costTier ?? DEFAULT_AUTO_ROUTER_COST_TIER;
+  assert.enum(
+    costTier,
+    ['low', 'medium', 'high', 'xhigh', 'max'],
+    'autoRouterPlugin: unknown cost tier'
+  );
   plugin.cost_tier = costTier;
   if (options.allowedModels !== undefined && options.allowedModels.length > 0) {
-    plugin.allowed_models = options.allowedModels;
+    plugin.allowed_models = copyModelPatterns(
+      options.allowedModels,
+      'autoRouterPlugin: allowed model pattern must be non-empty'
+    );
   }
   if (
     options.excludedModels !== undefined &&
     options.excludedModels.length > 0
   ) {
-    plugin.excluded_models = options.excludedModels;
+    plugin.excluded_models = copyModelPatterns(
+      options.excludedModels,
+      'autoRouterPlugin: excluded model pattern must be non-empty'
+    );
   }
+  assert.equals(
+    plugin.id,
+    AUTO_ROUTER_PLUGIN_ID,
+    'autoRouterPlugin: id invariant'
+  );
+  assert.equals(
+    plugin.cost_tier,
+    costTier,
+    'autoRouterPlugin: cost_tier invariant'
+  );
   return plugin;
 }
 
@@ -98,7 +154,18 @@ export function autoRouterPlugin(
 export function autoRouterRequest(
   options: AutoRouterOptions = {}
 ): AutoRouterRequest {
-  return { plugins: [autoRouterPlugin(options)] };
+  assert.record(options, 'autoRouterRequest: options must be an object');
+  const request: AutoRouterRequest = { plugins: [autoRouterPlugin(options)] };
+  assert.nonEmptyArray(
+    request.plugins,
+    'autoRouterRequest: must carry exactly one plugin'
+  );
+  assert.equals(
+    request.plugins.length,
+    1,
+    'autoRouterRequest: single plugin invariant'
+  );
+  return request;
 }
 
 /**
@@ -109,7 +176,8 @@ export function autoRouterRequest(
 export function autoRouterModel(
   options: AutoRouterOptions = {}
 ): OpenCodeModelConfig {
-  return {
+  assert.record(options, 'autoRouterModel: options must be an object');
+  const model: OpenCodeModelConfig = {
     id: AUTO_ROUTER_MODEL_ID,
     name: 'OpenRouter Auto (routing)',
     description: 'Auto Router — selects the best model for each task',
@@ -119,4 +187,22 @@ export function autoRouterModel(
     limit: { context: 128000, output: 16000 },
     request: { body: autoRouterRequest(options) },
   };
+  assert.equals(
+    model.id,
+    AUTO_ROUTER_MODEL_ID,
+    'autoRouterModel: id invariant'
+  );
+  assert.nonEmptyArray(
+    model.request.body.plugins,
+    'autoRouterModel: request must carry a plugin'
+  );
+  assert.ok(
+    model.limit.context > 0,
+    'autoRouterModel: context limit must be positive'
+  );
+  assert.ok(
+    model.limit.output > 0,
+    'autoRouterModel: output limit must be positive'
+  );
+  return model;
 }

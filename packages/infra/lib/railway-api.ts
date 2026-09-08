@@ -1,3 +1,6 @@
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import { requireRailwayToken } from "./railway-token.js";
 
 const RAILWAY_GRAPHQL_URL = "https://backboard.railway.com/graphql/v2";
@@ -11,6 +14,8 @@ export class RailwayApiError extends Error {
   readonly errors: readonly RailwayGraphQLError[];
 
   constructor(message: string, errors: readonly RailwayGraphQLError[] = []) {
+    assert.nonEmptyString(message, "railway api error message must be non-empty");
+    assert.array(errors, "railway api errors must be an array");
     super(message);
     this.name = "RailwayApiError";
     this.errors = errors;
@@ -21,6 +26,8 @@ export class RailwayRateLimitError extends RailwayApiError {
   readonly retryAfterMs: number;
 
   constructor(message: string, retryAfterMs: number, errors: readonly RailwayGraphQLError[] = []) {
+    assert.nonEmptyString(message, "railway rate limit message must be non-empty");
+    assert.nonNegative(retryAfterMs, "retryAfterMs must be non-negative");
     super(message, errors);
     this.name = "RailwayRateLimitError";
     this.retryAfterMs = retryAfterMs;
@@ -89,7 +96,9 @@ let lastRequestAt = 0;
 function railwayMinIntervalMs(): number {
   const raw = process.env["RAILWAY_API_MIN_INTERVAL_MS"]?.trim();
   const parsed = raw ? Number(raw) : 400;
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 400;
+  const result = Number.isFinite(parsed) && parsed >= 0 ? parsed : 400;
+  assert.nonNegative(result, "railway min interval must be non-negative");
+  return result;
 }
 
 /** Clear process-local Railway read caches (called after mutations). */
@@ -97,6 +106,8 @@ export function invalidateRailwayCache(): void {
   listProjectsCache = null;
   projectCache.clear();
   projectContextCache.clear();
+  assert.ok(projectCache.size === 0, "railway project cache must be empty after invalidate");
+  assert.ok(projectContextCache.size === 0, "railway project context cache must be empty after invalidate");
 }
 
 async function paceRailwayRequest(): Promise<void> {
@@ -114,9 +125,13 @@ export async function waitForRailwayRateLimit(
   error: RailwayRateLimitError,
   options?: { readonly logEveryMs?: number },
 ): Promise<void> {
+  assert.ok(error instanceof RailwayRateLimitError, "wait requires a RailwayRateLimitError");
+  assert.nonNegative(error.retryAfterMs, "retryAfterMs must be non-negative");
   const logEveryMs = options?.logEveryMs ?? 30_000;
+  assert.nonNegative(logEveryMs, "logEveryMs must be non-negative");
   let remaining = error.retryAfterMs;
   while (remaining > 0) {
+    ha.ok(remaining > 0, "remaining rate-limit wait must be positive", { remaining });
     console.log(`  Waiting ${Math.ceil(remaining / 1000)}s for Railway rate limit…`);
     const step = Math.min(remaining, logEveryMs);
     await new Promise((resolve) => setTimeout(resolve, step));
@@ -131,6 +146,11 @@ function throwRailwayHttpError(
   body: string,
   errors: readonly RailwayGraphQLError[] = [],
 ): never {
+  assert.number(status, "railway http status must be a number");
+  assert.string(detail, "railway http detail must be a string");
+  assert.ok(response instanceof Response, "railway http response must be a Response");
+  assert.string(body, "railway http body must be a string");
+  assert.array(errors, "railway graphql errors must be an array");
   if (status === 429) {
     const retryAfterMs = parseRetryAfterMs(response, body) ?? 60_000;
     throw new RailwayRateLimitError(
@@ -146,6 +166,8 @@ function throwRailwayHttpError(
 }
 
 function parseRetryAfterMs(response: Response, body: string): number | undefined {
+  assert.ok(response instanceof Response, "railway response must be a Response");
+  assert.string(body, "railway body must be a string");
   const header = response.headers.get("retry-after")?.trim();
   if (header) {
     const seconds = Number(header);
@@ -162,6 +184,10 @@ function parseRetryAfterMs(response: Response, body: string): number | undefined
 }
 
 function railwayRetryDelayMs(response: Response, body: string, attempt: number): number {
+  assert.ok(response instanceof Response, "railway response must be a Response");
+  assert.string(body, "railway body must be a string");
+  assert.integer(attempt, "railway retry attempt must be an integer");
+  assert.ok(attempt >= 0, "railway retry attempt must be >= 0", { attempt });
   const retryAfterMs = parseRetryAfterMs(response, body);
   if (retryAfterMs != null) return Math.min(retryAfterMs, 120_000);
   return Math.min(1_000 * 2 ** attempt, 30_000);
@@ -183,10 +209,15 @@ async function railwayRequest<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
+  assert.nonEmptyString(query, "railway graphql query must be non-empty");
+  if (variables !== undefined) assert.record(variables, "railway graphql variables must be a record");
+  assert.ok(RAILWAY_GRAPHQL_URL.startsWith("https://"), "railway graphql url must be https");
   const token = requireRailwayToken();
+  assert.nonEmptyString(token, "railway token must be non-empty");
   const maxAttempts = 5;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    ha.ok(attempt >= 0 && attempt < maxAttempts, "railway attempt must be in range", { attempt });
     await paceRailwayRequest();
 
     const response = await fetch(RAILWAY_GRAPHQL_URL, {
@@ -197,8 +228,10 @@ async function railwayRequest<T>(
       },
       body: JSON.stringify({ query, variables }),
     });
+    assert.ok(response instanceof Response, "railway fetch must return a Response");
 
     const body = await response.text();
+    assert.string(body, "railway response body must be a string");
     let payload: GraphQLResponse<T>;
     try {
       payload = JSON.parse(body) as GraphQLResponse<T>;
@@ -211,6 +244,7 @@ async function railwayRequest<T>(
       }
       throwRailwayHttpError(response.status, body.slice(0, 500), response, body);
     }
+    assert.record(payload, "railway graphql payload must be a record");
 
     if (!response.ok) {
       if (shouldRetryRailwayRequest(response.status) && attempt < maxAttempts - 1) {
@@ -219,6 +253,8 @@ async function railwayRequest<T>(
         );
         continue;
       }
+      const errors = payload.errors ?? [];
+      assert.array(errors, "railway graphql errors must be an array");
       const detail =
         payload.errors?.map((e) => e.message).join("; ") ||
         body.slice(0, 500);
@@ -226,11 +262,13 @@ async function railwayRequest<T>(
     }
 
     if (payload.errors?.length) {
+      assert.nonEmptyArray(payload.errors, "railway graphql errors must be non-empty when present");
       throw new RailwayApiError(
         payload.errors.map((e) => e.message).join("; "),
         payload.errors,
       );
     }
+    assert.defined(payload.data, "Railway API returned no data");
     if (!payload.data) {
       throw new RailwayApiError("Railway API returned no data");
     }
@@ -262,10 +300,16 @@ export async function listProjects(): Promise<readonly ProjectSummary[]> {
     }
   `);
   listProjectsCache = nodes(data.projects);
+  assert.array(listProjectsCache, "railway projects must be an array");
+  for (const project of listProjectsCache) {
+    ha.nonEmptyString(project.id, "railway project id must be non-empty");
+    ha.nonEmptyString(project.name, "railway project name must be non-empty");
+  }
   return listProjectsCache;
 }
 
 export async function getProject(projectId: string): Promise<RailwayProject> {
+  assert.nonEmptyString(projectId, "project id must be non-empty");
   const cached = projectCache.get(projectId);
   if (cached) return cached;
 
@@ -296,18 +340,24 @@ export async function getProject(projectId: string): Promise<RailwayProject> {
   `,
     { id: projectId },
   );
+  assert.record(data.project, "railway project must be a record");
+  assert.nonEmptyString(data.project.id, "railway project id must be non-empty");
+  assert.nonEmptyString(data.project.name, "railway project name must be non-empty");
   projectCache.set(projectId, data.project);
   return data.project;
 }
 
 export async function findProjectByName(name: string): Promise<RailwayProject | undefined> {
+  assert.nonEmptyString(name, "project name must be non-empty");
   const projects = await listProjects();
+  assert.array(projects, "railway projects must be an array");
   const match = projects.find((p) => p.name === name);
   if (!match) return undefined;
   return getProject(match.id);
 }
 
 export async function createProject(name: string): Promise<RailwayProject> {
+  assert.nonEmptyString(name, "project name must be non-empty");
   const data = await railwayRequest<{ projectCreate: { readonly id: string } }>(
     `
     mutation projectCreate($input: ProjectCreateInput!) {
@@ -318,17 +368,22 @@ export async function createProject(name: string): Promise<RailwayProject> {
   `,
     { input: { name } },
   );
+  assert.record(data.projectCreate, "created project must be a record");
+  assert.nonEmptyString(data.projectCreate.id, "created project id must be non-empty");
   invalidateRailwayCache();
   return getProject(data.projectCreate.id);
 }
 
 export async function ensureProject(name: string): Promise<RailwayProject> {
+  assert.nonEmptyString(name, "project name must be non-empty");
   const existing = await findProjectByName(name);
   if (existing) return existing;
   return createProject(name);
 }
 
 export async function updateProjectName(projectId: string, name: string): Promise<void> {
+  assert.nonEmptyString(projectId, "project id must be non-empty");
+  assert.nonEmptyString(name, "project name must be non-empty");
   await railwayRequest<{ projectUpdate: { readonly id: string; readonly name: string } }>(
     `
     mutation projectUpdate($id: String!, $input: ProjectUpdateInput!) {
@@ -344,6 +399,8 @@ export async function updateProjectName(projectId: string, name: string): Promis
 }
 
 export async function updateServiceName(serviceId: string, name: string): Promise<void> {
+  assert.nonEmptyString(serviceId, "service id must be non-empty");
+  assert.nonEmptyString(name, "service name must be non-empty");
   await railwayRequest<{ serviceUpdate: { readonly id: string; readonly name: string } }>(
     `
     mutation serviceUpdate($id: String!, $input: ServiceUpdateInput!) {
@@ -362,13 +419,22 @@ export function resolveEnvironment(
   project: RailwayProject,
   environmentName: string,
 ): { readonly id: string; readonly name: string } {
+  assert.record(project, "railway project must be a record");
+  assert.nonEmptyString(project.id, "railway project id must be non-empty");
+  assert.nonEmptyString(environmentName, "environment name must be non-empty");
   const envs = nodes(project.environments);
-  const match = envs.find((e) => e.name === environmentName);
+  assert.array(envs, "railway environments must be an array");
+  const match = envs.find((e) => {
+    ha.nonEmptyString(e.name, "railway environment name must be non-empty");
+    return e.name === environmentName;
+  });
   if (!match) {
     throw new RailwayApiError(
       `Environment "${environmentName}" not found in project "${project.name}" (have: ${envs.map((e) => e.name).join(", ")})`,
     );
   }
+  assert.nonEmptyString(match.id, "resolved environment id must be non-empty");
+  assert.nonEmptyString(match.name, "resolved environment name must be non-empty");
   return match;
 }
 
@@ -376,7 +442,16 @@ export function findServiceByName(
   project: RailwayProject,
   serviceName: string,
 ): { readonly id: string; readonly name: string } | undefined {
-  return nodes(project.services).find((s) => s.name === serviceName);
+  assert.record(project, "railway project must be a record");
+  assert.nonEmptyString(serviceName, "service name must be non-empty");
+  const services = nodes(project.services);
+  assert.array(services, "railway services must be an array");
+  const match = services.find((s) => {
+    ha.nonEmptyString(s.name, "railway service name must be non-empty");
+    return s.name === serviceName;
+  });
+  if (match !== undefined) assert.nonEmptyString(match.id, "matched service id must be non-empty");
+  return match;
 }
 
 export async function createServiceFromImage(input: {
@@ -385,6 +460,11 @@ export async function createServiceFromImage(input: {
   readonly image: string;
   readonly variables?: Record<string, string>;
 }): Promise<{ readonly id: string; readonly name: string }> {
+  assert.record(input, "service create input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.name, "service name must be non-empty");
+  assert.nonEmptyString(input.image, "service image must be non-empty");
+  if (input.variables !== undefined) assert.record(input.variables, "service variables must be a record");
   const data = await railwayRequest<{
     serviceCreate: { readonly id: string; readonly name: string };
   }>(
@@ -406,6 +486,8 @@ export async function createServiceFromImage(input: {
     },
   );
   invalidateRailwayCache();
+  assert.nonEmptyString(data.serviceCreate.id, "created service id must be non-empty");
+  assert.nonEmptyString(data.serviceCreate.name, "created service name must be non-empty");
   return data.serviceCreate;
 }
 
@@ -415,6 +497,10 @@ export async function ensureServiceFromImage(input: {
   readonly image: string;
   readonly variables?: Record<string, string>;
 }): Promise<{ readonly service: { readonly id: string; readonly name: string }; readonly created: boolean }> {
+  assert.record(input, "ensure service input must be a record");
+  assert.record(input.project, "railway project must be a record");
+  assert.nonEmptyString(input.name, "service name must be non-empty");
+  assert.nonEmptyString(input.image, "service image must be non-empty");
   const existing = findServiceByName(input.project, input.name);
   if (existing) {
     return { service: existing, created: false };
@@ -438,6 +524,11 @@ export async function updateServiceInstance(input: {
   readonly startCommand?: string | null;
   readonly registryCredentials?: { readonly username: string; readonly password: string };
 }): Promise<void> {
+  assert.record(input, "service instance input must be a record");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  if (input.region !== undefined) assert.nonEmptyString(input.region, "region must be non-empty");
+  if (input.numReplicas !== undefined) assert.integer(input.numReplicas, "numReplicas must be an integer");
   const patch: Record<string, unknown> = {};
   if (input.healthcheckPath !== undefined) patch.healthcheckPath = input.healthcheckPath;
   if (input.sleepApplication != null) patch.sleepApplication = input.sleepApplication;
@@ -469,6 +560,8 @@ export async function updateServiceInstance(input: {
 }
 
 export async function connectServiceImage(serviceId: string, image: string): Promise<void> {
+  assert.nonEmptyString(serviceId, "service id must be non-empty");
+  assert.nonEmptyString(image, "service image must be non-empty");
   await railwayRequest<{ serviceConnect: { readonly id: string } }>(
     `
     mutation serviceConnect($id: String!, $input: ServiceConnectInput!) {
@@ -492,6 +585,11 @@ export async function upsertVariables(input: {
   readonly replace?: boolean;
   readonly skipDeploys?: boolean;
 }): Promise<void> {
+  assert.record(input, "upsert variables input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  if (input.serviceId !== undefined) assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.record(input.variables, "variables must be a record");
   await railwayRequest<{ variableCollectionUpsert: boolean }>(
     `
     mutation variableCollectionUpsert($input: VariableCollectionUpsertInput!) {
@@ -512,6 +610,8 @@ export async function upsertVariables(input: {
 }
 
 export async function deployService(serviceId: string, environmentId: string): Promise<string> {
+  assert.nonEmptyString(serviceId, "service id must be non-empty");
+  assert.nonEmptyString(environmentId, "environment id must be non-empty");
   const data = await railwayRequest<{ serviceInstanceDeployV2: string }>(
     `
     mutation serviceInstanceDeployV2($serviceId: String!, $environmentId: String!) {
@@ -520,10 +620,13 @@ export async function deployService(serviceId: string, environmentId: string): P
   `,
     { serviceId, environmentId },
   );
+  assert.nonEmptyString(data.serviceInstanceDeployV2, "deploy must return a deployment id");
   return data.serviceInstanceDeployV2;
 }
 
 export async function redeployService(serviceId: string, environmentId: string): Promise<void> {
+  assert.nonEmptyString(serviceId, "service id must be non-empty");
+  assert.nonEmptyString(environmentId, "environment id must be non-empty");
   await railwayRequest<{ serviceInstanceRedeploy: boolean }>(
     `
     mutation serviceInstanceRedeploy($serviceId: String!, $environmentId: String!) {
@@ -554,6 +657,12 @@ export async function createCustomDomain(input: {
   readonly domain: string;
   readonly targetPort?: number;
 }): Promise<RailwayCustomDomain> {
+  assert.record(input, "custom domain input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.domain, "domain must be non-empty");
+  if (input.targetPort !== undefined) assert.integer(input.targetPort, "targetPort must be an integer");
   const data = await railwayRequest<{ customDomainCreate: RailwayCustomDomain }>(
     `
     mutation customDomainCreate($input: CustomDomainCreateInput!) {
@@ -568,6 +677,9 @@ export async function createCustomDomain(input: {
   `,
     { input },
   );
+  assert.record(data.customDomainCreate, "created custom domain must be a record");
+  assert.nonEmptyString(data.customDomainCreate.id, "created custom domain id must be non-empty");
+  assert.nonEmptyString(data.customDomainCreate.domain, "created custom domain must be non-empty");
   return data.customDomainCreate;
 }
 
@@ -575,6 +687,8 @@ export async function getCustomDomain(
   customDomainId: string,
   projectId: string,
 ): Promise<RailwayCustomDomain> {
+  assert.nonEmptyString(customDomainId, "custom domain id must be non-empty");
+  assert.nonEmptyString(projectId, "project id must be non-empty");
   const data = await railwayRequest<{ customDomain: RailwayCustomDomain }>(
     `
     query customDomain($id: String!, $projectId: String!) {
@@ -597,6 +711,10 @@ export async function listCustomDomains(input: {
   readonly environmentId: string;
   readonly serviceId: string;
 }): Promise<readonly RailwayCustomDomain[]> {
+  assert.record(input, "list custom domains input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
   const data = await railwayRequest<{
     domains: { readonly customDomains: readonly RailwayCustomDomain[] };
   }>(
@@ -615,6 +733,8 @@ export async function listCustomDomains(input: {
   `,
     input,
   );
+  assert.record(data.domains, "domains payload must be a record");
+  assert.array(data.domains.customDomains, "custom domains must be an array");
   return data.domains.customDomains;
 }
 
@@ -623,6 +743,10 @@ export async function updateCustomDomainTargetPort(input: {
   readonly environmentId: string;
   readonly targetPort: number;
 }): Promise<void> {
+  assert.record(input, "update target port input must be a record");
+  assert.nonEmptyString(input.id, "custom domain id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  assert.integer(input.targetPort, "targetPort must be an integer");
   await railwayRequest<{ customDomainUpdate: boolean }>(
     `
     mutation customDomainUpdate($id: String!, $environmentId: String!, $targetPort: Int) {
@@ -634,6 +758,7 @@ export async function updateCustomDomainTargetPort(input: {
 }
 
 export async function deleteCustomDomain(id: string): Promise<void> {
+  assert.nonEmptyString(id, "custom domain id must be non-empty");
   await railwayRequest<{ customDomainDelete: boolean }>(
     `
     mutation customDomainDelete($id: String!) {
@@ -653,7 +778,13 @@ async function findCustomDomainInProject(input: {
   readonly domain: string;
   readonly services: readonly { readonly id: string }[];
 }): Promise<CustomDomainLocation | undefined> {
+  assert.record(input, "find custom domain input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  assert.nonEmptyString(input.domain, "domain must be non-empty");
+  assert.array(input.services, "services must be an array");
   for (const service of input.services) {
+    ha.nonEmptyString(service.id, "service id must be non-empty");
     const domains = await listCustomDomains({
       projectId: input.projectId,
       environmentId: input.environmentId,
@@ -678,6 +809,10 @@ async function adoptCustomDomain(
   environmentId: string,
   targetPort?: number,
 ): Promise<RailwayCustomDomain> {
+  assert.record(domain, "custom domain must be a record");
+  assert.nonEmptyString(domain.id, "custom domain id must be non-empty");
+  assert.nonEmptyString(environmentId, "environment id must be non-empty");
+  if (targetPort !== undefined) assert.integer(targetPort, "targetPort must be an integer");
   if (targetPort != null) {
     await updateCustomDomainTargetPort({
       id: domain.id,
@@ -695,7 +830,13 @@ export async function ensureCustomDomain(input: {
   readonly domain: string;
   readonly targetPort?: number;
 }): Promise<RailwayCustomDomain> {
+  assert.record(input, "ensure custom domain input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.domain, "domain must be non-empty");
   const onService = await listCustomDomains(input);
+  assert.array(onService, "custom domains must be an array");
   const local = onService.find((d) => d.domain === input.domain);
   if (local) return adoptCustomDomain(local, input.environmentId, input.targetPort);
 
@@ -731,6 +872,7 @@ export async function ensureCustomDomain(input: {
 }
 
 export async function issueCustomDomainCertificate(customDomainId: string): Promise<void> {
+  assert.nonEmptyString(customDomainId, "custom domain id must be non-empty");
   await railwayRequest<{ customDomainIssueCertificate: boolean }>(
     `
     mutation customDomainIssueCertificate($id: String!) {
@@ -742,11 +884,13 @@ export async function issueCustomDomainCertificate(customDomainId: string): Prom
 }
 
 export function isCustomDomainCertificateFailed(status: string | null | undefined): boolean {
+  assert.ok(status === null || status === undefined || typeof status === "string", "certificate status must be a string or nullish");
   const normalized = status?.toUpperCase() ?? "";
   return normalized.includes("FAILED") || normalized.includes("ERROR");
 }
 
 export function isCustomDomainCertificateReady(status: string | null | undefined): boolean {
+  assert.ok(status === null || status === undefined || typeof status === "string", "certificate status must be a string or nullish");
   const normalized = status?.toUpperCase() ?? "";
   return normalized === "CERTIFICATE_STATUS_TYPE_VALID" || normalized === "ISSUED";
 }
@@ -755,10 +899,16 @@ export function railwayDnsRecords(
   domain: RailwayCustomDomain,
   zone: string,
 ): readonly RailwayDnsRecord[] {
+  assert.record(domain, "custom domain must be a record");
+  assert.nonEmptyString(domain.id, "custom domain id must be non-empty");
+  assert.nonEmptyString(domain.domain, "custom domain must be non-empty");
+  assert.record(domain.status, "custom domain status must be a record");
+  assert.nonEmptyString(zone, "zone must be non-empty");
   const records: RailwayDnsRecord[] = [];
   const token = domain.status.verificationToken?.trim();
 
   for (const record of domain.status.dnsRecords ?? []) {
+    ha.record(record, "railway dns record must be a record");
     const hostlabel = record.hostlabel?.trim() || "@";
     const requiredValue = record.requiredValue?.trim();
     if (!requiredValue) continue;
@@ -787,6 +937,7 @@ export function railwayDnsRecords(
     });
   }
 
+  assert.array(records, "railway dns records must be an array");
   return records;
 }
 
@@ -797,6 +948,11 @@ export async function createVolume(input: {
   readonly mountPath: string;
   readonly region?: string;
 }): Promise<{ readonly id: string; readonly name: string }> {
+  assert.record(input, "create volume input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  assert.nonEmptyString(input.mountPath, "mount path must be non-empty");
   const data = await railwayRequest<{ volumeCreate: { readonly id: string; readonly name: string } }>(
     `
     mutation volumeCreate($input: VolumeCreateInput!) {
@@ -823,6 +979,9 @@ export async function listVolumeMounts(input: {
   readonly projectId: string;
   readonly serviceId: string;
 }): Promise<readonly { readonly id: string; readonly mountPath: string }[]> {
+  assert.record(input, "list volume mounts input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
   const data = await railwayRequest<{
     project: {
       volumes: Connection<{
@@ -858,11 +1017,15 @@ export async function listVolumeMounts(input: {
 
   const mounts: { readonly id: string; readonly mountPath: string }[] = [];
   for (const volume of nodes(data.project.volumes)) {
+    ha.nonEmptyString(volume.id, "railway volume id must be non-empty");
     for (const instance of nodes(volume.volumeInstances)) {
+      ha.nonEmptyString(instance.serviceId, "volume instance service id must be non-empty");
+      ha.nonEmptyString(instance.mountPath, "volume instance mount path must be non-empty");
       if (instance.serviceId !== input.serviceId) continue;
       mounts.push({ id: instance.id, mountPath: instance.mountPath });
     }
   }
+  assert.array(mounts, "volume mounts must be an array");
   return mounts;
 }
 
@@ -871,7 +1034,11 @@ export async function listVolumes(input: {
   readonly projectId: string;
   readonly serviceId: string;
 }): Promise<readonly { readonly id: string; readonly name: string; readonly mountPath?: string }[]> {
+  assert.record(input, "list volumes input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
   const mounts = await listVolumeMounts(input);
+  assert.array(mounts, "volume mounts must be an array");
   return mounts.map((mount) => ({ id: mount.id, name: mount.mountPath, mountPath: mount.mountPath }));
 }
 
@@ -883,6 +1050,12 @@ export async function ensureVolume(input: {
   readonly name: string;
   readonly region?: string;
 }): Promise<void> {
+  assert.record(input, "ensure volume input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  assert.nonEmptyString(input.mountPath, "mount path must be non-empty");
+  assert.nonEmptyString(input.name, "volume name must be non-empty");
   const existing = await listVolumeMounts({
     projectId: input.projectId,
     serviceId: input.serviceId,
@@ -897,6 +1070,8 @@ export async function resolveProjectContext(
   projectName: string,
   environmentName: string,
 ): Promise<CachedProjectContext> {
+  assert.nonEmptyString(projectName, "project name must be non-empty");
+  assert.nonEmptyString(environmentName, "environment name must be non-empty");
   const cacheKey = `${projectName}:${environmentName}`;
   const cached = projectContextCache.get(cacheKey);
   if (cached) return cached;
@@ -908,6 +1083,8 @@ export async function resolveProjectContext(
     projectId: project.id,
     environmentId: environment.id,
   };
+  assert.nonEmptyString(ctx.projectId, "resolved project id must be non-empty");
+  assert.nonEmptyString(ctx.environmentId, "resolved environment id must be non-empty");
   projectContextCache.set(cacheKey, ctx);
   return ctx;
 }
@@ -934,7 +1111,13 @@ export async function listDeployments(input: {
   readonly environmentId: string;
   readonly pageSize?: number;
 }): Promise<readonly RailwayDeployment[]> {
+  assert.record(input, "list deployments input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
+  if (input.pageSize !== undefined) assert.integer(input.pageSize, "pageSize must be an integer");
   const pageSize = input.pageSize ?? 50;
+  assert.ok(pageSize > 0, "pageSize must be positive", { pageSize });
   const deployments: RailwayDeployment[] = [];
   let after: string | undefined;
 
@@ -969,20 +1152,25 @@ export async function listDeployments(input: {
     );
 
     for (const edge of data.deployments.edges) {
+      ha.nonEmptyString(edge.node.id, "deployment id must be non-empty");
+      ha.nonEmptyString(edge.node.status, "deployment status must be non-empty");
       deployments.push(edge.node);
     }
 
     const { hasNextPage, endCursor } = data.deployments.pageInfo;
+    ha.ok(typeof hasNextPage === "boolean", "deployments hasNextPage must be a boolean");
     if (!hasNextPage || !endCursor) {
       break;
     }
     after = endCursor;
   }
 
+  assert.array(deployments, "deployments must be an array");
   return deployments;
 }
 
 export async function removeDeployment(deploymentId: string): Promise<void> {
+  assert.nonEmptyString(deploymentId, "deployment id must be non-empty");
   await railwayRequest<{ deploymentRemove: boolean }>(
     `
     mutation deploymentRemove($id: String!) {
@@ -997,6 +1185,9 @@ export async function waitForDeployment(
   deploymentId: string,
   timeoutMs = 600_000,
 ): Promise<void> {
+  assert.nonEmptyString(deploymentId, "deployment id must be non-empty");
+  assert.number(timeoutMs, "timeoutMs must be a number");
+  assert.ok(timeoutMs > 0, "timeoutMs must be positive", { timeoutMs });
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const data = await railwayRequest<{
@@ -1012,6 +1203,7 @@ export async function waitForDeployment(
       { id: deploymentId },
     );
     const status = data.deployment?.status?.toUpperCase() ?? "";
+    ha.string(status, "deployment status must be a string");
     if (status === "SUCCESS") return;
     if (status === "FAILED" || status === "CRASHED" || status === "REMOVED" || status === "CANCELLED") {
       const details = await deploymentFailureDetails(deploymentId);
@@ -1029,11 +1221,18 @@ export async function latestDeploymentId(input: {
   readonly serviceId: string;
   readonly environmentId: string;
 }): Promise<string | undefined> {
+  assert.record(input, "latest deployment input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
   const deployments = await listDeployments(input);
+  assert.array(deployments, "deployments must be an array");
   const newest = deployments
     .slice()
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
-  return newest?.id;
+  const id = newest?.id;
+  assert.ok(id === undefined || id.length > 0, "latest deployment id must be undefined or non-empty");
+  return id;
 }
 
 /**
@@ -1052,8 +1251,15 @@ export async function waitForLatestDeploymentSuccess(
   },
   opts?: { readonly afterDeploymentId?: string; readonly timeoutMs?: number },
 ): Promise<void> {
+  assert.record(input, "wait input must be a record");
+  assert.nonEmptyString(input.projectId, "project id must be non-empty");
+  assert.nonEmptyString(input.serviceId, "service id must be non-empty");
+  assert.nonEmptyString(input.environmentId, "environment id must be non-empty");
   const timeoutMs = opts?.timeoutMs ?? 600_000;
+  assert.number(timeoutMs, "timeoutMs must be a number");
+  assert.ok(timeoutMs > 0, "timeoutMs must be positive", { timeoutMs });
   const afterDeploymentId = opts?.afterDeploymentId;
+  if (afterDeploymentId !== undefined) assert.nonEmptyString(afterDeploymentId, "afterDeploymentId must be non-empty");
   const deadline = Date.now() + timeoutMs;
   let deploymentId: string | undefined;
 
@@ -1062,6 +1268,7 @@ export async function waitForLatestDeploymentSuccess(
     const newest = deployments
       .slice()
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
+    if (newest) ha.nonEmptyString(newest.id, "newest deployment id must be non-empty");
     if (newest && newest.id !== afterDeploymentId) {
       deploymentId = newest.id;
       break;
@@ -1074,11 +1281,13 @@ export async function waitForLatestDeploymentSuccess(
       `No new deployment appeared for service within ${timeoutMs / 1000}s`,
     );
   }
+  assert.nonEmptyString(deploymentId, "deployment id must be non-empty after friendly check");
 
   await waitForDeployment(deploymentId, timeoutMs);
 }
 
 async function deploymentFailureDetails(deploymentId: string): Promise<string> {
+  assert.nonEmptyString(deploymentId, "deployment id must be non-empty");
   try {
     const data = await railwayRequest<{
       deployment: {
@@ -1128,19 +1337,26 @@ async function deploymentFailureDetails(deploymentId: string): Promise<string> {
       ...data.deploymentLogs.slice(0, 10),
       ...data.deploymentLogs.slice(-30),
     ];
+    assert.array(deploymentLogs, "deployment logs must be an array");
     if (deploymentLogs.length > 0) {
       lines.push("Deployment logs:");
       for (const log of deploymentLogs) {
+        ha.nonEmptyString(log.timestamp, "log timestamp must be non-empty");
+        ha.string(log.message, "log message must be a string");
         lines.push(`  ${log.timestamp} ${log.severity ?? ""} ${log.message}`.trimEnd());
       }
     }
     const buildLogs = data.buildLogs.slice(-10);
+    assert.array(buildLogs, "build logs must be an array");
     if (buildLogs.length > 0) {
       lines.push("Build logs:");
       for (const log of buildLogs) {
+        ha.nonEmptyString(log.timestamp, "build log timestamp must be non-empty");
+        ha.string(log.message, "build log message must be a string");
         lines.push(`  ${log.timestamp} ${log.severity ?? ""} ${log.message}`.trimEnd());
       }
     }
+    assert.array(lines, "failure detail lines must be an array");
     return lines.join("\n");
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -1149,6 +1365,7 @@ async function deploymentFailureDetails(deploymentId: string): Promise<string> {
 }
 
 export async function deleteService(serviceId: string): Promise<void> {
+  assert.nonEmptyString(serviceId, "service id must be non-empty");
   await railwayRequest<{ serviceDelete: boolean }>(
     `
     mutation serviceDelete($id: String!) {
@@ -1161,6 +1378,7 @@ export async function deleteService(serviceId: string): Promise<void> {
 }
 
 export async function deleteProject(projectId: string): Promise<void> {
+  assert.nonEmptyString(projectId, "project id must be non-empty");
   await railwayRequest<{ projectDelete: boolean }>(
     `
     mutation projectDelete($id: String!) {

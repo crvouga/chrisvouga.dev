@@ -1,3 +1,4 @@
+import { assert } from '@pkgs/assert';
 import { CACHE_OBJECT_STORE_NAMESPACE } from '@pkgs/api/config/object-store-namespace';
 import { createS3ObjectStore } from '@pkgs/object-store/create-s3-object-store';
 import type { ObjectStoreS3ConnectionConfig } from '@pkgs/object-store/impl-s3';
@@ -5,11 +6,16 @@ import type { ObjectStoreS3ConnectionConfig } from '@pkgs/object-store/impl-s3';
 import { VaultSecretKey } from './vault-secrets-registry';
 
 function readRequiredEnv(key: string): string | null {
+  assert.nonEmptyString(key, 'readRequiredEnv requires key');
   const value = process.env[key]?.trim() ?? '';
   return value.length > 0 ? value : null;
 }
 
 export function readB2S3ConfigFromEnv(): ObjectStoreS3ConnectionConfig | null {
+  assert.nonEmptyString(
+    CACHE_OBJECT_STORE_NAMESPACE,
+    'object store namespace must be non-empty'
+  );
   const endpoint = readRequiredEnv(VaultSecretKey.b2S3Endpoint);
   const region = readRequiredEnv(VaultSecretKey.b2S3Region);
   const accessKeyId = readRequiredEnv(VaultSecretKey.b2S3AccessKeyId);
@@ -33,6 +39,8 @@ const B2_CREDENTIAL_HINT =
   'Create a new Backblaze B2 application key with read/write access to the cache bucket, then set B2_S3_ACCESS_KEY_ID (key ID) and B2_S3_SECRET_ACCESS_KEY (application key) in Vault dev and prd.';
 
 function formatB2ProbeError(message: string, bucket: string): string {
+  assert.nonEmptyString(message, 'formatB2ProbeError requires message');
+  assert.nonEmptyString(bucket, 'formatB2ProbeError requires bucket');
   if (
     message.includes('403') ||
     message.includes('401') ||
@@ -55,10 +63,15 @@ export async function verifyB2S3Credentials(): Promise<string | null> {
   if (config === null) {
     return 'B2 S3 env vars are missing (B2_S3_ENDPOINT, B2_S3_REGION, B2_S3_ACCESS_KEY_ID, B2_S3_SECRET_ACCESS_KEY, B2_BUCKET).';
   }
+  assert.nonEmptyString(config.bucket, 'B2 bucket must be non-empty');
+  assert.nonEmptyString(config.endpoint, 'B2 endpoint must be non-empty');
 
   const store = createS3ObjectStore(config, CACHE_OBJECT_STORE_NAMESPACE);
+  assert.defined(store, 'verifyB2S3Credentials requires object store');
   const probeKey = `credential-probe-${String(Date.now())}`;
   const probeBytes = new Uint8Array([0x53, 0x4d, 0x4b]); // "SMK"
+  assert.nonEmptyString(probeKey, 'probe key must be non-empty');
+  assert.instanceOf(probeBytes, Uint8Array, 'probe bytes must be bytes');
 
   try {
     await store.put(probeKey, probeBytes, 'application/octet-stream');

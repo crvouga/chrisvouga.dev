@@ -1,4 +1,4 @@
-import { Assert, ThrowingCrashHandler } from '@pkgs/assert';
+import { Assert, ThrowingCrashHandler, assert } from '@pkgs/assert';
 import { createLogger } from '@pkgs/logger';
 
 import { CacheBootManager } from './cache/boot-manager';
@@ -13,6 +13,7 @@ const ERROR_CORS_HEADERS = {
 } as const;
 
 function preflightResponse(request: Request): Response {
+  assert.ok(request instanceof Request, 'preflight requires Request');
   const requested = request.headers.get('Access-Control-Request-Headers');
   const allowHeaders =
     requested !== null && requested.trim().length > 0
@@ -29,6 +30,7 @@ function preflightResponse(request: Request): Response {
 }
 
 function fatalConfigResponse(reason: string): Response {
+  assert.nonEmptyString(reason, 'fatalConfigResponse requires reason');
   return new Response(
     JSON.stringify({ error: 'cache misconfigured', reason }),
     {
@@ -54,6 +56,7 @@ function internalErrorResponse(): Response {
 }
 
 function healthResponse(method: string): Response | null {
+  assert.nonEmptyString(method, 'healthResponse requires method');
   if (method === 'HEAD') {
     return new Response(null, {
       status: 200,
@@ -69,15 +72,22 @@ function healthResponse(method: string): Response | null {
       },
     });
   }
+  assert.ok(
+    method !== 'HEAD' && method !== 'GET',
+    'healthResponse null is valid for non-HEAD/GET'
+  );
   return null;
 }
 
 export function createCacheRequestHandler(env: CacheServerEnv): {
   fetch: (request: Request) => Promise<Response>;
 } {
+  assert.record(env, 'createCacheRequestHandler requires env');
   const boot = new CacheBootManager(env);
+  assert.defined(boot, 'createCacheRequestHandler requires boot manager');
 
   async function fetch(request: Request): Promise<Response> {
+    assert.ok(request instanceof Request, 'fetch handler requires Request');
     try {
       const url = new URL(request.url);
 
@@ -114,7 +124,10 @@ export function createCacheRequestHandler(env: CacheServerEnv): {
 export async function startServer(
   env: CacheServerEnv = readCacheServerEnv()
 ): Promise<void> {
+  assert.record(env, 'startServer requires env');
+  assert.nonNegativeInteger(env.PORT, 'startServer requires valid PORT');
   const handler = createCacheRequestHandler(env);
+  assert.defined(handler, 'startServer requires handler');
 
   log.info('cache server listening', {
     port: env.PORT,

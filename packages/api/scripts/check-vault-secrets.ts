@@ -4,6 +4,10 @@
  * CI: GitHub OIDC → vault-action injects env vars before this script runs.
  * Local: `vault run -- bun run scripts/check-vault-secrets.ts`.
  */
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
+
+const ha: Assert = hotAssert();
+
 import {
   VAULT_SECRET_REGISTRY,
   VaultSecretKey,
@@ -19,6 +23,7 @@ function isCi(): boolean {
 }
 
 function fail(message: string): never {
+  assert.nonEmptyString(message, 'fail requires message');
   console.error('');
   console.error('════════════════════════════════════════════════════════');
   console.error('  Vault secrets check FAILED');
@@ -35,6 +40,7 @@ function fail(message: string): never {
 }
 
 function readEnvSecret(key: string): string {
+  assert.nonEmptyString(key, 'readEnvSecret requires key');
   return process.env[key]?.trim() ?? '';
 }
 
@@ -42,6 +48,8 @@ async function smokeCacheStatus(
   apiUrl: string,
   token: string
 ): Promise<string | null> {
+  assert.nonEmptyString(apiUrl, 'smokeCacheStatus requires apiUrl');
+  assert.nonEmptyString(token, 'smokeCacheStatus requires token');
   const url = `${apiUrl.replace(/\/$/, '')}/v8/artifacts/status`;
   try {
     const res = await fetch(url, {
@@ -62,6 +70,10 @@ async function smokeCacheStatus(
 }
 
 async function main(): Promise<void> {
+  assert.nonEmptyArray(
+    VAULT_SECRET_REGISTRY,
+    'secret registry must be non-empty'
+  );
   const config = process.env['VAULT_CONFIG']?.trim() || 'dev';
   const project = process.env['VAULT_PROJECT']?.trim() || 'personal';
 
@@ -71,6 +83,7 @@ async function main(): Promise<void> {
   const optionalWarnings: string[] = [];
 
   for (const def of VAULT_SECRET_REGISTRY) {
+    ha.nonEmptyString(def.key, 'registry entry key must be non-empty');
     const raw = readEnvSecret(def.key);
 
     if (def.required) {
@@ -110,6 +123,14 @@ async function main(): Promise<void> {
 
   const turboApi = readEnvSecret(VaultSecretKey.turboApi);
   const turboToken = readEnvSecret(VaultSecretKey.turboToken);
+  assert.nonEmptyString(
+    VaultSecretKey.turboApi,
+    'secret name must be non-empty'
+  );
+  assert.nonEmptyString(
+    VaultSecretKey.turboToken,
+    'secret name must be non-empty'
+  );
 
   // Skip cache smoke test in CI - the server may not exist until after deployment.
   if (!isCi() && turboApi.length > 0 && turboToken.length > 0) {

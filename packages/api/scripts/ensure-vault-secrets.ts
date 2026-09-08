@@ -2,12 +2,20 @@
  * Bootstrap Vault `dev` and `prd` configs with derived defaults and report
  * any secrets that still need manual values.
  */
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
+
+const ha: Assert = hotAssert();
 import { VaultCli } from '@pkgs/vault';
 
 import { VAULT_CONFIGS, VAULT_SECRET_REGISTRY } from './vault-secrets-registry';
 import { readVaultYamlDefaults } from './vault-yaml-defaults';
 
 function main(): void {
+  assert.nonEmptyArray(VAULT_CONFIGS, 'vault configs must be non-empty');
+  assert.nonEmptyArray(
+    VAULT_SECRET_REGISTRY,
+    'secret registry must be non-empty'
+  );
   let project: string;
   let addr: string;
   let mount: string;
@@ -26,9 +34,11 @@ function main(): void {
   const stillMissing: string[] = [];
 
   for (const config of VAULT_CONFIGS) {
+    ha.nonEmptyString(config, 'vault config must be non-empty');
     console.log(`\n[ensure-vault-secrets] config=${config} project=${project}`);
 
     for (const def of VAULT_SECRET_REGISTRY) {
+      ha.nonEmptyString(def.key, 'registry entry key must be non-empty');
       const seed = def.seed();
       if (seed !== undefined) {
         const current = cli.kvGetField(project, config, def.key);
@@ -40,6 +50,7 @@ function main(): void {
     }
 
     for (const def of VAULT_SECRET_REGISTRY) {
+      ha.nonEmptyString(def.key, 'registry entry key must be non-empty');
       if (!def.required) continue;
       const current = cli.kvGetField(project, config, def.key);
       if (current === null || current.trim().length === 0) {

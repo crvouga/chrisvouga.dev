@@ -8,6 +8,9 @@
  *   bun run scripts/provision-railway.ts --check
  *   bun run scripts/provision-railway.ts --id portfolio --apply
  */
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import {
   connectServiceImage,
   ensureCustomDomain,
@@ -57,6 +60,7 @@ type Args = {
 };
 
 function parseArgs(argv: readonly string[]): Args {
+  assert.array(argv, "argv must be an array");
   const ids: string[] = [];
   let apply = false;
   let check = false;
@@ -87,13 +91,18 @@ function parseArgs(argv: readonly string[]): Args {
 }
 
 function servicesForArgs(config: ServicesConfig, args: Args): readonly ServiceSpec[] {
+  assert.record(config, "services config must be a record");
+  assert.record(args, "args must be a record");
+  assert.array(args.ids, "ids must be an array");
   if (args.ids.length > 0) {
     return args.ids.map((id) => {
+      ha.nonEmptyString(id, "service id filter must be non-empty");
       const service = findService(config, id);
       if (!service) {
         console.error(`No service with id "${id}"`);
         process.exit(1);
       }
+      assert.defined(service, `No service with id "${id}"`);
       return service;
     });
   }
@@ -102,6 +111,9 @@ function servicesForArgs(config: ServicesConfig, args: Args): readonly ServiceSp
 }
 
 function describeService(config: ServicesConfig, service: ServiceSpec): string {
+  assert.record(config, "services config must be a record");
+  assert.record(service, "service spec must be a record");
+  assert.nonEmptyString(service.id, "service id must be non-empty");
   const name = railwayServiceName(config, service.id);
   const image = imageRef(config, service.id);
   const sleep = railwaySleep(service);
@@ -125,6 +137,13 @@ async function provisionService(
   service: ServiceSpec,
   args: Args,
 ): Promise<void> {
+  assert.record(config, "services config must be a record");
+  assert.record(project, "railway project must be a record");
+  assert.nonEmptyString(project.id, "railway project id must be non-empty");
+  assert.nonEmptyString(environmentId, "environment id must be non-empty");
+  assert.record(service, "service spec must be a record");
+  assert.nonEmptyString(service.id, "service id must be non-empty");
+  assert.record(args, "args must be a record");
   const serviceName = railwayServiceName(config, service.id);
   const image = imageRef(config, service.id);
 
@@ -140,6 +159,7 @@ async function provisionService(
 
   const failOnMissing = (service.secrets?.length ?? 0) > 0;
   const vaultData = await loadVaultSecretEnv();
+  assert.record(vaultData, "vault data must be a record");
   const { variables, missing } = collectServiceVariables(service, vaultData);
   if (missing.length > 0 && failOnMissing) {
     throw new Error(
@@ -153,6 +173,8 @@ async function provisionService(
     image,
     variables,
   });
+  assert.nonEmptyString(railwayService.id, "railway service id must be non-empty");
+  assert.ok(typeof created === "boolean", "created must be a boolean");
 
   await syncServiceVariablesToRailway(service, {
     skipDeploys: true,
@@ -215,6 +237,7 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const config = loadServicesConfig();
   const services = servicesForArgs(config, args);
+  assert.array(services, "services must be an array");
   const projectName = railwayProjectName(config);
   const environmentName = railwayEnvironmentName(config);
 
@@ -231,10 +254,14 @@ async function main(): Promise<void> {
 
   await ensureRailwayToken();
   const ctx = await resolveProjectContext(projectName, environmentName);
+  assert.nonEmptyString(ctx.projectId, "project id must be non-empty");
+  assert.nonEmptyString(ctx.environmentId, "environment id must be non-empty");
   const project = args.apply ? await ensureProject(projectName) : ctx.project;
   const environment = resolveEnvironment(project, environmentName);
+  assert.nonEmptyString(environment.id, "environment id must be non-empty");
 
   for (const service of services) {
+    ha.nonEmptyString(service.id, "service id must be non-empty");
     await provisionService(config, project, environment.id, service, args);
   }
 

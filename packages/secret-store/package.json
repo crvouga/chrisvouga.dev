@@ -16,6 +16,7 @@
     "test": "bun test --pass-with-no-tests"
   },
   "dependencies": {
+    "@pkgs/assert": "workspace:*",
     "@pkgs/vault": "workspace:*",
     "@pkgs/secret-string": "workspace:*"
   },

@@ -7,6 +7,9 @@
  *   bun run scripts/deploy-railway.ts --id portfolio
  *   bun run scripts/deploy-railway.ts --continue-on-error
  */
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import {
   connectServiceImage,
   ensureProject,
@@ -43,6 +46,7 @@ type Args = {
 };
 
 function parseArgs(argv: readonly string[]): Args {
+  assert.array(argv, "argv must be an array");
   const config = loadServicesConfig();
   const ids: string[] = [];
   let imageTag = config.default_image_tag;
@@ -84,6 +88,10 @@ async function deployOne(
   skipHealth: boolean,
   waitDeployment: boolean,
 ): Promise<void> {
+  assert.record(config, "services config must be a record");
+  assert.record(service, "service spec must be a record");
+  assert.nonEmptyString(service.id, "service id must be non-empty");
+  assert.nonEmptyString(imageTag, "image tag must be non-empty");
   const projectName = railwayProjectName(config);
   const environmentName = railwayEnvironmentName(config);
   const serviceName = railwayServiceName(config, service.id);
@@ -93,12 +101,14 @@ async function deployOne(
 
   const project = await ensureProject(projectName);
   const environment = resolveEnvironment(project, environmentName);
+  assert.nonEmptyString(environment.id, "environment id must be non-empty");
   const railwayService = findServiceByName(project, serviceName);
   if (!railwayService) {
     throw new Error(
       `Railway service "${serviceName}" not found — run provision-railway --apply first`,
     );
   }
+  assert.nonEmptyString(railwayService.id, "railway service id must be non-empty");
 
   const healthcheckPath = railwayHealthcheckSetting(service);
   const startCommand = railwayStartCommand(service);
@@ -148,16 +158,20 @@ async function main(): Promise<void> {
     args.ids.length === 0
       ? deployableServices(config)
       : args.ids.map((id) => {
+          ha.nonEmptyString(id, "service id filter must be non-empty");
           const service = findService(config, id);
           if (!service) {
             console.error(`No service with id "${id}"`);
             process.exit(1);
           }
+          assert.defined(service, `No service with id "${id}"`);
           return service;
         });
+  assert.array(services, "services must be an array");
 
   let failures = 0;
   for (const service of services) {
+    ha.nonEmptyString(service.id, "service id must be non-empty");
     try {
       await deployOne(config, service, args.imageTag, args.skipHealth, args.waitDeployment);
     } catch (err) {
@@ -168,6 +182,7 @@ async function main(): Promise<void> {
   }
 
   if (failures > 0) process.exit(1);
+  assert.nonNegative(failures, "failures must be non-negative");
 }
 
 main().catch((err) => {

@@ -1,4 +1,7 @@
 import { applyEnvFile, ensureEnvFile, upsertEnv } from "./env.ts";
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import { ENV_FILE, SECRET_KEYS, type SecretKey } from "./paths.ts";
 import {
   applyVaultRunEnv,
@@ -16,6 +19,7 @@ export type EnsureAppSecretsOptions = {
 };
 
 function missingSecretKeys(): SecretKey[] {
+  assert.nonEmptyArray(SECRET_KEYS, "secret key labels must be non-empty");
   return SECRET_KEYS.filter((key) => !process.env[key]?.trim());
 }
 
@@ -24,7 +28,9 @@ function allSecretsPresent(): boolean {
 }
 
 function applySecretsToProcessEnv(secrets: Partial<Record<SecretKey, string>>): void {
+  assert.record(secrets, "resolved secrets container must be a record");
   for (const key of SECRET_KEYS) {
+    ha.nonEmptyString(key, "secret key label must be non-empty");
     const value = secrets[key]?.trim();
     if (value) process.env[key] = value;
   }
@@ -37,13 +43,16 @@ function applySecretsToProcessEnv(secrets: Partial<Record<SecretKey, string>>): 
 export async function ensureAppSecrets(
   opts: EnsureAppSecretsOptions = {},
 ): Promise<void> {
+  assert.record(opts, "ensure secrets options must be a record");
   applyEnvFile(ENV_FILE);
   applyVaultRunEnv();
 
   if (allSecretsPresent()) return;
 
   const config = defaultVaultKvConfig();
+  assert.enum(config, ["dev", "prd"], "vault KV config must be dev or prd");
   const kvPath = vaultKvCliPath(config);
+  assert.nonEmptyString(kvPath, "vault KV path must be non-empty");
 
   let kvData: Record<string, string> = {};
   let lastError = "";
@@ -73,6 +82,7 @@ export async function ensureAppSecrets(
   applySecretsToProcessEnv(resolved);
 
   const stillMissing = missingSecretKeys();
+  assert.array(stillMissing, "missing secret labels must be an array");
   if (stillMissing.length > 0) {
     console.error(`ERROR: missing in ${kvPath}:`);
     for (const key of stillMissing) {
@@ -85,6 +95,13 @@ export async function ensureAppSecrets(
   if (opts.writeEnv) {
     ensureEnvFile();
     for (const key of SECRET_KEYS) {
+      ha.nonEmptyString(key, "secret key label must be non-empty");
+      // NOTE: secret bytes never enter assert context — only the key label.
+      assert.ok(
+        typeof process.env[key] === "string" && (process.env[key] as string).length > 0,
+        "resolved secret must be present before writing env",
+        { key },
+      );
       upsertEnv(key, process.env[key]!);
     }
   }
@@ -95,9 +112,15 @@ export function allSecretsFromEnv(): Record<SecretKey, string> | null {
   applyVaultRunEnv();
   const out = {} as Record<SecretKey, string>;
   for (const key of SECRET_KEYS) {
+    ha.nonEmptyString(key, "secret key label must be non-empty");
     const value = process.env[key]?.trim();
     if (!value) return null;
     out[key] = value;
   }
+  assert.ok(
+    Object.keys(out).length === SECRET_KEYS.length,
+    "env secrets must cover every secret key label",
+    { count: Object.keys(out).length, expected: SECRET_KEYS.length },
+  );
   return out;
 }

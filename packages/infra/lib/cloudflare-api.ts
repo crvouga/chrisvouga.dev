@@ -2,6 +2,9 @@
  * Typed Cloudflare REST API client.
  * Required env: CLOUDFLARE_API_TOKEN (or CF_API_TOKEN).
  */
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 
 export function cloudflareCredentialsFromEnv(): {
   readonly token: string;
@@ -11,7 +14,10 @@ export function cloudflareCredentialsFromEnv(): {
     process.env["CLOUDFLARE_API_TOKEN"]?.trim() || process.env["CF_API_TOKEN"]?.trim() || "";
   if (!token) return null;
   const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"]?.trim() || "";
-  return { token, accountId };
+  const creds = { token, accountId };
+  assert.nonEmptyString(creds.token, "cloudflare token must be non-empty");
+  assert.string(creds.accountId, "cloudflare accountId must be a string");
+  return creds;
 }
 
 const API_BASE = "https://api.cloudflare.com/client/v4";
@@ -75,6 +81,10 @@ export class CloudflareApiError extends Error {
     readonly status: number,
     readonly errors: readonly CloudflareErrorEntry[],
   ) {
+    assert.nonEmptyString(method, "cloudflare error method must be non-empty");
+    assert.nonEmptyString(path, "cloudflare error path must be non-empty");
+    assert.number(status, "cloudflare error status must be a number");
+    assert.array(errors, "cloudflare error entries must be an array");
     super(
       `Cloudflare API ${method} ${path} failed (HTTP ${status}): ${
         errors.map((e) => `[${e.code}] ${e.message}`).join("; ") || "unknown error"
@@ -96,6 +106,7 @@ export class CloudflareApi {
     if (!token) {
       throw new Error("CLOUDFLARE_API_TOKEN is required.");
     }
+    assert.nonEmptyString(token, "CLOUDFLARE_API_TOKEN is required");
     this.token = token;
   }
 
@@ -104,6 +115,10 @@ export class CloudflareApi {
     path: string,
     body?: unknown,
   ): Promise<T> {
+    assert.enum(method, ["GET", "POST", "PUT", "PATCH", "DELETE"], "cloudflare method must be a known verb");
+    assert.nonEmptyString(path, "cloudflare path must be non-empty");
+    assert.ok(path.startsWith("/"), "cloudflare path must start with /", { path });
+    assert.ok(API_BASE.startsWith("https://"), "cloudflare api base must be https");
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.token}`,
       Accept: "application/json",
@@ -128,25 +143,40 @@ export class CloudflareApi {
   }
 
   async findZoneByName(zoneName: string): Promise<CloudflareZone | null> {
+    assert.nonEmptyString(zoneName, "zone name must be non-empty");
     const result = await this.request<readonly CloudflareZone[]>(
       "GET",
       `/zones?name=${encodeURIComponent(zoneName)}`,
     );
-    return result[0] ?? null;
+    assert.array(result, "cloudflare zones result must be an array");
+    const zone = result[0] ?? null;
+    if (zone !== null) {
+      assert.record(zone, "cloudflare zone must be a record");
+      assert.nonEmptyString(zone.id, "cloudflare zone id must be non-empty");
+      assert.nonEmptyString(zone.name, "cloudflare zone name must be non-empty");
+    }
+    return zone;
   }
 
   async listDnsRecords(zoneId: string): Promise<readonly CloudflareDnsRecord[]> {
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
     const out: CloudflareDnsRecord[] = [];
     let page = 1;
     for (;;) {
+      ha.ok(page >= 1, "cloudflare dns page must be >= 1", { page });
       const result = await this.request<readonly CloudflareDnsRecord[]>(
         "GET",
         `/zones/${encodeURIComponent(zoneId)}/dns_records?per_page=100&page=${page}`,
       );
+      ha.array(result, "cloudflare dns page must be an array");
+      for (const record of result) {
+        ha.nonEmptyString(record.id, "cloudflare dns record id must be non-empty");
+      }
       out.push(...result);
       if (result.length < 100) break;
       page += 1;
     }
+    assert.array(out, "cloudflare dns records must be an array");
     return out;
   }
 
@@ -154,11 +184,18 @@ export class CloudflareApi {
     zoneId: string,
     record: CloudflareDnsRecordInput,
   ): Promise<CloudflareDnsRecord> {
-    return this.request<CloudflareDnsRecord>(
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.record(record, "dns record input must be a record");
+    assert.nonEmptyString(record.name, "dns record name must be non-empty");
+    assert.nonEmptyString(record.content, "dns record content must be non-empty");
+    const created = await this.request<CloudflareDnsRecord>(
       "POST",
       `/zones/${encodeURIComponent(zoneId)}/dns_records`,
       record,
     );
+    assert.record(created, "created dns record must be a record");
+    assert.nonEmptyString(created.id, "created dns record id must be non-empty");
+    return created;
   }
 
   async updateDnsRecord(
@@ -166,14 +203,23 @@ export class CloudflareApi {
     recordId: string,
     record: CloudflareDnsRecordInput,
   ): Promise<CloudflareDnsRecord> {
-    return this.request<CloudflareDnsRecord>(
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.nonEmptyString(recordId, "dns record id must be non-empty");
+    assert.record(record, "dns record input must be a record");
+    assert.nonEmptyString(record.name, "dns record name must be non-empty");
+    const updated = await this.request<CloudflareDnsRecord>(
       "PUT",
       `/zones/${encodeURIComponent(zoneId)}/dns_records/${encodeURIComponent(recordId)}`,
       record,
     );
+    assert.record(updated, "updated dns record must be a record");
+    assert.nonEmptyString(updated.id, "updated dns record id must be non-empty");
+    return updated;
   }
 
   async deleteDnsRecord(zoneId: string, recordId: string): Promise<void> {
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.nonEmptyString(recordId, "dns record id must be non-empty");
     await this.request<{ id: string }>(
       "DELETE",
       `/zones/${encodeURIComponent(zoneId)}/dns_records/${encodeURIComponent(recordId)}`,
@@ -181,6 +227,8 @@ export class CloudflareApi {
   }
 
   async getZoneSetting(zoneId: string, setting: string): Promise<{ readonly id: string; readonly value: unknown }> {
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.nonEmptyString(setting, "zone setting must be non-empty");
     return this.request<{ id: string; value: unknown }>(
       "GET",
       `/zones/${encodeURIComponent(zoneId)}/settings/${encodeURIComponent(setting)}`,
@@ -192,6 +240,9 @@ export class CloudflareApi {
     setting: string,
     value: unknown,
   ): Promise<{ readonly id: string; readonly value: unknown }> {
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.nonEmptyString(setting, "zone setting must be non-empty");
+    assert.defined(value, "zone setting value must be defined");
     return this.request<{ id: string; value: unknown }>(
       "PATCH",
       `/zones/${encodeURIComponent(zoneId)}/settings/${encodeURIComponent(setting)}`,
@@ -203,11 +254,16 @@ export class CloudflareApi {
     zoneId: string,
     phase: string,
   ): Promise<CloudflareRuleset | null> {
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.nonEmptyString(phase, "ruleset phase must be non-empty");
     try {
-      return await this.request<CloudflareRuleset>(
+      const ruleset = await this.request<CloudflareRuleset>(
         "GET",
         `/zones/${encodeURIComponent(zoneId)}/rulesets/phases/${encodeURIComponent(phase)}/entrypoint`,
       );
+      assert.record(ruleset, "ruleset must be a record");
+      assert.nonEmptyString(ruleset.id, "ruleset id must be non-empty");
+      return ruleset;
     } catch (err) {
       if (err instanceof CloudflareApiError && err.status === 404) return null;
       throw err;
@@ -223,11 +279,19 @@ export class CloudflareApi {
       readonly rules: readonly CloudflareRulesetRule[];
     },
   ): Promise<CloudflareRuleset> {
-    return this.request<CloudflareRuleset>(
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.record(body, "ruleset body must be a record");
+    assert.nonEmptyString(body.name, "ruleset name must be non-empty");
+    assert.nonEmptyString(body.phase, "ruleset phase must be non-empty");
+    assert.array(body.rules, "ruleset rules must be an array");
+    const ruleset = await this.request<CloudflareRuleset>(
       "POST",
       `/zones/${encodeURIComponent(zoneId)}/rulesets`,
       body,
     );
+    assert.record(ruleset, "created ruleset must be a record");
+    assert.nonEmptyString(ruleset.id, "created ruleset id must be non-empty");
+    return ruleset;
   }
 
   async updateRuleset(
@@ -240,10 +304,18 @@ export class CloudflareApi {
       readonly rules: readonly CloudflareRulesetRule[];
     },
   ): Promise<CloudflareRuleset> {
-    return this.request<CloudflareRuleset>(
+    assert.nonEmptyString(zoneId, "zone id must be non-empty");
+    assert.nonEmptyString(rulesetId, "ruleset id must be non-empty");
+    assert.record(body, "ruleset body must be a record");
+    assert.nonEmptyString(body.name, "ruleset name must be non-empty");
+    assert.array(body.rules, "ruleset rules must be an array");
+    const ruleset = await this.request<CloudflareRuleset>(
       "PUT",
       `/zones/${encodeURIComponent(zoneId)}/rulesets/${encodeURIComponent(rulesetId)}`,
       body,
     );
+    assert.record(ruleset, "updated ruleset must be a record");
+    assert.nonEmptyString(ruleset.id, "updated ruleset id must be non-empty");
+    return ruleset;
   }
 }

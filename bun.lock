@@ -30,6 +30,7 @@
       },
       "dependencies": {
         "@inquirer/prompts": "^8.5.2",
+        "@pkgs/assert": "workspace:*",
         "chalk": "^6.0.0",
         "yaml": "catalog:",
       },
@@ -67,6 +68,7 @@
       "name": "@pkgs/infra",
       "version": "0.0.0",
       "dependencies": {
+        "@pkgs/assert": "workspace:*",
         "yaml": "catalog:",
       },
       "devDependencies": {
@@ -77,6 +79,9 @@
     "packages/logger": {
       "name": "@pkgs/logger",
       "version": "0.0.0",
+      "dependencies": {
+        "@pkgs/assert": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "catalog:",
         "eslint-plugin-lingui": "catalog:",
@@ -99,6 +104,9 @@
     "packages/openrouter": {
       "name": "@pkgs/openrouter",
       "version": "0.0.0",
+      "dependencies": {
+        "@pkgs/assert": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "catalog:",
         "eslint-plugin-lingui": "catalog:",
@@ -109,6 +117,7 @@
       "name": "@pkgs/secret-store",
       "version": "0.0.0",
       "dependencies": {
+        "@pkgs/assert": "workspace:*",
         "@pkgs/secret-string": "workspace:*",
         "@pkgs/vault": "workspace:*",
       },
@@ -121,6 +130,9 @@
     "packages/secret-string": {
       "name": "@pkgs/secret-string",
       "version": "0.0.0",
+      "dependencies": {
+        "@pkgs/assert": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "catalog:",
         "eslint-plugin-lingui": "catalog:",
@@ -130,6 +142,9 @@
     "packages/vault": {
       "name": "@pkgs/vault",
       "version": "0.0.0",
+      "dependencies": {
+        "@pkgs/assert": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "catalog:",
         "eslint-plugin-lingui": "catalog:",
@@ -145,6 +160,7 @@
       "dependencies": {
         "@inquirer/prompts": "catalog:",
         "@opencode-ai/plugin": "1.18.29",
+        "@pkgs/assert": "workspace:*",
         "@pkgs/openrouter": "workspace:*",
         "@pkgs/secret-store": "workspace:*",
         "@pkgs/vault": "workspace:*",

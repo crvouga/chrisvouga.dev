@@ -9,8 +9,12 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname } from "node:path";
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 
 export function isPidAlive(pid: number): boolean {
+  assert.number(pid, "pid must be a number");
   if (!Number.isFinite(pid) || pid <= 0) return false;
   try {
     process.kill(pid, 0);
@@ -21,6 +25,7 @@ export function isPidAlive(pid: number): boolean {
 }
 
 export function readPidFile(file: string): number | null {
+  assert.nonEmptyString(file, "pid file path must be non-empty");
   if (!existsSync(file)) return null;
   try {
     const pid = Number(readFileSync(file, "utf8").trim());
@@ -31,11 +36,15 @@ export function readPidFile(file: string): number | null {
 }
 
 export function writePidFile(file: string, pid: number): void {
+  assert.nonEmptyString(file, "pid file path must be non-empty");
+  assert.integer(pid, "pid must be an integer", { file });
+  assert.ok(pid > 0, "pid must be positive", { file, pid });
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, `${pid}\n`, { mode: 0o600 });
 }
 
 export function removePidFile(file: string): void {
+  assert.nonEmptyString(file, "pid file path must be non-empty");
   try {
     unlinkSync(file);
   } catch {
@@ -45,6 +54,7 @@ export function removePidFile(file: string): void {
 
 /** Live pid from file, or null if missing/stale (stale file removed). */
 export function livePidFromFile(file: string): number | null {
+  assert.nonEmptyString(file, "pid file path must be non-empty");
   const pid = readPidFile(file);
   if (pid === null) return null;
   if (isPidAlive(pid)) return pid;
@@ -54,6 +64,7 @@ export function livePidFromFile(file: string): number | null {
 
 /** PIDs listening on TCP port (macOS/Linux lsof). */
 export function pidsOnPort(port: string): number[] {
+  assert.nonEmptyString(port, "port must be non-empty");
   try {
     const out = execFileSync(
       "lsof",
@@ -75,9 +86,12 @@ export function pidsOnPort(port: string): number[] {
 }
 
 export function stopPortOccupants(port: string): boolean {
+  assert.nonEmptyString(port, "port must be non-empty");
   const pids = pidsOnPort(port);
+  assert.array(pids, "port pids must be an array", { port });
   if (pids.length === 0) return false;
   for (const pid of pids) {
+    ha.integer(pid, "port occupant pid must be an integer", { port });
     try {
       process.kill(pid, "SIGTERM");
       console.log(`stopped process on :${port} (pid ${pid})`);
@@ -92,6 +106,7 @@ export function stopPortOccupants(port: string): boolean {
 
 /** Kill process group first (detached daemons), then the pid itself. */
 export function killProcessTree(pid: number): void {
+  assert.integer(pid, "pid must be an integer");
   try {
     process.kill(-pid, "SIGTERM");
   } catch {
@@ -105,6 +120,8 @@ export function killProcessTree(pid: number): void {
 }
 
 export function stopDaemon(pidFile: string, label: string): boolean {
+  assert.nonEmptyString(pidFile, "pid file path must be non-empty");
+  assert.nonEmptyString(label, "daemon label must be non-empty");
   const pid = readPidFile(pidFile);
   if (pid === null) {
     removePidFile(pidFile);
@@ -134,6 +151,10 @@ export type SpawnDaemonOpts = {
  * Start a background process (new process group on Unix), append logs, write pid, unref.
  */
 export function spawnDaemon(opts: SpawnDaemonOpts): number {
+  assert.nonEmptyString(opts.cmd, "daemon command must be non-empty");
+  assert.array(opts.args, "daemon args must be an array", { cmd: opts.cmd });
+  assert.nonEmptyString(opts.pidFile, "daemon pid file must be non-empty");
+  assert.nonEmptyString(opts.logFile, "daemon log file must be non-empty");
   mkdirSync(dirname(opts.pidFile), { recursive: true });
   mkdirSync(dirname(opts.logFile), { recursive: true });
   const logFd = openSync(opts.logFile, "a");
@@ -147,6 +168,7 @@ export function spawnDaemon(opts: SpawnDaemonOpts): number {
   if (!child.pid) {
     throw new Error(`failed to spawn ${opts.cmd}`);
   }
+  assert.integer(child.pid, "spawned pid must be an integer", { cmd: opts.cmd });
   child.unref();
   writePidFile(opts.pidFile, child.pid);
   return child.pid;
@@ -157,6 +179,9 @@ export async function waitForHealth(
   timeoutMs = 30_000,
   intervalMs = 400,
 ): Promise<void> {
+  assert.nonEmptyString(url, "health URL must be non-empty");
+  assert.nonNegative(timeoutMs, "health timeout must be non-negative");
+  assert.nonNegative(intervalMs, "health interval must be non-negative");
   const deadline = Date.now() + timeoutMs;
   let lastErr = "";
   while (Date.now() < deadline) {

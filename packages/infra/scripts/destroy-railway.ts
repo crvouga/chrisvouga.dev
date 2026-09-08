@@ -6,6 +6,9 @@
  *   bun run scripts/destroy-railway.ts --id pgweb --id filestash
  *   bun run scripts/destroy-railway.ts --id pgweb --apply
  */
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import {
   deleteService,
   ensureProject,
@@ -26,6 +29,7 @@ type Args = {
 };
 
 function parseArgs(argv: readonly string[]): Args {
+  assert.array(argv, "argv must be an array");
   const ids: string[] = [];
   let apply = false;
 
@@ -47,11 +51,14 @@ function parseArgs(argv: readonly string[]): Args {
     console.error("At least one --id is required");
     process.exit(2);
   }
+  assert.nonEmptyArray(resolved, "at least one --id is required");
 
   return { ids: resolved, apply };
 }
 
 async function destroyOne(id: string, apply: boolean): Promise<void> {
+  assert.nonEmptyString(id, "service id must be non-empty");
+  assert.ok(typeof apply === "boolean", "apply must be a boolean");
   const config = loadServicesConfig();
   const serviceName = railwayServiceName(config, id);
   const project = await ensureProject(railwayProjectName(config));
@@ -74,11 +81,14 @@ async function destroyOne(id: string, apply: boolean): Promise<void> {
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+  assert.nonEmptyArray(args.ids, "at least one --id is required");
   console.log(`Destroy Railway services (${args.apply ? "APPLY" : "DRY-RUN"}) ids=${args.ids.join(",")}`);
 
-  await ensureRailwayToken();
+  const token = await ensureRailwayToken();
+  assert.nonEmptyString(token, "railway token must be non-empty after friendly check");
 
   for (const id of args.ids) {
+    ha.nonEmptyString(id, "service id must be non-empty");
     await destroyOne(id, args.apply);
   }
 }

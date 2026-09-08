@@ -10,6 +10,7 @@
  *   bun run scripts/rename-railway.ts --apply --wait-on-rate-limit
  *   bun run scripts/rename-railway.ts --old-project crvouga-infra --old-prefix crvouga --apply
  */
+import { assert, hotAssert } from "@pkgs/assert";
 import {
   deleteProject,
   findServiceByName,
@@ -37,6 +38,7 @@ type Args = {
 };
 
 function parseArgs(argv: readonly string[]): Args {
+  assert.array(argv, "argv must be an array");
   let apply = false;
   let waitOnRateLimit =
     process.env["RAILWAY_WAIT_ON_RATE_LIMIT"]?.trim() === "1" ||
@@ -65,13 +67,19 @@ function parseArgs(argv: readonly string[]): Args {
 }
 
 function oldServiceName(prefix: string, service: ServiceSpec): string {
-  return prefix ? `${prefix}-${service.id}` : service.id;
+  assert.string(prefix, "old prefix must be a string");
+  assert.record(service, "service spec must be a record");
+  assert.nonEmptyString(service.id, "service id must be non-empty");
+  const name = prefix ? `${prefix}-${service.id}` : service.id;
+  assert.nonEmptyString(name, "old service name must be non-empty");
+  return name;
 }
 
 async function withRateLimitRetry<T>(
   waitOnRateLimit: boolean,
   run: () => Promise<T>,
 ): Promise<T> {
+  assert.ok(typeof waitOnRateLimit === "boolean", "waitOnRateLimit must be a boolean");
   for (;;) {
     try {
       return await run();
@@ -86,7 +94,10 @@ async function withRateLimitRetry<T>(
 }
 
 function projectServiceNames(project: RailwayProject): readonly string[] {
-  return project.services.edges?.map((edge) => edge.node.name) ?? [];
+  assert.record(project, "railway project must be a record");
+  const names = project.services.edges?.map((edge) => edge.node.name) ?? [];
+  assert.array(names, "project service names must be an array");
+  return names;
 }
 
 async function removeStrayDuplicateProject(
@@ -95,7 +106,11 @@ async function removeStrayDuplicateProject(
   apply: boolean,
   waitOnRateLimit: boolean,
 ): Promise<void> {
+  assert.nonEmptyString(oldProjectName, "old project name must be non-empty");
+  assert.nonEmptyString(newProjectName, "new project name must be non-empty");
+  assert.ok(typeof apply === "boolean", "apply must be a boolean");
   const projects = await listProjects();
+  assert.array(projects, "railway projects must be an array");
   const oldMatch = projects.find((p) => p.name === oldProjectName);
   const newMatch = projects.find((p) => p.name === newProjectName);
   if (!oldMatch || !newMatch || oldMatch.id === newMatch.id) return;
@@ -129,11 +144,15 @@ async function loadTargetProject(
   apply: boolean,
   waitOnRateLimit: boolean,
 ): Promise<RailwayProject> {
+  assert.nonEmptyString(oldProjectName, "old project name must be non-empty");
+  assert.nonEmptyString(newProjectName, "new project name must be non-empty");
+  assert.ok(typeof apply === "boolean", "apply must be a boolean");
   console.log("  Loading Railway projects…");
   return withRateLimitRetry(waitOnRateLimit, async () => {
     await removeStrayDuplicateProject(oldProjectName, newProjectName, apply, waitOnRateLimit);
 
     const projects = await listProjects();
+    assert.array(projects, "railway projects must be an array");
     const oldMatch = projects.find((p) => p.name === oldProjectName);
     const newMatch = projects.find((p) => p.name === newProjectName);
 
@@ -149,15 +168,21 @@ async function loadTargetProject(
         `Railway project "${oldProjectName}" or "${newProjectName}" not found — nothing to rename`,
       );
     }
-    return getProject(match.id);
+    assert.nonEmptyString(match.id, "matched project id must be non-empty");
+    const project = await getProject(match.id);
+    assert.nonEmptyString(project.id, "target project id must be non-empty");
+    return project;
   });
 }
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+  assert.nonEmptyString(args.oldProject, "old project must be non-empty");
+  assert.string(args.oldPrefix, "old prefix must be a string");
   const config = loadServicesConfig();
   const newProjectName = railwayProjectName(config);
   const services = config.services;
+  assert.array(services, "services must be an array");
 
   console.log(
     `Rename Railway (${args.apply ? "APPLY" : "DRY-RUN"}) project ${args.oldProject} → ${newProjectName}, services=${services.length}`,

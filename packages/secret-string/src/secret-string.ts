@@ -1,3 +1,5 @@
+import { assert } from '@pkgs/assert';
+
 /**
  * Wrapper around a `string` that is meant to stay out of logs.
  *
@@ -22,11 +24,15 @@ export class SecretString {
   readonly #value: string;
 
   constructor(name: string, value: string) {
+    assert.string(name, 'SecretString: name must be a string');
+    assert.string(value, 'SecretString: value must be a string');
     if (name.trim().length === 0) {
       throw new Error('SecretString name must be non-empty');
     }
     this.#name = name;
     this.#value = value;
+    assert.equals(this.#name, name, 'SecretString: name invariant');
+    assert.equals(this.#value, value, 'SecretString: value invariant');
   }
 
   /** Logical env key label — safe to log. */
@@ -36,11 +42,15 @@ export class SecretString {
 
   /** Explicit opt-in to the raw secret value. */
   readSecretValue(): string {
-    return this.#value;
+    const value = this.#value;
+    assert.string(value, 'SecretString: value invariant broken');
+    return value;
   }
 
   toString(): string {
-    return `SecretString(${this.#name})`;
+    const rendered = `SecretString(${this.#name})`;
+    assert.nonEmptyString(rendered, 'SecretString: rendered label non-empty');
+    return rendered;
   }
 
   toJSON(): string {

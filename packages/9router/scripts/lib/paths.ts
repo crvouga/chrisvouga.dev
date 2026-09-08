@@ -1,5 +1,6 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { assert } from "@pkgs/assert";
 import { loadEnvFile } from "./env.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -45,13 +46,23 @@ export const REPO_BRANCH = process.env.NINEROUTER_BRANCH?.trim() || "master";
 
 /** Resolve DATA_DIR from env relative to ROOT when not absolute. */
 export function resolveDataDir(raw?: string): string {
+  assert.ok(
+    raw === undefined || typeof raw === "string",
+    "DATA_DIR override must be a string",
+  );
   const value = (raw ?? process.env.DATA_DIR ?? "./data").trim() || "./data";
+  assert.nonEmptyString(value, "resolved DATA_DIR must be non-empty");
   if (value.startsWith("/")) return value;
-  return resolve(ROOT, value.replace(/^\.\//, ""));
+  const resolved = resolve(ROOT, value.replace(/^\.\//, ""));
+  assert.nonEmptyString(resolved, "resolved DATA_DIR must be non-empty");
+  return resolved;
 }
 
 /** DATA_DIR from project .env only — ignores ambient shell DATA_DIR. */
 export function dataDirFromEnvFile(): string {
   const fileEnv = loadEnvFile(ENV_FILE);
-  return resolveDataDir(fileEnv.DATA_DIR?.trim() || "./data");
+  assert.record(fileEnv, "env file must parse to a record");
+  const resolved = resolveDataDir(fileEnv.DATA_DIR?.trim() || "./data");
+  assert.nonEmptyString(resolved, "DATA_DIR from env file must be non-empty");
+  return resolved;
 }

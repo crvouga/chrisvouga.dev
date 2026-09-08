@@ -1,3 +1,4 @@
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
 import type { SecretString } from '@pkgs/secret-string/secret-string';
 import { SecretMissingError } from './errors';
 import type {
@@ -58,9 +59,26 @@ export class CachingSecretStore implements SecretStore {
   private currentBatch: PendingBatch | null = null;
 
   constructor(inner: SecretStore, options: CachingSecretStoreOptions) {
+    assert.defined(inner, 'CachingSecretStore: inner store is required');
+    assert.record(options, 'CachingSecretStore: options must be an object');
+    assert.nonNegativeInteger(
+      options.ttlMs,
+      'CachingSecretStore: ttlMs must be a non-negative integer'
+    );
+    assert.ok(
+      options.now === undefined || typeof options.now === 'function',
+      'CachingSecretStore: now must be a function when provided'
+    );
     this.inner = inner;
     this.ttlMs = options.ttlMs;
     this.now = options.now ?? Date.now;
+    assert.equals(this.inner, inner, 'CachingSecretStore: inner invariant');
+    assert.equals(
+      this.ttlMs,
+      options.ttlMs,
+      'CachingSecretStore: ttlMs invariant'
+    );
+    assert.defined(this.now, 'CachingSecretStore: now must be set');
   }
 
   /** Testing: drop all cached entries. */
@@ -69,19 +87,41 @@ export class CachingSecretStore implements SecretStore {
   }
 
   private peek(name: string): string | null | undefined {
+    assert.nonEmptyString(
+      name,
+      'CachingSecretStore.peek: name must be non-empty'
+    );
     const e = this.cache.get(name);
     if (e === undefined) {
       return undefined;
     }
+    assert.record(e, 'CachingSecretStore.peek: cache entry must be an object');
     if (e.expiresAt <= this.now()) {
       this.cache.delete(name);
       return undefined;
     }
+    assert.ok(
+      e.value === null || typeof e.value === 'string',
+      'CachingSecretStore.peek: cached value must be string or null'
+    );
     return e.value;
   }
 
   private put(name: string, value: string | null): void {
-    this.cache.set(name, { value, expiresAt: this.now() + this.ttlMs });
+    assert.nonEmptyString(
+      name,
+      'CachingSecretStore.put: name must be non-empty'
+    );
+    assert.ok(
+      value === null || typeof value === 'string',
+      'CachingSecretStore.put: value must be string or null'
+    );
+    const expiresAt = this.now() + this.ttlMs;
+    assert.number(
+      expiresAt,
+      'CachingSecretStore.put: expiresAt must be a number'
+    );
+    this.cache.set(name, { value, expiresAt });
   }
 
   /**
@@ -90,6 +130,10 @@ export class CachingSecretStore implements SecretStore {
    * `names` set so a single upstream `getOptionalMany` resolves them all.
    */
   private getOrStartBatch(signal: AbortSignal | undefined): PendingBatch {
+    assert.ok(
+      signal === undefined || signal instanceof AbortSignal,
+      'CachingSecretStore.getOrStartBatch: signal must be an AbortSignal when provided'
+    );
     if (this.currentBatch !== null) {
       return this.currentBatch;
     }
@@ -108,10 +152,27 @@ export class CachingSecretStore implements SecretStore {
       const init: SecretStoreGetInit | undefined =
         signal !== undefined ? { signal } : undefined;
       const names = [...batch.names];
+      assert.nonEmptyArray(
+        names,
+        'CachingSecretStore: batch must hold at least one name'
+      );
       this.inner.getOptionalMany(names, init).then((wrapped) => {
+        assert.record(
+          wrapped,
+          'CachingSecretStore: upstream result must be an object'
+        );
         const unwrapped: Record<string, string | null> = {};
+        const ha: Assert = hotAssert();
         for (const n of names) {
+          ha.nonEmptyString(
+            n,
+            'CachingSecretStore: batch name must be non-empty'
+          );
           const v = wrapped[n] ?? null;
+          assert.ok(
+            v === null || typeof v === 'object',
+            'CachingSecretStore: upstream value must be SecretString or null'
+          );
           unwrapped[n] = v === null ? null : v.readSecretValue();
         }
         resolveBatch(unwrapped);
@@ -129,6 +190,10 @@ export class CachingSecretStore implements SecretStore {
     name: string,
     init?: SecretStoreGetInit
   ): Promise<string | null> {
+    assert.nonEmptyString(
+      name,
+      'CachingSecretStore.fetchCoalesced: name must be non-empty'
+    );
     const existing = this.inflight.get(name);
     if (existing !== undefined) {
       return existing;
@@ -137,8 +202,16 @@ export class CachingSecretStore implements SecretStore {
     batch.names.add(name);
     const inflight = batch.promise.then(
       (result) => {
+        assert.record(
+          result,
+          'CachingSecretStore: batch result must be an object'
+        );
         this.inflight.delete(name);
         const value = result[name] ?? null;
+        assert.ok(
+          value === null || typeof value === 'string',
+          'CachingSecretStore: batch value must be string or null'
+        );
         this.put(name, value);
         return value;
       },
@@ -155,6 +228,10 @@ export class CachingSecretStore implements SecretStore {
     name: string,
     init?: SecretStoreGetInit
   ): Promise<SecretString> {
+    assert.nonEmptyString(
+      name,
+      'CachingSecretStore.getRequired: name must be non-empty'
+    );
     if (init?.force !== true) {
       const p = this.peek(name);
       if (p !== null && p !== undefined) {
@@ -170,6 +247,10 @@ export class CachingSecretStore implements SecretStore {
     if (value === null) {
       throw new SecretMissingError(name);
     }
+    assert.string(
+      value,
+      'CachingSecretStore.getRequired: value must be a string here'
+    );
     return wrapSecret(name, value);
   }
 
@@ -177,6 +258,10 @@ export class CachingSecretStore implements SecretStore {
     name: string,
     init?: SecretStoreGetInit
   ): Promise<SecretString | null> {
+    assert.nonEmptyString(
+      name,
+      'CachingSecretStore.getOptional: name must be non-empty'
+    );
     if (init?.force !== true) {
       const p = this.peek(name);
       if (p !== undefined) {
@@ -193,14 +278,30 @@ export class CachingSecretStore implements SecretStore {
     names: readonly string[],
     init?: SecretStoreGetInit
   ): Promise<Record<string, SecretString>> {
+    assert.array(
+      names,
+      'CachingSecretStore.getRequiredMany: names must be an array'
+    );
     if (names.length === 0) {
       return {};
+    }
+    const haRequired: Assert = hotAssert();
+    for (const n of names) {
+      haRequired.nonEmptyString(
+        n,
+        'CachingSecretStore.getRequiredMany: name must be non-empty'
+      );
     }
     const out: Record<string, SecretString> = {};
     await Promise.all(
       names.map(async (name) => {
         out[name] = await this.getRequired(name, init);
       })
+    );
+    assert.equals(
+      Object.keys(out).length,
+      names.length,
+      'CachingSecretStore.getRequiredMany: one entry per name'
     );
     return out;
   }
@@ -209,14 +310,30 @@ export class CachingSecretStore implements SecretStore {
     names: readonly string[],
     init?: SecretStoreGetInit
   ): Promise<Record<string, SecretString | null>> {
+    assert.array(
+      names,
+      'CachingSecretStore.getOptionalMany: names must be an array'
+    );
     if (names.length === 0) {
       return {};
+    }
+    const haOptional: Assert = hotAssert();
+    for (const n of names) {
+      haOptional.nonEmptyString(
+        n,
+        'CachingSecretStore.getOptionalMany: name must be non-empty'
+      );
     }
     const out: Record<string, SecretString | null> = {};
     await Promise.all(
       names.map(async (name) => {
         out[name] = await this.getOptional(name, init);
       })
+    );
+    assert.equals(
+      Object.keys(out).length,
+      names.length,
+      'CachingSecretStore.getOptionalMany: one entry per name'
     );
     return out;
   }
@@ -230,6 +347,14 @@ export class CachingSecretStore implements SecretStore {
     value: string,
     init?: SecretStoreSetInit
   ): Promise<void> {
+    assert.nonEmptyString(
+      name,
+      'CachingSecretStore.setSecret: name must be non-empty'
+    );
+    assert.string(
+      value,
+      'CachingSecretStore.setSecret: value must be a string'
+    );
     await this.inner.setSecret(name, value, init);
     this.cache.delete(name);
   }
@@ -239,5 +364,12 @@ export function createCachingSecretStore(
   inner: SecretStore,
   options: CachingSecretStoreOptions
 ): SecretStore {
-  return new CachingSecretStore(inner, options);
+  assert.defined(inner, 'createCachingSecretStore: inner store is required');
+  assert.record(options, 'createCachingSecretStore: options must be an object');
+  const store = new CachingSecretStore(inner, options);
+  assert.ok(
+    store instanceof CachingSecretStore,
+    'createCachingSecretStore: must return CachingSecretStore'
+  );
+  return store;
 }

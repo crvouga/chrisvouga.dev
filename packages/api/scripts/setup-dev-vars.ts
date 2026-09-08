@@ -1,3 +1,6 @@
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
+
+const ha: Assert = hotAssert();
 import { VaultCli } from '@pkgs/vault';
 import { renameSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -9,10 +12,14 @@ import {
 } from './vault-yaml-defaults';
 
 const apiRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+assert.nonEmptyString(apiRoot, 'api root must be non-empty');
 const outPath = join(apiRoot, '.env');
+assert.nonEmptyString(outPath, 'env out path must be non-empty');
 const tmpPath = `${outPath}.${process.pid}.tmp`;
+assert.nonEmptyString(tmpPath, 'env tmp path must be non-empty');
 
 function encodeEnvValue(value: string): string {
+  assert.string(value, 'encodeEnvValue requires string');
   return `"${value
     .replaceAll('\\', '\\\\')
     .replaceAll('"', '\\"')
@@ -83,6 +90,10 @@ function resolveScope(): VaultScope {
 
 async function main(): Promise<void> {
   const { token, addr, project, config } = resolveScope();
+  assert.nonEmptyString(token, 'setup requires token');
+  assert.nonEmptyString(addr, 'setup requires addr');
+  assert.nonEmptyString(project, 'setup requires project');
+  assert.nonEmptyString(config, 'setup requires config');
   const lines: string[] = [
     `VAULT_TOKEN=${encodeEnvValue(token)}`,
     `VAULT_ADDR=${encodeEnvValue(addr)}`,
@@ -92,8 +103,13 @@ async function main(): Promise<void> {
   ];
 
   const body = `${lines.join('\n')}\n`;
+  assert.nonEmptyString(body, 'env body must be non-empty');
   writeFileSync(tmpPath, body, { encoding: 'utf8' });
   renameSync(tmpPath, outPath);
+
+  for (const line of lines) {
+    ha.nonEmptyString(line, 'env line must be non-empty');
+  }
 
   process.stdout.write(
     `[setup-dev-vars] wrote .env (${lines.map((l) => l.split('=')[0]).join(', ')})\n`

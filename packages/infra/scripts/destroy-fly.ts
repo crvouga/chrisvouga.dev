@@ -7,6 +7,9 @@
  *   bun run scripts/destroy-fly.ts --apply
  */
 import { $ } from "bun";
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import {
   deployableServices,
   legacyFlyAppName,
@@ -26,6 +29,7 @@ type Args = {
 };
 
 function parseArgs(argv: readonly string[]): Args {
+  assert.array(argv, "argv must be an array");
   let apply = false;
   for (const arg of argv) {
     if (arg === "--apply") apply = true;
@@ -41,13 +45,17 @@ function parseArgs(argv: readonly string[]): Args {
 }
 
 async function flyAppExists(app: string): Promise<boolean> {
+  assert.nonEmptyString(app, "fly app name must be non-empty");
   const result = await $`flyctl apps list --json`.env({ ...process.env }).quiet().nothrow();
   if (result.exitCode !== 0) return false;
   const apps = JSON.parse(result.stdout.toString()) as Array<{ Name?: string; name?: string }>;
+  assert.array(apps, "fly apps listing must be an array");
   return apps.some((entry) => (entry.Name ?? entry.name) === app);
 }
 
 async function destroyApp(app: string, apply: boolean): Promise<void> {
+  assert.nonEmptyString(app, "fly app name must be non-empty");
+  assert.ok(typeof apply === "boolean", "apply must be a boolean");
   const exists = await flyAppExists(app);
   if (!exists) {
     console.log(`  skip ${app} (not found)`);
@@ -75,9 +83,12 @@ async function main(): Promise<void> {
   ];
 
   console.log(`Destroy Fly apps (${args.apply ? "APPLY" : "DRY-RUN"}) count=${apps.length}`);
-  requireFlyApiToken();
+  assert.nonNegative(apps.length, "fly app count must be non-negative");
+  const token = requireFlyApiToken();
+  assert.nonEmptyString(token, "fly api token must be non-empty after friendly check");
 
   for (const app of apps) {
+    ha.nonEmptyString(app, "fly app name must be non-empty");
     await destroyApp(app, args.apply);
   }
 }

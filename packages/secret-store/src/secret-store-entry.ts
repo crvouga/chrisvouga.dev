@@ -1,3 +1,5 @@
+import { assert } from '@pkgs/assert';
+
 /** Consumers of a secret — the cache server, Turbo CLI clients, OpenCode, etc. */
 export type SecretUsedBy = 'server' | 'client' | 'opencode' | string;
 
@@ -54,6 +56,29 @@ export class SecretStoreEntry {
   private readonly validateFn: (value: string) => string | null;
 
   constructor(options: SecretStoreEntryOptions) {
+    assert.record(options, 'SecretStoreEntry: options must be an object');
+    assert.nonEmptyString(
+      options.key,
+      'SecretStoreEntry: key must be non-empty'
+    );
+    assert.nonEmptyString(
+      options.hint,
+      'SecretStoreEntry: hint must be non-empty'
+    );
+    assert.array(options.usedBy, 'SecretStoreEntry: usedBy must be an array');
+    assert.ok(
+      options.seed === undefined || typeof options.seed === 'function',
+      'SecretStoreEntry: seed must be a function when provided'
+    );
+    assert.ok(
+      options.transform === undefined ||
+        typeof options.transform === 'function',
+      'SecretStoreEntry: transform must be a function when provided'
+    );
+    assert.ok(
+      options.validate === undefined || typeof options.validate === 'function',
+      'SecretStoreEntry: validate must be a function when provided'
+    );
     this.key = options.key;
     this.required = options.required;
     this.usedBy = options.usedBy;
@@ -67,16 +92,32 @@ export class SecretStoreEntry {
     this.seedFn = options.seed ?? (() => undefined);
     this.transformFn = options.transform ?? ((value: string) => value);
     this.validateFn = options.validate ?? (() => null);
+    assert.equals(this.key, options.key, 'SecretStoreEntry: key invariant');
+    assert.equals(this.hint, options.hint, 'SecretStoreEntry: hint invariant');
+    assert.defined(this.seedFn, 'SecretStoreEntry: seedFn must be set');
+    assert.defined(
+      this.transformFn,
+      'SecretStoreEntry: transformFn must be set'
+    );
+    assert.defined(this.validateFn, 'SecretStoreEntry: validateFn must be set');
   }
 
   /** Default value to write when the secret is missing, if any. */
   seed(): string | undefined {
-    return this.seedFn();
+    const out = this.seedFn();
+    assert.ok(
+      out === undefined || typeof out === 'string',
+      'SecretStoreEntry.seed: must return string or undefined'
+    );
+    return out;
   }
 
   /** Normalizes a raw stored value into its canonical form. */
   transform(value: string): string {
-    return this.transformFn(value);
+    assert.string(value, 'SecretStoreEntry.transform: value must be a string');
+    const out = this.transformFn(value);
+    assert.string(out, 'SecretStoreEntry.transform: must return a string');
+    return out;
   }
 
   /**
@@ -85,11 +126,18 @@ export class SecretStoreEntry {
    * to aid debugging.
    */
   validate(value: string): string | null {
+    assert.string(value, 'SecretStoreEntry.validate: value must be a string');
     const error = this.validateFn(value);
+    assert.ok(
+      error === null || typeof error === 'string',
+      'SecretStoreEntry.validate: must return string or null'
+    );
     if (error === null) return null;
-    return this.invalidHint !== undefined
-      ? `${error}\n${this.invalidHint}`
-      : error;
+    assert.defined(error, 'SecretStoreEntry.validate: error must be set here');
+    if (this.invalidHint === undefined) {
+      return error;
+    }
+    return `${error}\n${this.invalidHint}`;
   }
 
   /**
@@ -99,6 +147,7 @@ export class SecretStoreEntry {
    * @param prefix Lines are emitted with this indentation prefix.
    */
   describe(prefix = '  '): string {
+    assert.string(prefix, 'SecretStoreEntry.describe: prefix must be a string');
     const lines: string[] = [];
     lines.push(`${prefix}${this.key} — ${this.hint}`);
     if (this.description !== undefined) {
@@ -119,6 +168,8 @@ export class SecretStoreEntry {
     if (this.invalidHint !== undefined) {
       lines.push(`${prefix}  if invalid: ${this.invalidHint}`);
     }
-    return lines.join('\n');
+    const out = lines.join('\n');
+    assert.nonEmptyString(out, 'SecretStoreEntry.describe: must be non-empty');
+    return out;
   }
 }

@@ -8,6 +8,9 @@
  *   bun run scripts/cleanup-railway-deployments.ts --id portfolio --id vault --apply
  *   bun run scripts/cleanup-railway-deployments.ts --apply --wait-on-rate-limit
  */
+import { assert, hotAssert, type Assert } from "@pkgs/assert";
+
+const ha: Assert = hotAssert();
 import {
   ensureProject,
   isRailwayRateLimitError,
@@ -39,6 +42,7 @@ type ServiceRef = {
 };
 
 function parseArgs(argv: readonly string[]): Args {
+  assert.array(argv, "argv must be an array");
   const ids: string[] = [];
   let apply = false;
   let waitOnRateLimit =
@@ -75,6 +79,7 @@ async function withRateLimitRetry<T>(
   waitOnRateLimit: boolean,
   run: () => Promise<T>,
 ): Promise<T> {
+  assert.ok(typeof waitOnRateLimit === "boolean", "waitOnRateLimit must be a boolean");
   for (;;) {
     try {
       return await run();
@@ -89,23 +94,30 @@ async function withRateLimitRetry<T>(
 }
 
 function projectServices(project: RailwayProject): readonly ServiceRef[] {
-  return (
+  assert.record(project, "railway project must be a record");
+  const services = (
     project.services.edges?.map((edge) => ({
       id: edge.node.id,
       name: edge.node.name,
     })) ?? []
   );
+  assert.array(services, "project services must be an array");
+  return services;
 }
 
 function filterServices(
   services: readonly ServiceRef[],
   ids: readonly string[],
 ): readonly ServiceRef[] {
+  assert.array(services, "services must be an array");
+  assert.array(ids, "ids must be an array");
   if (ids.length === 0) return services;
   const wanted = new Set(ids.map((id) => id.toLowerCase()));
   const matched = services.filter((service) => wanted.has(service.name.toLowerCase()));
+  assert.array(matched, "matched services must be an array");
   const matchedNames = new Set(matched.map((s) => s.name.toLowerCase()));
   for (const id of ids) {
+    ha.nonEmptyString(id, "service id filter must be non-empty");
     if (!matchedNames.has(id.toLowerCase())) {
       console.log(`  skip ${id} (not on Railway)`);
     }
@@ -120,6 +132,12 @@ async function cleanupService(
   apply: boolean,
   waitOnRateLimit: boolean,
 ): Promise<{ found: number; removed: number }> {
+  assert.nonEmptyString(projectId, "project id must be non-empty");
+  assert.nonEmptyString(environmentId, "environment id must be non-empty");
+  assert.record(service, "service ref must be a record");
+  assert.nonEmptyString(service.id, "service id must be non-empty");
+  assert.nonEmptyString(service.name, "service name must be non-empty");
+  assert.ok(typeof apply === "boolean", "apply must be a boolean");
   const deployments = await withRateLimitRetry(waitOnRateLimit, () =>
     listDeployments({
       projectId,
@@ -127,6 +145,7 @@ async function cleanupService(
       environmentId,
     }),
   );
+  assert.array(deployments, "deployments must be an array");
 
   const failed = deployments.filter((d) =>
     CLEANUP_STATUSES.has(d.status.toUpperCase()),
@@ -139,6 +158,8 @@ async function cleanupService(
 
   let removed = 0;
   for (const deployment of failed) {
+    ha.nonEmptyString(deployment.id, "deployment id must be non-empty");
+    ha.nonEmptyString(deployment.status, "deployment status must be non-empty");
     const label = `${service.name} ${deployment.id} ${deployment.status} ${deployment.createdAt}`;
     if (!apply) {
       console.log(`  [plan] remove ${label}`);
@@ -166,7 +187,9 @@ async function main(): Promise<void> {
     ensureProject(railwayProjectName(config)),
   );
   const environment = resolveEnvironment(project, railwayEnvironmentName(config));
+  assert.nonEmptyString(environment.id, "environment id must be non-empty");
   const services = filterServices(projectServices(project), args.ids);
+  assert.array(services, "services must be an array");
 
   let servicesScanned = 0;
   let failedFound = 0;
@@ -174,6 +197,8 @@ async function main(): Promise<void> {
   const errors: string[] = [];
 
   for (const service of services) {
+    ha.nonEmptyString(service.id, "service id must be non-empty");
+    ha.nonEmptyString(service.name, "service name must be non-empty");
     try {
       const result = await cleanupService(
         project.id,
@@ -202,6 +227,9 @@ async function main(): Promise<void> {
       args.apply ? `removed=${removed}` : `planned=${failedFound}`
     }`,
   );
+  assert.nonNegative(servicesScanned, "services scanned must be non-negative");
+  assert.nonNegative(failedFound, "failed found must be non-negative");
+  assert.nonNegative(removed, "removed must be non-negative");
 
   if (errors.length > 0) {
     console.error(`\n${errors.length} service(s) failed`);

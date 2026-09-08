@@ -1,8 +1,10 @@
 import { chmodSync, copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { assert } from "@pkgs/assert";
 import { ENV_EXAMPLE, ENV_FILE } from "./paths.ts";
 
 /** Parse a simple KEY=VALUE .env file (no export, no multiline). */
 export function parseEnvFile(contents: string): Record<string, string> {
+  assert.string(contents, "env file contents must be a string");
   const out: Record<string, string> = {};
   for (const line of contents.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -23,8 +25,11 @@ export function parseEnvFile(contents: string): Record<string, string> {
 }
 
 export function loadEnvFile(path = ENV_FILE): Record<string, string> {
+  assert.nonEmptyString(path, "env file path must be non-empty");
   if (!existsSync(path)) return {};
-  return parseEnvFile(readFileSync(path, "utf8"));
+  const parsed = parseEnvFile(readFileSync(path, "utf8"));
+  assert.record(parsed, "parsed env file must be a record", { path });
+  return parsed;
 }
 
 /** Ensure .env exists (copy from example if needed). */
@@ -41,6 +46,9 @@ export function ensureEnvFile(): void {
 
 /** Upsert KEY=value in .env (preserves other lines). */
 export function upsertEnv(key: string, value: string, path = ENV_FILE): void {
+  assert.nonEmptyString(key, "env key must be non-empty");
+  assert.ok(typeof value === "string", "env value must be a string", { key });
+  assert.nonEmptyString(path, "env file path must be non-empty");
   ensureEnvFile();
   const lines = existsSync(path) ? readFileSync(path, "utf8").split(/\r?\n/) : [];
   const prefix = `${key}=`;
@@ -68,7 +76,9 @@ export function upsertEnv(key: string, value: string, path = ENV_FILE): void {
 
 /** Load .env into process.env without overriding already-set vars. */
 export function applyEnvFile(path = ENV_FILE): void {
+  assert.nonEmptyString(path, "env file path must be non-empty");
   const data = loadEnvFile(path);
+  assert.record(data, "env file data must be a record", { path });
   for (const [k, v] of Object.entries(data)) {
     if (process.env[k] === undefined) process.env[k] = v;
   }

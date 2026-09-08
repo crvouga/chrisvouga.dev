@@ -10,6 +10,7 @@
     "cli": "tsx cli/index.ts"
   },
   "dependencies": {
+    "@pkgs/assert": "workspace:*",
     "@inquirer/prompts": "^8.5.2",
     "chalk": "^6.0.0",
     "yaml": "catalog:"

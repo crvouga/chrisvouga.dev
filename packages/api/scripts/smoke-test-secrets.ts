@@ -8,6 +8,10 @@
  * Requires secrets in env (via `vault run --config <config>`).
  * Part of the main checks (`bun run check:ci`).
  */
+import { assert, hotAssert, type Assert } from '@pkgs/assert';
+
+const ha: Assert = hotAssert();
+
 import {
   VAULT_SECRET_REGISTRY,
   VaultSecretKey,
@@ -18,10 +22,12 @@ type SmokeResult =
   { readonly ok: true } | { readonly ok: false; readonly error: string };
 
 function readEnvSecret(key: string): string {
+  assert.nonEmptyString(key, 'readEnvSecret requires key');
   return process.env[key]?.trim() ?? '';
 }
 
 function fail(message: string): never {
+  assert.nonEmptyString(message, 'fail requires message');
   console.error('');
   console.error('════════════════════════════════════════════════════════');
   console.error('  Secret store smoke test FAILED');
@@ -32,6 +38,8 @@ function fail(message: string): never {
 }
 
 function logResult(name: string, result: SmokeResult): void {
+  assert.nonEmptyString(name, 'logResult requires name');
+  assert.record(result, 'logResult requires result');
   if (result.ok) {
     console.log(`PASS  ${name}`);
     return;
@@ -43,6 +51,8 @@ async function smokeCacheStatus(
   apiUrl: string,
   token: string
 ): Promise<SmokeResult> {
+  assert.nonEmptyString(apiUrl, 'smokeCacheStatus requires apiUrl');
+  assert.nonEmptyString(token, 'smokeCacheStatus requires token');
   const url = `${apiUrl.replace(/\/$/, '')}/v8/artifacts/status`;
   try {
     const res = await fetch(url, {
@@ -69,6 +79,10 @@ async function smokeCacheStatus(
 }
 
 async function main(): Promise<void> {
+  assert.nonEmptyArray(
+    VAULT_SECRET_REGISTRY,
+    'secret registry must be non-empty'
+  );
   const config = process.env['VAULT_CONFIG']?.trim() || 'dev';
   const project = process.env['VAULT_PROJECT']?.trim() || 'personal';
 
@@ -77,6 +91,7 @@ async function main(): Promise<void> {
   const failures: string[] = [];
 
   for (const entry of VAULT_SECRET_REGISTRY) {
+    ha.nonEmptyString(entry.key, 'registry entry key must be non-empty');
     const raw = readEnvSecret(entry.key);
     if (raw.length === 0) {
       if (entry.required) {

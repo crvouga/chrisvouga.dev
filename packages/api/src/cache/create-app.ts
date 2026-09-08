@@ -1,3 +1,4 @@
+import { assert } from '@pkgs/assert';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import type { ObjectStore } from '@pkgs/object-store/interface';
@@ -11,6 +12,12 @@ export type CacheAppConfig = {
 };
 
 export function createCacheApp(config: CacheAppConfig): Hono {
+  assert.record(config, 'createCacheApp requires config');
+  assert.nonEmptyString(
+    config.turboToken,
+    'createCacheApp requires turboToken'
+  );
+  assert.defined(config.objectStore, 'createCacheApp requires objectStore');
   const app = new Hono();
 
   app.use(
@@ -34,5 +41,6 @@ export function createCacheApp(config: CacheAppConfig): Hono {
     return c.json({ error: message }, 500);
   });
 
+  assert.defined(app, 'createCacheApp must return app');
   return app;
 }

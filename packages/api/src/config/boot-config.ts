@@ -1,3 +1,4 @@
+import { assert } from '@pkgs/assert';
 import { createS3ObjectStore } from '@pkgs/object-store/create-s3-object-store';
 import type { ObjectStore } from '@pkgs/object-store/interface';
 import type { SecretStore } from '@pkgs/secret-store';
@@ -13,6 +14,7 @@ export type CacheBootConfig = {
 export async function loadCacheBootConfig(
   secretStore: SecretStore
 ): Promise<CacheBootConfig> {
+  assert.defined(secretStore, 'loadCacheBootConfig requires secretStore');
   const [turboToken, endpoint, region, accessKeyId, secretAccessKey, bucket] =
     await Promise.all([
       secretStore.getRequired(CacheSecretName.turboToken),
@@ -33,9 +35,13 @@ export async function loadCacheBootConfig(
     },
     CACHE_OBJECT_STORE_NAMESPACE
   );
+  assert.defined(objectStore, 'bootConfig requires objectStore');
+
+  const token = turboToken.readSecretValue();
+  assert.nonEmptyString(token, 'bootConfig requires turboToken');
 
   return {
-    turboToken: turboToken.readSecretValue(),
+    turboToken: token,
     objectStore,
   };
 }

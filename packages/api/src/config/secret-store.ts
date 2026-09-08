@@ -1,3 +1,4 @@
+import { assert } from '@pkgs/assert';
 import type { SecretStore } from '@pkgs/secret-store';
 import { createCachingSecretStore, VaultSecretStore } from '@pkgs/secret-store';
 
@@ -17,6 +18,8 @@ export function createCacheSecretStore(
   token: string,
   options: CreateCacheSecretStoreOptions = {}
 ): SecretStore {
+  assert.nonEmptyString(token, 'createCacheSecretStore requires token');
+  assert.record(options, 'createCacheSecretStore requires options');
   const addr = options.addr ?? DEFAULT_VAULT_ADDR;
   const mount = options.mount ?? DEFAULT_VAULT_MOUNT;
   const project = options.project ?? DEFAULT_VAULT_PROJECT;
@@ -28,5 +31,6 @@ export function createCacheSecretStore(
     project,
     config,
   });
+  assert.defined(store, 'createCacheSecretStore must return store');
   return createCachingSecretStore(store, { ttlMs: 300_000 });
 }

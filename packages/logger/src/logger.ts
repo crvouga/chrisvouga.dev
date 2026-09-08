@@ -1,3 +1,5 @@
+import { assert } from '@pkgs/assert';
+
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'silent';
 
 export interface Logger {
@@ -29,7 +31,19 @@ export interface CreateLoggerOptions {
 }
 
 export function createLogger(options: CreateLoggerOptions): Logger {
-  return buildLogger(options.name, options.level ?? 'debug', {});
+  assert.record(options, 'createLogger: options must be an object');
+  assert.nonEmptyString(options.name, 'createLogger: name must be non-empty');
+  assert.defined(
+    options.level ?? 'debug',
+    'createLogger: level fallback valid'
+  );
+  const level = options.level ?? 'debug';
+  assert.enum(
+    level,
+    ['debug', 'info', 'warn', 'error', 'silent'],
+    'createLogger: unknown level'
+  );
+  return buildLogger(options.name, level, {});
 }
 
 function buildLogger(
@@ -37,13 +51,34 @@ function buildLogger(
   level: LogLevel,
   bindings: Record<string, unknown>
 ): Logger {
+  assert.nonEmptyString(name, 'buildLogger: name must be non-empty');
+  assert.enum(
+    level,
+    ['debug', 'info', 'warn', 'error', 'silent'],
+    'buildLogger: unknown level'
+  );
+  assert.record(bindings, 'buildLogger: bindings must be an object');
   const threshold = LEVEL_VALUE[level];
+  assert.defined(threshold, 'buildLogger: threshold must exist for level');
+  assert.number(threshold, 'buildLogger: threshold must be a number');
+  assert.equals(
+    LEVEL_VALUE[level],
+    threshold,
+    'buildLogger: threshold invariant'
+  );
 
   function emit(
     lvl: Exclude<LogLevel, 'silent'>,
     msg: string,
     context?: Record<string, unknown>
   ): void {
+    assert.enum(lvl, ['debug', 'info', 'warn', 'error'], 'emit: unknown level');
+    assert.string(msg, 'emit: msg must be a string');
+    assert.ok(
+      context === undefined ||
+        (typeof context === 'object' && context !== null),
+      'emit: context must be an object when provided'
+    );
     if (LEVEL_VALUE[lvl] < threshold) return;
 
     const entry = {
@@ -56,6 +91,7 @@ function buildLogger(
     };
 
     const method = CONSOLE_METHOD[lvl];
+    assert.defined(method, 'emit: console method must exist for level');
     (console[method] as (...args: unknown[]) => void)(JSON.stringify(entry));
   }
 
@@ -64,6 +100,11 @@ function buildLogger(
     info: (msg, context) => emit('info', msg, context),
     warn: (msg, context) => emit('warn', msg, context),
     error: (msg, context) => emit('error', msg, context),
-    child: (extra) => buildLogger(name, level, { ...bindings, ...extra }),
+    child: (extra) => {
+      assert.record(extra, 'child: bindings must be an object');
+      const merged = { ...bindings, ...extra };
+      assert.record(merged, 'child: merged bindings must be an object');
+      return buildLogger(name, level, merged);
+    },
   };
 }

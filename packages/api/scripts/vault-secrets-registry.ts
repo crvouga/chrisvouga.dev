@@ -1,4 +1,8 @@
+import { Assert, assert, hotAssert } from '@pkgs/assert';
 import { SecretStoreEntry, type SecretUsedBy } from '@pkgs/secret-store';
+
+const ha: Assert = hotAssert();
+const validationAssert: Assert = Assert.validation();
 
 /** Public hostname for the self-hosted Turborepo remote cache server. */
 export const CACHE_PUBLIC_HOSTNAME = 'turborepo.chrisvouga.dev';
@@ -35,6 +39,7 @@ export const VaultSecretKey = {
 const TURBO_CACHE_RE = /^(local|remote):(r|rw|w)?(,(local|remote):(r|rw|w)?)?$/;
 
 function validateHttpsUrl(value: string): string | null {
+  validationAssert.nonEmptyString(value, 'TURBO_API must be non-empty');
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:') {
@@ -47,6 +52,7 @@ function validateHttpsUrl(value: string): string | null {
 }
 
 function validateTurboCache(value: string): string | null {
+  validationAssert.nonEmptyString(value, 'TURBO_CACHE must be non-empty');
   if (!TURBO_CACHE_RE.test(value)) {
     return `Invalid ${VaultSecretKey.turboCache} "${value}" (expected e.g. remote:rw)`;
   }
@@ -54,6 +60,10 @@ function validateTurboCache(value: string): string | null {
 }
 
 function validateB2AccessKeyId(value: string): string | null {
+  validationAssert.nonEmptyString(
+    value,
+    'B2_S3_ACCESS_KEY_ID must be non-empty'
+  );
   if (!value.startsWith('004')) {
     return `${VaultSecretKey.b2S3AccessKeyId} must start with "004", got ${value}`;
   }
@@ -61,6 +71,10 @@ function validateB2AccessKeyId(value: string): string | null {
 }
 
 function validateB2SecretAccessKey(value: string): string | null {
+  validationAssert.nonEmptyString(
+    value,
+    'B2_S3_SECRET_ACCESS_KEY must be non-empty'
+  );
   if (!value.startsWith('K')) {
     return `${VaultSecretKey.b2S3SecretAccessKey} must start with "K", got ${value}`;
   }
@@ -176,6 +190,18 @@ export const VAULT_SECRET_REGISTRY: readonly SecretStoreEntry[] = [
 
 export const VAULT_CONFIGS = ['dev', 'prd'] as const;
 
+assert.nonEmptyArray(VAULT_CONFIGS, 'vault configs must be non-empty');
+for (const key of Object.values(VaultSecretKey)) {
+  assert.nonEmptyString(key, 'vault secret key must be non-empty');
+}
+assert.nonEmptyArray(
+  VAULT_SECRET_REGISTRY,
+  'vault secret registry must be non-empty'
+);
+for (const def of VAULT_SECRET_REGISTRY) {
+  assert.nonEmptyString(def.key, 'registry entry key must be non-empty');
+}
+
 /** Turbo env vars consumer monorepos need to use this self-hosted cache. */
 export const TURBO_CLIENT_REQUIRED_KEYS = [
   VaultSecretKey.turboToken,
@@ -193,13 +219,16 @@ export const TURBO_CLIENT_OPTIONAL_KEYS = [
 export function turboClientRegistryDefaults(): Readonly<
   Record<string, string | undefined>
 > {
+  assert.nonEmptyArray(VAULT_SECRET_REGISTRY, 'registry must have entries');
   const defaults: Record<string, string | undefined> = {};
   for (const def of VAULT_SECRET_REGISTRY) {
+    ha.nonEmptyString(def.key, 'registry entry key must be non-empty');
     const value = def.seed();
     if (value !== undefined) {
       defaults[def.key] = value;
     }
   }
+  assert.record(defaults, 'registry defaults must be a record');
   return defaults;
 }
 

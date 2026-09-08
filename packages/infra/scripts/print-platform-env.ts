@@ -6,6 +6,7 @@
  *   bun run scripts/print-platform-env.ts
  *   eval "$(bun run scripts/print-platform-env.ts --format shell)"
  */
+import { assert } from "@pkgs/assert";
 import {
   imagePrefix,
   infraGithubRepo,
@@ -19,6 +20,7 @@ import {
 } from "../lib/services.js";
 
 function parseArgs(argv: readonly string[]): { format: "shell" | "github" } {
+  assert.array(argv, "argv must be an array");
   let format: "shell" | "github" = "shell";
   for (const arg of argv) {
     if (arg === "--format") {
@@ -34,8 +36,10 @@ function parseArgs(argv: readonly string[]): { format: "shell" | "github" } {
 
 function main(): void {
   const { format } = parseArgs(process.argv.slice(2));
+  assert.enum(format, ["shell", "github"], "format must be shell or github");
   const config = loadServicesConfig();
   const slug = zoneSlug(config.zone);
+  assert.nonEmptyString(slug, "zone slug must be non-empty");
   const vars: Record<string, string> = {
     ZONE: config.zone,
     ZONE_SLUG: slug,
@@ -48,6 +52,9 @@ function main(): void {
     RAILWAY_SERVICE_PREFIX: railwayServicePrefix(config),
     STACK_DESCRIPTION: `${config.zone} Railway stack`,
   };
+  assert.record(vars, "platform env vars must be a record");
+  assert.nonEmptyString(vars["ZONE"], "ZONE must be non-empty");
+  assert.ok(vars["VAULT_ADDR"].startsWith("https://"), "VAULT_ADDR must be https");
 
   if (format === "github") {
     for (const [key, value] of Object.entries(vars)) {
